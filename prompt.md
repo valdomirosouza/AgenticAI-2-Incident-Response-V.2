@@ -245,6 +245,16 @@ Detectou ausência de repositório git (projeto sem `.git`). Inicializou `git in
 
 ---
 
+### 15:10 BRT — Prompt #21
+
+**Usuário:**
+> commit tudo e atualiza o prompt.md
+
+**Claude:**
+Working tree estava limpo (último commit `2755d8c` já incluía todas as alterações do prompt #20). Registrou este prompt e commitou apenas o `prompt.md`.
+
+---
+
 ### 14:45 BRT — Prompt #20
 
 **Usuário:**
@@ -298,3 +308,4 @@ Working tree estava limpo (nenhuma alteração desde o commit `d5a98db`). Regist
 | 18 | 15/05 12:30 | commit tudo e atualiza o prompt.md | git init + primeiro commit do projeto completo (Sprints 1–4 ✅) |
 | 19 | 15/05 14:20 | commit tudo e atualiza o prompt.md | Working tree já limpo; registrado este prompt e commitado prompt.md |
 | 20 | 15/05 14:45 | SDD e Harness Engineering alinhados? | Auditoria completa — 9 gaps corrigidos; SDD v1.7.0 |
+| 21 | 15/05 15:10 | commit tudo e atualiza o prompt.md | Working tree já limpo; apenas prompt.md registrado e commitado |
