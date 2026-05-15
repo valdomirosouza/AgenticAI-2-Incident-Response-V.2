@@ -264,10 +264,12 @@ reset_for_testing() -> None
 
 | Serviço                   | Testes                      | Cobertura | Gate CI |
 | ------------------------- | --------------------------- | --------- | ------- |
-| Log-Ingestion-and-Metrics | 77 unit/integration + 4 E2E | 95.61%    | ≥ 85%   |
-| Incident-Response-Agent   | 174 unit/integration        | 99.35%    | ≥ 85%   |
+| Log-Ingestion-and-Metrics | 77 unit/integration + 4 E2E | 96.96%    | ≥ 85%   |
+| Incident-Response-Agent   | 174 unit/integration        | 98.26%    | ≥ 85%   |
 | Knowledge-Base            | 49 unit/integration + 6 E2E | 97.60%    | ≥ 85%   |
-| **Total**                 | **~300 + 10 E2E**           | —         | —       |
+| **Total**                 | **300 + 10 E2E**            | —         | —       |
+
+**Confirmado em execução local (2026-05-15, Sessão 2)** com Python 3.12 — venvs recriados após migração do projeto para novo caminho. Testes E2E ignorados por ausência de `testcontainers` nos venvs recriados (requerem Docker ativo).
 
 **Configuração de cobertura KB:** `omit = ["tests/*", "app/telemetry.py", "app/scripts/*"]` — `seed_kb.py` excluído propositalmente (script de carga, não lógica de produção). Rodar sempre de dentro do diretório do serviço para respeitar o `pyproject.toml`.
 
@@ -400,7 +402,7 @@ AgenticAI-2-Incident-Response/
 │   └── runbooks/           — high-latency.md, redis-memory.md
 ├── AgenticAI-Incident-Response.md  — SDD v1.7.0 (§7.4 e §3.2.2 corrigidos na Sessão 2)
 ├── CLAUDE.md               — guia para Claude Code (criado na Sessão 2)
-├── prompt.md               — histórico de 31 interações com timestamps BRT
+├── prompt.md               — histórico de 36 interações com timestamps BRT
 └── SESSION_MEMORY.md       — este arquivo
 ```
 
@@ -474,6 +476,9 @@ Validação do projeto recém-criado. **Gaps identificados e corrigidos:**
 ## 14. Histórico de Commits
 
 ```
+1b0240e  docs: atualiza prompt.md com prompts #34–#36
+d51d992  docs: atualiza prompt.md com prompts #32–#33
+0d50710  docs: atualiza SESSION_MEMORY.md com estado da Sessão 2
 61579cb  docs: atualiza prompt.md com prompts #30–#31 (criação do repo GitHub)
 01413a5  docs: atualiza prompt.md com prompts #25–#29 (Sessão 2)
 573dcf8  docs: adiciona CLAUDE.md e corrige stales no SDD §3.2.2 e §7.4
@@ -481,7 +486,6 @@ a47973f  docs: atualiza prompt.md com prompt #24
 2d1ec04  docs: SESSION_MEMORY.md + prompt.md atualizado com prompts #22 e #23
 bc4655b  docs: atualiza prompt.md com prompt #21
 2755d8c  docs: SDD v1.7.0 — auditoria de alinhamento SDD×Harness (9 gaps corrigidos)
-3edb216  docs: atualiza prompt.md com prompt #19
 d5a98db  feat: projeto completo — Sprints 1–4 concluídos
 ```
 
