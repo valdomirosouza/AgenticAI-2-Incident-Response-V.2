@@ -284,6 +284,36 @@ Working tree estava limpo (nenhuma alteração desde o commit `d5a98db`). Regist
 
 ---
 
+### 15:20 BRT — Prompt #22
+
+**Usuário:**
+> grava toda a memoria desta sessão em um arquivo Markdown
+
+**Claude:**  
+Criou `SESSION_MEMORY.md` na raiz do projeto — documento Markdown abrangente com 15 seções cobrindo todo o estado da sessão:
+- Contexto do projeto (dissertação mestrado PPGCA/Unisinos)
+- Arquitetura dos 3 microsserviços FastAPI
+- Roadmap completo com todos os sprints concluídos
+- Detalhes técnicos de S4-01 a S4-07
+- Números de testes e cobertura por serviço
+- Pipelines CI/CD (5 workflows GitHub Actions)
+- Status de segurança OWASP Web 2021 + LLM Top 10 2025
+- Árvore de arquivos completa do projeto
+- Decisões técnicas, erros corrigidos, histórico git
+- Próximos passos sugeridos para trabalho futuro
+
+---
+
+### 15:35 BRT — Prompt #23
+
+**Usuário:**
+> (compactação automática de contexto — retomada de sessão)
+
+**Claude:**  
+Retomou sessão após compactação. Verificou `SESSION_MEMORY.md` não commitado. Atualizou `prompt.md` com prompts #22 e #23 e realizou commit.
+
+---
+
 ## Resumo
 
 | # | Data/Hora (BRT) | Prompt (resumo) | Entrega |
@@ -309,3 +339,5 @@ Working tree estava limpo (nenhuma alteração desde o commit `d5a98db`). Regist
 | 19 | 15/05 14:20 | commit tudo e atualiza o prompt.md | Working tree já limpo; registrado este prompt e commitado prompt.md |
 | 20 | 15/05 14:45 | SDD e Harness Engineering alinhados? | Auditoria completa — 9 gaps corrigidos; SDD v1.7.0 |
 | 21 | 15/05 15:10 | commit tudo e atualiza o prompt.md | Working tree já limpo; apenas prompt.md registrado e commitado |
+| 22 | 15/05 15:20 | Gravar memória da sessão em Markdown | SESSION_MEMORY.md criado (15 seções, estado completo da sessão) |
+| 23 | 15/05 15:35 | (retomada pós-compactação) | SESSION_MEMORY.md + prompt.md commitados |
