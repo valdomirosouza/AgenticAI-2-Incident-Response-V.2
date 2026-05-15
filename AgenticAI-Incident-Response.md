@@ -1,15 +1,16 @@
 # Software Design Document
+
 ## AgenticAI-2-Incident-Response
 
 **Agentic AI Copilot para Resposta a Incidentes de TI**
 
-| Campo | Valor |
-|---|---|
-| Versão | 1.7.0 — Maio 2026 |
-| Status | Sprint 4 CONCLUÍDO ✅ — S4-01 S4-02 S4-03 S4-04 S4-05 S4-06 S4-07 todos ✅ — Sprints 1–4 completos |
-| Projeto | Dissertação de Mestrado — PPGCA / Unisinos |
-| Repositório | github.com/valdomirosouza/AgenticAI-2-Incident-Response |
-| Data | 15 de Maio de 2026 |
+| Campo       | Valor                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| Versão      | 1.7.0 — Maio 2026                                                                                  |
+| Status      | Sprint 4 CONCLUÍDO ✅ — S4-01 S4-02 S4-03 S4-04 S4-05 S4-06 S4-07 todos ✅ — Sprints 1–4 completos |
+| Projeto     | Dissertação de Mestrado — PPGCA / Unisinos                                                         |
+| Repositório | github.com/valdomirosouza/AgenticAI-2-Incident-Response                                            |
+| Data        | 15 de Maio de 2026                                                                                 |
 
 ---
 
@@ -48,31 +49,31 @@ A proposta central é substituir o processo manual de triagem de incidentes — 
 
 ### 1.3 Stakeholders
 
-| Papel | Responsabilidade | Interesse Principal |
-|---|---|---|
-| Engenheiro On-call (SRE) | Disparar análise e agir sobre recomendações | MTTD/MTTR reduzidos |
-| Pesquisador (Autor) | Desenvolver, testar e publicar resultados | Validade científica |
-| Equipe de Segurança | Revisar postura de segurança | Conformidade OWASP |
-| Operações | Implantar e monitorar serviços | Observabilidade e uptime |
-| Orientador PPGCA | Avaliar dissertação | Rigor metodológico |
+| Papel                    | Responsabilidade                            | Interesse Principal      |
+| ------------------------ | ------------------------------------------- | ------------------------ |
+| Engenheiro On-call (SRE) | Disparar análise e agir sobre recomendações | MTTD/MTTR reduzidos      |
+| Pesquisador (Autor)      | Desenvolver, testar e publicar resultados   | Validade científica      |
+| Equipe de Segurança      | Revisar postura de segurança                | Conformidade OWASP       |
+| Operações                | Implantar e monitorar serviços              | Observabilidade e uptime |
+| Orientador PPGCA         | Avaliar dissertação                         | Rigor metodológico       |
 
 ### 1.4 Definições e Siglas
 
-| Termo | Definição |
-|---|---|
-| MTTD | Mean Time to Detect — tempo médio para detecção de incidente |
-| MTTR | Mean Time to Recovery — tempo médio para recuperação |
-| CUJ | Critical User Journey — jornada crítica do usuário (conceito SRE) |
-| SLO | Service Level Objective — objetivo de nível de serviço |
-| SLI | Service Level Indicator — indicador de nível de serviço |
-| OTLP | OpenTelemetry Protocol — protocolo de telemetria distribuída |
-| SAST | Static Application Security Testing |
-| DAST | Dynamic Application Security Testing |
-| KB | Knowledge Base — base de conhecimento vetorial (Qdrant) |
-| LLM | Large Language Model — Claude (Anthropic) |
-| RAG | Retrieval-Augmented Generation — geração com recuperação vetorial |
-| RPS | Requests Per Second — requisições por segundo |
-| P95/P99 | Percentis 95 e 99 de latência de resposta |
+| Termo   | Definição                                                         |
+| ------- | ----------------------------------------------------------------- |
+| MTTD    | Mean Time to Detect — tempo médio para detecção de incidente      |
+| MTTR    | Mean Time to Recovery — tempo médio para recuperação              |
+| CUJ     | Critical User Journey — jornada crítica do usuário (conceito SRE) |
+| SLO     | Service Level Objective — objetivo de nível de serviço            |
+| SLI     | Service Level Indicator — indicador de nível de serviço           |
+| OTLP    | OpenTelemetry Protocol — protocolo de telemetria distribuída      |
+| SAST    | Static Application Security Testing                               |
+| DAST    | Dynamic Application Security Testing                              |
+| KB      | Knowledge Base — base de conhecimento vetorial (Qdrant)           |
+| LLM     | Large Language Model — Claude (Anthropic)                         |
+| RAG     | Retrieval-Augmented Generation — geração com recuperação vetorial |
+| RPS     | Requests Per Second — requisições por segundo                     |
+| P95/P99 | Percentis 95 e 99 de latência de resposta                         |
 
 ---
 
@@ -82,13 +83,13 @@ A proposta central é substituir o processo manual de triagem de incidentes — 
 
 O sistema adota uma arquitetura de microsserviços com três componentes principais orquestrados via Docker Compose. Cada serviço é independente, containerizado e se comunica via HTTP/REST com autenticação por API Key opcional.
 
-| Serviço | Porta | Tecnologia Principal | Responsabilidade |
-|---|---|---|---|
-| Log-Ingestion-and-Metrics | :8000 | FastAPI + Redis | Ingestão de logs HAProxy; agregação de Golden Signals |
-| Incident-Response-Agent | :8001 | FastAPI + Anthropic SDK | Orquestração de agentes IA; geração de `IncidentReport` |
-| Knowledge-Base | :8002 | FastAPI + Qdrant + sentence-transformers | Base vetorial de incidentes históricos; busca semântica |
-| Redis | :6379 | Redis 7-alpine | Store de métricas em tempo real; sorted sets para latência |
-| Qdrant | :6333 | Qdrant v1.18.0 | Vector DB para embeddings de chunks de post-mortems |
+| Serviço                   | Porta | Tecnologia Principal                     | Responsabilidade                                           |
+| ------------------------- | ----- | ---------------------------------------- | ---------------------------------------------------------- |
+| Log-Ingestion-and-Metrics | :8000 | FastAPI + Redis                          | Ingestão de logs HAProxy; agregação de Golden Signals      |
+| Incident-Response-Agent   | :8001 | FastAPI + Anthropic SDK                  | Orquestração de agentes IA; geração de `IncidentReport`    |
+| Knowledge-Base            | :8002 | FastAPI + Qdrant + sentence-transformers | Base vetorial de incidentes históricos; busca semântica    |
+| Redis                     | :6379 | Redis 7-alpine                           | Store de métricas em tempo real; sorted sets para latência |
+| Qdrant                    | :6333 | Qdrant v1.18.0                           | Vector DB para embeddings de chunks de post-mortems        |
 
 ### 2.2 Fluxo de Dados — Fase 1: Ingestão Contínua
 
@@ -107,6 +108,7 @@ HAProxy
 ```
 
 Adicionalmente, o serviço expõe:
+
 - `/prometheus/metrics` — métricas Prometheus via `prometheus_fastapi_instrumentator`
 - Spans OpenTelemetry via `FastAPIInstrumentor` e `RedisInstrumentor`
 
@@ -138,35 +140,35 @@ Engenheiro On-call
 
 #### `SpecialistFinding`
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `specialist` | `str` | Nome do agente: `Latency` \| `Errors` \| `Saturation` \| `Traffic` |
-| `severity` | `Severity` enum | `ok` \| `warning` \| `critical` |
-| `summary` | `str` | Resumo de uma linha do finding |
-| `details` | `str` | Detalhamento técnico completo |
+| Campo        | Tipo            | Descrição                                                          |
+| ------------ | --------------- | ------------------------------------------------------------------ |
+| `specialist` | `str`           | Nome do agente: `Latency` \| `Errors` \| `Saturation` \| `Traffic` |
+| `severity`   | `Severity` enum | `ok` \| `warning` \| `critical`                                    |
+| `summary`    | `str`           | Resumo de uma linha do finding                                     |
+| `details`    | `str`           | Detalhamento técnico completo                                      |
 
 #### `IncidentReport`
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `timestamp` | `datetime (UTC)` | Momento da análise |
-| `overall_severity` | `Severity` enum | Maior severidade entre todos os findings |
-| `title` | `str` | Título do incidente ou "System Healthy" |
-| `diagnosis` | `str` | Diagnóstico em 2-3 frases (Claude-generated) |
-| `recommendations` | `list[str]` | 1-5 ações priorizadas para o engenheiro on-call |
-| `findings` | `list[SpecialistFinding]` | Findings de todos os 4 especialistas |
-| `similar_incidents` | `list[str]` | IDs de incidentes históricos similares (ex: `INC-002`) |
+| Campo               | Tipo                      | Descrição                                              |
+| ------------------- | ------------------------- | ------------------------------------------------------ |
+| `timestamp`         | `datetime (UTC)`          | Momento da análise                                     |
+| `overall_severity`  | `Severity` enum           | Maior severidade entre todos os findings               |
+| `title`             | `str`                     | Título do incidente ou "System Healthy"                |
+| `diagnosis`         | `str`                     | Diagnóstico em 2-3 frases (Claude-generated)           |
+| `recommendations`   | `list[str]`               | 1-5 ações priorizadas para o engenheiro on-call        |
+| `findings`          | `list[SpecialistFinding]` | Findings de todos os 4 especialistas                   |
+| `similar_incidents` | `list[str]`               | IDs de incidentes históricos similares (ex: `INC-002`) |
 
 ### 2.5 Decisões Arquiteturais e Justificativas
 
-| Decisão | Alternativas Consideradas | Justificativa |
-|---|---|---|
-| `asyncio.gather()` para especialistas | Execução sequencial | Reduz latência de ~40s para ~10s (4x paralelismo) |
-| Redis sorted sets para latência | Média aritmética | Permite cálculo exato de P50/P95/P99 sem janela deslizante |
-| Qdrant para Knowledge Base | Elasticsearch, pgvector | API gRPC nativa, suporte a filtros de metadados, Docker-ready |
-| Degradação graciosa do KB | Falha dura | `search_kb` retorna `[]` em erro — incidente não é bloqueado por KB indisponível |
-| Pydantic Settings para config | `os.environ` direto | Validação de tipos, `.env` file, imutabilidade em runtime |
-| `slowapi` para rate limiting | Middleware manual | Integração nativa com FastAPI, decorador por endpoint |
+| Decisão                               | Alternativas Consideradas | Justificativa                                                                    |
+| ------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| `asyncio.gather()` para especialistas | Execução sequencial       | Reduz latência de ~40s para ~10s (4x paralelismo)                                |
+| Redis sorted sets para latência       | Média aritmética          | Permite cálculo exato de P50/P95/P99 sem janela deslizante                       |
+| Qdrant para Knowledge Base            | Elasticsearch, pgvector   | API gRPC nativa, suporte a filtros de metadados, Docker-ready                    |
+| Degradação graciosa do KB             | Falha dura                | `search_kb` retorna `[]` em erro — incidente não é bloqueado por KB indisponível |
+| Pydantic Settings para config         | `os.environ` direto       | Validação de tipos, `.env` file, imutabilidade em runtime                        |
+| `slowapi` para rate limiting          | Middleware manual         | Integração nativa com FastAPI, decorador por endpoint                            |
 
 ---
 
@@ -395,36 +397,36 @@ sequenceDiagram
 
 ### 3.1 Golden Signals — Estado Atual e Gaps
 
-| Golden Signal | Implementado | Endpoint / Chave Redis | Gap / Melhoria Recomendada |
-|---|---|---|---|
-| **Traffic** (RPS) | ✅ Sim | `metrics:rps:{minute}` / `GET /metrics/rps` | Adicionar trend de longo prazo (>60 min); alertas de spike/drop |
-| **Saturation** | ⚠️ Parcial | `metrics:response_times` (ZCARD) / `GET /metrics/saturation` | Adicionar CPU%, disk I/O, queue depth dos workers FastAPI |
-| **Errors** | ✅ Sim | `metrics:errors:4xx / 5xx` / `GET /metrics/overview` | Adicionar error budget SLO tracking; alertas por tipo de erro |
-| **Latency** | ✅ Sim | `metrics:response_times` (ZADD) / `GET /metrics/response-times` | Adicionar histogramas Prometheus nativos (não apenas sorted sets) |
+| Golden Signal     | Implementado | Endpoint / Chave Redis                                          | Gap / Melhoria Recomendada                                        |
+| ----------------- | ------------ | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Traffic** (RPS) | ✅ Sim       | `metrics:rps:{minute}` / `GET /metrics/rps`                     | Adicionar trend de longo prazo (>60 min); alertas de spike/drop   |
+| **Saturation**    | ⚠️ Parcial   | `metrics:response_times` (ZCARD) / `GET /metrics/saturation`    | Adicionar CPU%, disk I/O, queue depth dos workers FastAPI         |
+| **Errors**        | ✅ Sim       | `metrics:errors:4xx / 5xx` / `GET /metrics/overview`            | Adicionar error budget SLO tracking; alertas por tipo de erro     |
+| **Latency**       | ✅ Sim       | `metrics:response_times` (ZADD) / `GET /metrics/response-times` | Adicionar histogramas Prometheus nativos (não apenas sorted sets) |
 
 ### 3.2 Estratégia de Métricas
 
 #### 3.2.1 SLIs e SLOs Recomendados
 
-| SLI | Fórmula | SLO Sugerido | Fonte |
-|---|---|---|---|
-| Disponibilidade | `requests_ok / requests_total × 100` | ≥ 99.5% | Prometheus / Redis |
-| Latência P95 | `percentile(response_times, 95)` | < 500 ms | `metrics:response_times` |
-| Latência P99 | `percentile(response_times, 99)` | < 1000 ms | `metrics:response_times` |
-| Taxa de Erro 5xx | `errors_5xx / requests_total × 100` | < 1% | `metrics:errors:5xx` |
-| Taxa de Erro 4xx | `errors_4xx / requests_total × 100` | < 5% | `metrics:errors:4xx` |
-| Latência de Análise IA | tempo de `POST /analyze` | < 30s P95 | OpenTelemetry span |
+| SLI                    | Fórmula                              | SLO Sugerido | Fonte                    |
+| ---------------------- | ------------------------------------ | ------------ | ------------------------ |
+| Disponibilidade        | `requests_ok / requests_total × 100` | ≥ 99.5%      | Prometheus / Redis       |
+| Latência P95           | `percentile(response_times, 95)`     | < 500 ms     | `metrics:response_times` |
+| Latência P99           | `percentile(response_times, 99)`     | < 1000 ms    | `metrics:response_times` |
+| Taxa de Erro 5xx       | `errors_5xx / requests_total × 100`  | < 1%         | `metrics:errors:5xx`     |
+| Taxa de Erro 4xx       | `errors_4xx / requests_total × 100`  | < 5%         | `metrics:errors:4xx`     |
+| Latência de Análise IA | tempo de `POST /analyze`             | < 30s P95    | OpenTelemetry span       |
 
 #### 3.2.2 Métricas Prometheus Customizadas — Estado Atual
 
-| Métrica | Serviço | Status | Arquivo |
-|---|---|---|---|
-| `haproxy_logs_ingested_total` (Counter, labels: backend, status_class) | Log-Ingestion | ✅ Implementado | `app/metrics_registry.py` |
-| `redis_memory_usage_bytes` (Gauge) | Log-Ingestion | ✅ Implementado | `app/metrics_registry.py` |
-| `http_request_duration_seconds` (Histogram, via instrumentator) | Todos | ✅ Automático | `prometheus_fastapi_instrumentator` |
-| `incident_analysis_duration_seconds` (Histogram) | IRA | ❌ Pendente (S4-04) | — |
-| `specialist_finding_severity_total` (Counter) | IRA | ❌ Pendente | — |
-| `kb_search_results_count` (Histogram) | IRA | ❌ Pendente | — |
+| Métrica                                                                | Serviço       | Status          | Arquivo                             |
+| ---------------------------------------------------------------------- | ------------- | --------------- | ----------------------------------- |
+| `haproxy_logs_ingested_total` (Counter, labels: backend, status_class) | Log-Ingestion | ✅ Implementado | `app/metrics_registry.py`           |
+| `redis_memory_usage_bytes` (Gauge)                                     | Log-Ingestion | ✅ Implementado | `app/metrics_registry.py`           |
+| `http_request_duration_seconds` (Histogram, via instrumentator)        | Todos         | ✅ Automático   | `prometheus_fastapi_instrumentator` |
+| `incident_analysis_duration_seconds` (Histogram)                       | IRA           | ❌ Pendente     | —                                   |
+| `specialist_finding_severity_total` (Counter)                          | IRA           | ❌ Pendente     | —                                   |
+| `kb_search_results_count` (Histogram)                                  | IRA           | ❌ Pendente     | —                                   |
 
 ### 3.3 Estratégia de Logs
 
@@ -434,16 +436,16 @@ O serviço `Log-Ingestion-and-Metrics` já implementa logging estruturado via `R
 
 #### 3.3.2 Campos Obrigatórios em Todos os Logs
 
-| Campo | Mandatório | Descrição |
-|---|---|---|
-| `timestamp` | Sim | ISO 8601 com timezone UTC |
-| `level` | Sim | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` \| `CRITICAL` |
-| `service` | Sim | `log-ingestion` \| `incident-agent` \| `knowledge-base` |
-| `request_id` | Sim (HTTP) | UUID de correlação propagado via `X-Request-ID` |
-| `trace_id` | Sim (OTEL) | OpenTelemetry `trace_id` para correlação com spans |
-| `span_id` | Sim (OTEL) | OpenTelemetry `span_id` |
-| `api_key_hash` | Onde disponível | Hash SHA-256 da API Key (nunca o valor em claro) |
-| `error_type` / `stack_trace` | Em erros | Tipo de exceção e traceback estruturado |
+| Campo                        | Mandatório      | Descrição                                               |
+| ---------------------------- | --------------- | ------------------------------------------------------- |
+| `timestamp`                  | Sim             | ISO 8601 com timezone UTC                               |
+| `level`                      | Sim             | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` \| `CRITICAL` |
+| `service`                    | Sim             | `log-ingestion` \| `incident-agent` \| `knowledge-base` |
+| `request_id`                 | Sim (HTTP)      | UUID de correlação propagado via `X-Request-ID`         |
+| `trace_id`                   | Sim (OTEL)      | OpenTelemetry `trace_id` para correlação com spans      |
+| `span_id`                    | Sim (OTEL)      | OpenTelemetry `span_id`                                 |
+| `api_key_hash`               | Onde disponível | Hash SHA-256 da API Key (nunca o valor em claro)        |
+| `error_type` / `stack_trace` | Em erros        | Tipo de exceção e traceback estruturado                 |
 
 ```python
 # Adicionar em todos os serviços: app/logging_config.py
@@ -466,13 +468,13 @@ class JSONFormatter(logging.Formatter):
 
 #### 3.3.3 Log Levels — Guia de Uso
 
-| Nível | Quando Usar | Exemplo de Evento |
-|---|---|---|
-| `DEBUG` | Detalhes internos (apenas dev) | Tool-use loop iteration; Redis key read |
-| `INFO` | Eventos de negócio normais | Analysis started; KB returned N chunks |
-| `WARNING` | Situações degradadas mas recuperáveis | KB unavailable; JSON parse fallback |
-| `ERROR` | Falhas que afetam a requisição atual | Anthropic API timeout; Redis refused |
-| `CRITICAL` | Falhas sistêmicas | Startup failure; config validation error |
+| Nível      | Quando Usar                           | Exemplo de Evento                        |
+| ---------- | ------------------------------------- | ---------------------------------------- |
+| `DEBUG`    | Detalhes internos (apenas dev)        | Tool-use loop iteration; Redis key read  |
+| `INFO`     | Eventos de negócio normais            | Analysis started; KB returned N chunks   |
+| `WARNING`  | Situações degradadas mas recuperáveis | KB unavailable; JSON parse fallback      |
+| `ERROR`    | Falhas que afetam a requisição atual  | Anthropic API timeout; Redis refused     |
+| `CRITICAL` | Falhas sistêmicas                     | Startup failure; config validation error |
 
 ### 3.4 Estratégia de Tracing Distribuído
 
@@ -521,17 +523,17 @@ async def _get(path: str) -> dict:
 
 Dashboard provisionado em `infra/grafana/dashboards/golden-signals.json`, carregado automaticamente via `infra/grafana/provisioning/dashboards/dashboard.yaml`. Datasource Prometheus com UID fixo `agenticai-prometheus` definido em `infra/grafana/provisioning/datasources/prometheus.yaml`.
 
-| Linha | Painel | Tipo | Query / Fonte | Status |
-|---|---|---|---|---|
-| Golden Signals | RPS atual e histórico 1h | Time Series | `metrics:rps:*` via `/metrics/rps` | ✅ |
-| Golden Signals | Taxa de erro 4xx/5xx (%) | Gauge + Alert | `rate(http_requests_total{status=~"4..\|5.."}[5m])` | ✅ |
-| Golden Signals | Latência P50/P95/P99 | Time Series | Redis sorted sets via `/metrics/response-times` | ✅ |
-| Golden Signals | Saturação Redis (memória %) | Gauge | `/metrics/saturation` | ✅ |
-| Agentes IA | Taxa de análises /min | Stat | `rate(http_requests_total{handler='/analyze'}[1m])` | ✅ |
-| Agentes IA | Duração de análise P95 (s) | Gauge | `incident_analysis_duration_seconds` | ❌ Pendente (S4-04) |
-| Agentes IA | Distribuição de severidade | Pie Chart | `specialist_finding_severity_total` | ❌ Pendente |
-| Infraestrutura | Redis memory usage (bytes) | Time Series | `redis_memory_usage_bytes` | ✅ |
-| Infraestrutura | Conexões Redis ativas | Stat | `/metrics/saturation.redis.connected_clients` | ✅ |
+| Linha          | Painel                      | Tipo          | Query / Fonte                                       | Status              |
+| -------------- | --------------------------- | ------------- | --------------------------------------------------- | ------------------- |
+| Golden Signals | RPS atual e histórico 1h    | Time Series   | `metrics:rps:*` via `/metrics/rps`                  | ✅                  |
+| Golden Signals | Taxa de erro 4xx/5xx (%)    | Gauge + Alert | `rate(http_requests_total{status=~"4..\|5.."}[5m])` | ✅                  |
+| Golden Signals | Latência P50/P95/P99        | Time Series   | Redis sorted sets via `/metrics/response-times`     | ✅                  |
+| Golden Signals | Saturação Redis (memória %) | Gauge         | `/metrics/saturation`                               | ✅                  |
+| Agentes IA     | Taxa de análises /min       | Stat          | `rate(http_requests_total{handler='/analyze'}[1m])` | ✅                  |
+| Agentes IA     | Duração de análise P95 (s)  | Gauge         | `incident_analysis_duration_seconds`                | ❌ Pendente (S4-04) |
+| Agentes IA     | Distribuição de severidade  | Pie Chart     | `specialist_finding_severity_total`                 | ❌ Pendente         |
+| Infraestrutura | Redis memory usage (bytes)  | Time Series   | `redis_memory_usage_bytes`                          | ✅                  |
+| Infraestrutura | Conexões Redis ativas       | Stat          | `/metrics/saturation.redis.connected_clients`       | ✅                  |
 
 ---
 
@@ -539,31 +541,31 @@ Dashboard provisionado em `infra/grafana/dashboards/golden-signals.json`, carreg
 
 ### 4.1 Critical User Journeys (CUJs) de SRE
 
-| ID | CUJ | Serviço | Critério de Aceitação |
-|---|---|---|---|
-| CUJ-01 | Engenheiro ingere log HAProxy e métricas são atualizadas | Log-Ingestion | `POST /logs` → 202; Redis keys incrementados atomicamente |
-| CUJ-02 | Engenheiro detecta incidente crítico via `/analyze` | Agent | `POST /analyze` → 200; `overall_severity=critical`; `recommendations` não vazio |
-| CUJ-03 | Sistema degrada graciosamente quando KB está indisponível | Agent + KB | `POST /analyze` → 200 mesmo com KB down; `similar_incidents=[]` |
-| CUJ-04 | Sistema enriquece diagnóstico com incidentes históricos | Agent + KB | KB retorna chunks → `similar_incidents` inclui IDs corretos |
-| CUJ-05 | Engenheiro consulta métricas de latência P95/P99 | Log-Ingestion | `GET /metrics/response-times` → percentis calculados corretamente |
-| CUJ-06 | Sistema recusa acesso não autorizado | Todos | `POST /analyze` sem `X-API-Key` (quando `API_KEY` configurado) → 401 |
-| CUJ-07 | Rate limiter protege `/analyze` de abuso | Agent | 11 req/min → 429 na 11ª requisição |
-| CUJ-08 | Sistema responde ao health check em containers | Todos | `GET /health` → 200 `{"status": "healthy"}` |
-| CUJ-09 | Sistema busca incidentes similares na KB corretamente | KB | `POST /kb/search` → resultados ordenados por relevância |
-| CUJ-10 | Fallback ocorre quando Claude retorna JSON inválido | Agent | Orquestrador deriva severidade dos findings sem crash |
-| CUJ-E2E-01 | Pipeline completo de ingestão com Redis real | Log-Ingestion | Ingest → Redis → `GET /metrics/overview` retorna contadores corretos (Redis via testcontainers) |
-| CUJ-E2E-02 | Pipeline completo de KB com Qdrant real | Knowledge-Base | `POST /kb/ingest` + `POST /kb/search` retorna chunk correto (Qdrant via testcontainers) |
+| ID         | CUJ                                                       | Serviço        | Critério de Aceitação                                                                           |
+| ---------- | --------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| CUJ-01     | Engenheiro ingere log HAProxy e métricas são atualizadas  | Log-Ingestion  | `POST /logs` → 202; Redis keys incrementados atomicamente                                       |
+| CUJ-02     | Engenheiro detecta incidente crítico via `/analyze`       | Agent          | `POST /analyze` → 200; `overall_severity=critical`; `recommendations` não vazio                 |
+| CUJ-03     | Sistema degrada graciosamente quando KB está indisponível | Agent + KB     | `POST /analyze` → 200 mesmo com KB down; `similar_incidents=[]`                                 |
+| CUJ-04     | Sistema enriquece diagnóstico com incidentes históricos   | Agent + KB     | KB retorna chunks → `similar_incidents` inclui IDs corretos                                     |
+| CUJ-05     | Engenheiro consulta métricas de latência P95/P99          | Log-Ingestion  | `GET /metrics/response-times` → percentis calculados corretamente                               |
+| CUJ-06     | Sistema recusa acesso não autorizado                      | Todos          | `POST /analyze` sem `X-API-Key` (quando `API_KEY` configurado) → 401                            |
+| CUJ-07     | Rate limiter protege `/analyze` de abuso                  | Agent          | 11 req/min → 429 na 11ª requisição                                                              |
+| CUJ-08     | Sistema responde ao health check em containers            | Todos          | `GET /health` → 200 `{"status": "healthy"}`                                                     |
+| CUJ-09     | Sistema busca incidentes similares na KB corretamente     | KB             | `POST /kb/search` → resultados ordenados por relevância                                         |
+| CUJ-10     | Fallback ocorre quando Claude retorna JSON inválido       | Agent          | Orquestrador deriva severidade dos findings sem crash                                           |
+| CUJ-E2E-01 | Pipeline completo de ingestão com Redis real              | Log-Ingestion  | Ingest → Redis → `GET /metrics/overview` retorna contadores corretos (Redis via testcontainers) |
+| CUJ-E2E-02 | Pipeline completo de KB com Qdrant real                   | Knowledge-Base | `POST /kb/ingest` + `POST /kb/search` retorna chunk correto (Qdrant via testcontainers)         |
 
 ### 4.2 Pirâmide de Testes
 
-| Nível | Qtd. Atual | Meta | Ferramentas | Foco |
-|---|---|---|---|---|
-| Unit Tests | ~180 | ≥ 60 | `pytest` + `unittest.mock` | Lógica de negócio isolada; parsers JSON; cálculos de severidade |
-| Integration Tests | ~46 | ≥ 30 | `pytest-asyncio` + `AsyncMock` + `fakeredis` | Fluxos completos com dependências mockadas |
-| Contract Tests | 10 | ≥ 10 | `schemathesis` (API fuzzing no CI) | Fuzzing de contratos de API entre serviços |
-| E2E Tests | 10 | ≥ 5 | `pytest` + `testcontainers` (Redis + Qdrant reais) | Pipelines completos em infraestrutura real |
-| Load Tests | 3 cenários | ≥ 3 cenários | `locust` + `check_slos.py` | SLOs de latência e throughput sob carga realista |
-| Security Tests | 15+ | ≥ 15 | `bandit` + `semgrep` + OWASP ZAP + `pip-audit` | SAST estático + DAST dinâmico no CI |
+| Nível             | Qtd. Atual | Meta         | Ferramentas                                        | Foco                                                            |
+| ----------------- | ---------- | ------------ | -------------------------------------------------- | --------------------------------------------------------------- |
+| Unit Tests        | ~180       | ≥ 60         | `pytest` + `unittest.mock`                         | Lógica de negócio isolada; parsers JSON; cálculos de severidade |
+| Integration Tests | ~46        | ≥ 30         | `pytest-asyncio` + `AsyncMock` + `fakeredis`       | Fluxos completos com dependências mockadas                      |
+| Contract Tests    | 10         | ≥ 10         | `schemathesis` (API fuzzing no CI)                 | Fuzzing de contratos de API entre serviços                      |
+| E2E Tests         | 10         | ≥ 5          | `pytest` + `testcontainers` (Redis + Qdrant reais) | Pipelines completos em infraestrutura real                      |
+| Load Tests        | 3 cenários | ≥ 3 cenários | `locust` + `check_slos.py`                         | SLOs de latência e throughput sob carga realista                |
+| Security Tests    | 15+        | ≥ 15         | `bandit` + `semgrep` + OWASP ZAP + `pip-audit`     | SAST estático + DAST dinâmico no CI                             |
 
 ### 4.3 Testes a Implementar — Ciclo RED → GREEN → REFACTOR
 
@@ -689,14 +691,14 @@ def mock_anthropic_ok():
 
 ### 4.5 Métricas de Qualidade de Testes
 
-| Métrica | IRA | Log-Ingestion | Knowledge-Base | Meta | Ferramenta |
-|---|---|---|---|---|---|
-| Code Coverage (linhas) | 99.35% | 95.61% | 97.60% | ≥ 85% | `pytest-cov --cov-report=html` |
-| Code Coverage (branches) | 99% | 95% | 98% | ≥ 75% | `pytest-cov --branch` |
-| Total de testes | 174 | 77 (+ 4 E2E) | 49 (+ 6 E2E) | ≥ 95 | `pytest -q` |
-| Tempo de execução | < 1s | < 1s | < 1s | < 10s | `pytest --duration=10` |
-| Testes flaky | 0 | 0 | 0 | 0 | CI tracking |
-| Mutation Score | Não medido | Não medido | Não medido | ≥ 70% | `mutmut` |
+| Métrica                  | IRA        | Log-Ingestion | Knowledge-Base | Meta  | Ferramenta                     |
+| ------------------------ | ---------- | ------------- | -------------- | ----- | ------------------------------ |
+| Code Coverage (linhas)   | 99.35%     | 95.61%        | 97.60%         | ≥ 85% | `pytest-cov --cov-report=html` |
+| Code Coverage (branches) | 99%        | 95%           | 98%            | ≥ 75% | `pytest-cov --branch`          |
+| Total de testes          | 174        | 77 (+ 4 E2E)  | 49 (+ 6 E2E)   | ≥ 95  | `pytest -q`                    |
+| Tempo de execução        | < 1s       | < 1s          | < 1s           | < 10s | `pytest --duration=10`         |
+| Testes flaky             | 0          | 0             | 0              | 0     | CI tracking                    |
+| Mutation Score           | Não medido | Não medido    | Não medido     | ≥ 70% | `mutmut`                       |
 
 ### 4.6 Pipeline CI/CD — Gates de Qualidade (Implementado)
 
@@ -750,14 +752,14 @@ upload-artifact: load-test-results (30 dias)
 
 ### 5.1 Ferramentas Recomendadas
 
-| Ferramenta | Tipo | Foco Principal | Integração |
-|---|---|---|---|
-| **Bandit** | Python SAST | Vulnerabilidades Python (injection, hardcoded secrets, weak crypto) | `pip install bandit`; CLI + CI |
-| **Semgrep** | SAST multi-regra | Padrões personalizados, OWASP Top 10, regras da comunidade | `semgrep --config=auto`; CI + IDE |
-| **Trivy** | Supply chain | CVEs em dependências Python (`requirements.txt`) | `trivy fs . --security-checks vuln` |
-| **Safety** | Dependências | Vulnerabilidades conhecidas em packages PyPI | `safety check -r requirements.txt` |
-| **pip-audit** | Dependências | Alternativa ao Safety com suporte a PURL | `pip-audit -r requirements.txt` |
-| **Checkov** | IaC | Dockerfile e docker-compose.yml (mis-configurações) | `checkov -d . --framework dockerfile` |
+| Ferramenta    | Tipo             | Foco Principal                                                      | Integração                            |
+| ------------- | ---------------- | ------------------------------------------------------------------- | ------------------------------------- |
+| **Bandit**    | Python SAST      | Vulnerabilidades Python (injection, hardcoded secrets, weak crypto) | `pip install bandit`; CLI + CI        |
+| **Semgrep**   | SAST multi-regra | Padrões personalizados, OWASP Top 10, regras da comunidade          | `semgrep --config=auto`; CI + IDE     |
+| **Trivy**     | Supply chain     | CVEs em dependências Python (`requirements.txt`)                    | `trivy fs . --security-checks vuln`   |
+| **Safety**    | Dependências     | Vulnerabilidades conhecidas em packages PyPI                        | `safety check -r requirements.txt`    |
+| **pip-audit** | Dependências     | Alternativa ao Safety com suporte a PURL                            | `pip-audit -r requirements.txt`       |
+| **Checkov**   | IaC              | Dockerfile e docker-compose.yml (mis-configurações)                 | `checkov -d . --framework dockerfile` |
 
 ### 5.2 Configuração Bandit
 
@@ -810,15 +812,15 @@ rules:
 
 ### 5.4 Findings Identificados no Código Atual
 
-| ID | Arquivo | Severidade | Categoria | Descrição | Recomendação |
-|---|---|---|---|---|---|
-| SAST-01 | `config.py` (todos) | 🟡 MEDIUM | Secret Management | `api_key` default vazio: auth desabilitada por padrão; risco se `.env` não for configurado em prod | Exigir `API_KEY` não-vazio em produção via `@model_validator` |
-| SAST-02 | `config.py` (agent) | 🟡 MEDIUM | Secret Management | `anthropic_api_key` default vazio: sem erro de startup claro | Falhar no startup se `ANTHROPIC_API_KEY` ausente em não-dev |
-| SAST-03 | `orchestrator.py` | ✅ MITIGADO | Input Validation | `_sanitize_finding_text()` sanitiza `summary`/`details` (remove tags HTML/system, limita a 500 chars); delimitadores XML `<finding ...>` no prompt; `kb_query` usa apenas summaries sanitizados | Implementado em `orchestrator.py` — §7.3.1 |
-| SAST-04 | `base.py` (specialist) | 🟢 LOW | Error Handling | `tool_handlers` genérico: exceções retornam `{"error": str(exc)}` ao LLM — pode vazar stack traces | Retornar mensagens sanitizadas sem detalhes técnicos para o LLM |
-| SAST-05 | `Dockerfile` (todos) | 🟡 MEDIUM | Container Security | Prováveis execuções como `root` (não confirmado) | Adicionar `USER nonroot`; usar imagens `slim` |
-| SAST-06 | `requirements.txt` | ✅ MITIGADO | Supply Chain | CVEs varridos por `grype` via SBOM (S4-06 ✅); `pip-audit` no CI; artefatos SPDX retidos 90 dias | SBOM gerado por `syft`; grype bloqueia build em CVE crítico |
-| SAST-07 | `main.py` (todos) | ✅ MITIGADO | Security Headers | `SecurityHeadersMiddleware` adiciona `Content-Security-Policy: default-src 'self'`, HSTS, X-Frame-Options, X-Content-Type-Options em todos os serviços | Implementado em `app/middleware/security_headers.py` |
+| ID      | Arquivo                | Severidade  | Categoria          | Descrição                                                                                                                                                                                       | Recomendação                                                    |
+| ------- | ---------------------- | ----------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| SAST-01 | `config.py` (todos)    | 🟡 MEDIUM   | Secret Management  | `api_key` default vazio: auth desabilitada por padrão; risco se `.env` não for configurado em prod                                                                                              | Exigir `API_KEY` não-vazio em produção via `@model_validator`   |
+| SAST-02 | `config.py` (agent)    | 🟡 MEDIUM   | Secret Management  | `anthropic_api_key` default vazio: sem erro de startup claro                                                                                                                                    | Falhar no startup se `ANTHROPIC_API_KEY` ausente em não-dev     |
+| SAST-03 | `orchestrator.py`      | ✅ MITIGADO | Input Validation   | `_sanitize_finding_text()` sanitiza `summary`/`details` (remove tags HTML/system, limita a 500 chars); delimitadores XML `<finding ...>` no prompt; `kb_query` usa apenas summaries sanitizados | Implementado em `orchestrator.py` — §7.3.1                      |
+| SAST-04 | `base.py` (specialist) | 🟢 LOW      | Error Handling     | `tool_handlers` genérico: exceções retornam `{"error": str(exc)}` ao LLM — pode vazar stack traces                                                                                              | Retornar mensagens sanitizadas sem detalhes técnicos para o LLM |
+| SAST-05 | `Dockerfile` (todos)   | 🟡 MEDIUM   | Container Security | Prováveis execuções como `root` (não confirmado)                                                                                                                                                | Adicionar `USER nonroot`; usar imagens `slim`                   |
+| SAST-06 | `requirements.txt`     | ✅ MITIGADO | Supply Chain       | CVEs varridos por `grype` via SBOM (S4-06 ✅); `pip-audit` no CI; artefatos SPDX retidos 90 dias                                                                                                | SBOM gerado por `syft`; grype bloqueia build em CVE crítico     |
+| SAST-07 | `main.py` (todos)      | ✅ MITIGADO | Security Headers   | `SecurityHeadersMiddleware` adiciona `Content-Security-Policy: default-src 'self'`, HSTS, X-Frame-Options, X-Content-Type-Options em todos os serviços                                          | Implementado em `app/middleware/security_headers.py`            |
 
 ### 5.5 Dockerfile Seguro — Padrão
 
@@ -890,12 +892,13 @@ jobs:
 
 **Ferramentas:**
 
-| Ferramenta | Papel | Saída |
-|---|---|---|
-| **syft** | Gera SBOM inventariando todas as dependências do serviço | SPDX JSON (`<slug>.spdx.json`) |
-| **grype** | Varre o SBOM contra bases de CVE (NVD, GHSA, OSV) | SARIF + exit code ≠ 0 se CVE crítico |
+| Ferramenta | Papel                                                    | Saída                                |
+| ---------- | -------------------------------------------------------- | ------------------------------------ |
+| **syft**   | Gera SBOM inventariando todas as dependências do serviço | SPDX JSON (`<slug>.spdx.json`)       |
+| **grype**  | Varre o SBOM contra bases de CVE (NVD, GHSA, OSV)        | SARIF + exit code ≠ 0 se CVE crítico |
 
 **Comportamento do workflow:**
+
 - Acionado em push/PR para `main` e via `workflow_dispatch`
 - Estratégia de **matrix** — 1 job por serviço (`log-ingestion`, `incident-agent`, `knowledge-base`)
 - `grype --fail-on critical` — bloqueia o build se existir CVE crítico não mitigado
@@ -928,23 +931,23 @@ steps:
 
 ### 6.1 Ferramentas Recomendadas
 
-| Ferramenta | Tipo | Modo de Uso |
-|---|---|---|
-| **OWASP ZAP** | Full DAST | Scan ativo e passivo; fuzzing de endpoints; análise de headers |
+| Ferramenta       | Tipo                         | Modo de Uso                                                         |
+| ---------------- | ---------------------------- | ------------------------------------------------------------------- |
+| **OWASP ZAP**    | Full DAST                    | Scan ativo e passivo; fuzzing de endpoints; análise de headers      |
 | **Schemathesis** | Property-based / API fuzzing | Testa todos os endpoints OpenAPI com inputs gerados automaticamente |
-| **Nuclei** | Template-based | Templates para CVEs conhecidas e mis-configurações |
+| **Nuclei**       | Template-based               | Templates para CVEs conhecidas e mis-configurações                  |
 
 ### 6.2 Plano de Testes DAST por Endpoint
 
-| Endpoint | Método | Testes DAST | Resultado Esperado |
-|---|---|---|---|
-| `GET /health` | GET | Scan passivo; verificação de headers | 200 OK; headers de segurança presentes |
-| `POST /logs` | POST | Fuzzing de payload; injection (campos string); grandes payloads | 422 em payload inválido; sem 500 em fuzzing |
-| `GET /metrics/*` | GET | Enumeração de endpoints; verificação de dados sensíveis expostos | Sem API keys, IPs internos ou segredos |
-| `POST /analyze` | POST | Auth bypass; rate limit bypass; payload injection | 401 sem key; 429 em excesso; sem secrets em resposta |
-| `GET /prometheus/metrics` | GET | Verificar se está exposto publicamente | Deve ser protegido por auth ou restrito por IP |
-| `POST /kb/search` | POST | Adversarial embeddings; payloads enormes | Processamento seguro; limite de tamanho aplicado |
-| `/docs`, `/openapi.json` | GET | Verificar exposição em produção | Deve ser desabilitado (`enable_docs=False`) |
+| Endpoint                  | Método | Testes DAST                                                      | Resultado Esperado                                   |
+| ------------------------- | ------ | ---------------------------------------------------------------- | ---------------------------------------------------- |
+| `GET /health`             | GET    | Scan passivo; verificação de headers                             | 200 OK; headers de segurança presentes               |
+| `POST /logs`              | POST   | Fuzzing de payload; injection (campos string); grandes payloads  | 422 em payload inválido; sem 500 em fuzzing          |
+| `GET /metrics/*`          | GET    | Enumeração de endpoints; verificação de dados sensíveis expostos | Sem API keys, IPs internos ou segredos               |
+| `POST /analyze`           | POST   | Auth bypass; rate limit bypass; payload injection                | 401 sem key; 429 em excesso; sem secrets em resposta |
+| `GET /prometheus/metrics` | GET    | Verificar se está exposto publicamente                           | Deve ser protegido por auth ou restrito por IP       |
+| `POST /kb/search`         | POST   | Adversarial embeddings; payloads enormes                         | Processamento seguro; limite de tamanho aplicado     |
+| `/docs`, `/openapi.json`  | GET    | Verificar exposição em produção                                  | Deve ser desabilitado (`enable_docs=False`)          |
 
 ### 6.3 Configuração OWASP ZAP
 
@@ -985,6 +988,7 @@ schemathesis run http://localhost:8001/openapi.json \
 ```
 
 Checks ativos:
+
 - `response_conformance` — respostas conformes com schema OpenAPI
 - `not_a_server_error` — nenhum endpoint retorna 500 com input válido
 - `content_type_conformance` — `Content-Type` correto
@@ -1068,7 +1072,7 @@ jobs:
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:8000'
+          target: "http://localhost:8000"
           fail_action: true
 
       - name: Upload ZAP Report
@@ -1084,35 +1088,35 @@ jobs:
 
 ### 7.1 OWASP Top 10 Web Application 2021
 
-| ID | Risco | Status | Ação Requerida |
-|---|---|---|---|
-| A01:2021 | Broken Access Control | ⚠️ PARCIAL | `API_KEY=''` desabilita auth; deve ser obrigatória em produção |
-| A02:2021 | Cryptographic Failures | ✅ OK | Secrets via env vars; HSTS; nenhuma secret em logs |
-| A03:2021 | Injection | ✅ OK | `_sanitize_finding_text()` (MAX_FINDING_LENGTH=500) sanitiza findings; delimitadores XML `<finding ...>` isolam dados externos no prompt; `kb_query` limitado aos summaries sanitizados |
-| A04:2021 | Insecure Design | ✅ OK | Degradação graciosa; rate limiting; separação de responsabilidades |
-| A05:2021 | Security Misconfiguration | 🔴 RISCO | `/docs` exposto por padrão; Prometheus metrics sem auth |
-| A06:2021 | Vulnerable and Outdated Components | ✅ OK | `pip-audit` no `sast.yml`; `grype` via SBOM no `sbom.yml` (bloqueia CVE crítico); artefatos SPDX JSON retidos 90 dias |
-| A07:2021 | Authentication Failures | ✅ OK | Multi-key support (S4-07 ✅): `API_KEY` suporta lista CSV; `POST /admin/rotate-key` gera nova chave sem downtime; `ADMIN_KEY` separa acesso admin; timing-safe `hmac.compare_digest` |
-| A08:2021 | Software and Data Integrity | ✅ OK | SBOM gerado por `syft` (SPDX JSON) + CVEs varridos por `grype` no CI (`sbom.yml`); artefatos retidos 90 dias |
-| A09:2021 | Security Logging Failures | ⚠️ PARCIAL | Logs estruturados apenas no Log-Ingestion; sem alertas automáticos |
-| A10:2021 | SSRF | 🟢 BAIXO | URLs de serviços configuradas por env vars, não por input do usuário |
+| ID       | Risco                              | Status     | Ação Requerida                                                                                                                                                                          |
+| -------- | ---------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A01:2021 | Broken Access Control              | ⚠️ PARCIAL | `API_KEY=''` desabilita auth; deve ser obrigatória em produção                                                                                                                          |
+| A02:2021 | Cryptographic Failures             | ✅ OK      | Secrets via env vars; HSTS; nenhuma secret em logs                                                                                                                                      |
+| A03:2021 | Injection                          | ✅ OK      | `_sanitize_finding_text()` (MAX_FINDING_LENGTH=500) sanitiza findings; delimitadores XML `<finding ...>` isolam dados externos no prompt; `kb_query` limitado aos summaries sanitizados |
+| A04:2021 | Insecure Design                    | ✅ OK      | Degradação graciosa; rate limiting; separação de responsabilidades                                                                                                                      |
+| A05:2021 | Security Misconfiguration          | 🔴 RISCO   | `/docs` exposto por padrão; Prometheus metrics sem auth                                                                                                                                 |
+| A06:2021 | Vulnerable and Outdated Components | ✅ OK      | `pip-audit` no `sast.yml`; `grype` via SBOM no `sbom.yml` (bloqueia CVE crítico); artefatos SPDX JSON retidos 90 dias                                                                   |
+| A07:2021 | Authentication Failures            | ✅ OK      | Multi-key support (S4-07 ✅): `API_KEY` suporta lista CSV; `POST /admin/rotate-key` gera nova chave sem downtime; `ADMIN_KEY` separa acesso admin; timing-safe `hmac.compare_digest`    |
+| A08:2021 | Software and Data Integrity        | ✅ OK      | SBOM gerado por `syft` (SPDX JSON) + CVEs varridos por `grype` no CI (`sbom.yml`); artefatos retidos 90 dias                                                                            |
+| A09:2021 | Security Logging Failures          | ⚠️ PARCIAL | Logs estruturados apenas no Log-Ingestion; sem alertas automáticos                                                                                                                      |
+| A10:2021 | SSRF                               | 🟢 BAIXO   | URLs de serviços configuradas por env vars, não por input do usuário                                                                                                                    |
 
 ### 7.2 OWASP Top 10 for LLM Applications 2025
 
 > Este mapeamento é especialmente crítico: o projeto usa LLMs (Claude) como componente central de decisão.
 
-| ID | Risco | Manifestação no Projeto | Mitigação Implementada | Status |
-|---|---|---|---|---|
-| LLM01:2025 | Prompt Injection | `findings` inseridos no prompt do orquestrador | `_sanitize_finding_text()` (MAX=500 chars, remove tags system/human/assistant); delimitadores XML `<finding ...>`; `kb_query` truncado | ✅ |
-| LLM02:2025 | Sensitive Information Disclosure | Claude recebe métricas que podem identificar infraestrutura | Métricas são agregadas (contadores, percentis) — sem IPs ou hostnames individuais no payload | ⚠️ PARCIAL |
-| LLM03:2025 | Supply Chain | Dependência direta do Anthropic SDK e disponibilidade da API | Circuit breaker (S4-04): CLOSED→OPEN→HALF_OPEN; fallback rule-based (S4-05); tenacity retry com backoff | ✅ |
-| LLM04:2025 | Data and Model Poisoning | KB (Qdrant) pode ser poluída por post-mortems maliciosos | `require_api_key` em `/kb/ingest`; `ChunkValidator` valida tamanho (max 2000 chars) e formato dos chunks | ✅ |
-| LLM05:2025 | Improper Output Handling | JSON da resposta do Claude parseado sem validação | `OrchestratorResponse` (Pydantic) valida schema antes de construir `IncidentReport`; fallback em `ValidationError` | ✅ |
-| LLM06:2025 | Excessive Agency | Agentes têm acesso irrestrito a todas as métricas | Modelo HOTL: agente analisa, humano decide; sem ações automáticas de remediação | ✅ |
-| LLM07:2025 | System Prompt Leakage | System prompts podem aparecer em logs DEBUG | `ORCHESTRATOR_SYSTEM_PROMPT_V1` nunca logado; logs contêm apenas metadados (severity, duration) | ⚠️ PARCIAL |
-| LLM08:2025 | Vector and Embedding Weaknesses | Chunks irrelevantes podem contaminar diagnóstico | `score_threshold=0.70` configurado no `QdrantService.search()`; top_k=5 limitado | ✅ |
-| LLM09:2025 | Misinformation | Claude pode gerar diagnósticos incorretos com alta confiança | HOTL: humano valida antes de agir; `incident_commander_brief` explicita incertezas | ✅ |
-| LLM10:2025 | Unbounded Consumption | Muitos chunks KB podem inflar o prompt do orquestrador | `kb_results[:5]` limita chunks; `_sanitize_finding_text()` trunca cada finding; `max_tokens=1024` no synthesis call | ✅ |
+| ID         | Risco                            | Manifestação no Projeto                                      | Mitigação Implementada                                                                                                                 | Status     |
+| ---------- | -------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| LLM01:2025 | Prompt Injection                 | `findings` inseridos no prompt do orquestrador               | `_sanitize_finding_text()` (MAX=500 chars, remove tags system/human/assistant); delimitadores XML `<finding ...>`; `kb_query` truncado | ✅         |
+| LLM02:2025 | Sensitive Information Disclosure | Claude recebe métricas que podem identificar infraestrutura  | Métricas são agregadas (contadores, percentis) — sem IPs ou hostnames individuais no payload                                           | ⚠️ PARCIAL |
+| LLM03:2025 | Supply Chain                     | Dependência direta do Anthropic SDK e disponibilidade da API | Circuit breaker (S4-04): CLOSED→OPEN→HALF_OPEN; fallback rule-based (S4-05); tenacity retry com backoff                                | ✅         |
+| LLM04:2025 | Data and Model Poisoning         | KB (Qdrant) pode ser poluída por post-mortems maliciosos     | `require_api_key` em `/kb/ingest`; `ChunkValidator` valida tamanho (max 2000 chars) e formato dos chunks                               | ✅         |
+| LLM05:2025 | Improper Output Handling         | JSON da resposta do Claude parseado sem validação            | `OrchestratorResponse` (Pydantic) valida schema antes de construir `IncidentReport`; fallback em `ValidationError`                     | ✅         |
+| LLM06:2025 | Excessive Agency                 | Agentes têm acesso irrestrito a todas as métricas            | Modelo HOTL: agente analisa, humano decide; sem ações automáticas de remediação                                                        | ✅         |
+| LLM07:2025 | System Prompt Leakage            | System prompts podem aparecer em logs DEBUG                  | `ORCHESTRATOR_SYSTEM_PROMPT_V1` nunca logado; logs contêm apenas metadados (severity, duration)                                        | ⚠️ PARCIAL |
+| LLM08:2025 | Vector and Embedding Weaknesses  | Chunks irrelevantes podem contaminar diagnóstico             | `score_threshold=0.70` configurado no `QdrantService.search()`; top_k=5 limitado                                                       | ✅         |
+| LLM09:2025 | Misinformation                   | Claude pode gerar diagnósticos incorretos com alta confiança | HOTL: humano valida antes de agir; `incident_commander_brief` explicita incertezas                                                     | ✅         |
+| LLM10:2025 | Unbounded Consumption            | Muitos chunks KB podem inflar o prompt do orquestrador       | `kb_results[:5]` limita chunks; `_sanitize_finding_text()` trunca cada finding; `max_tokens=1024` no synthesis call                    | ✅         |
 
 ### 7.3 Implementações de Segurança Recomendadas
 
@@ -1213,28 +1217,28 @@ limiter = Limiter(key_func=get_api_key_or_ip)
 
 ### 7.4 Checklist de Segurança — Pré-Deploy
 
-| Categoria | Verificação | Status |
-|---|---|---|
-| **Secrets** | `API_KEY` configurado e não vazio em produção | ⬜ Pendente |
-| **Secrets** | `ANTHROPIC_API_KEY` em secret manager (não em `.env`) | ⬜ Pendente |
-| **Secrets** | `REDIS_PASSWORD` configurado | ⬜ Pendente |
-| **Config** | `enable_docs=False` em produção | ⬜ Pendente |
-| **Config** | `GET /prometheus/metrics` protegido por auth ou IP restrito | ⬜ Pendente |
-| **Container** | Dockerfile executa como usuário não-root | ⬜ Pendente |
-| **Container** | Imagens Docker escaneadas por CVEs (`trivy image`) | ⬜ Pendente |
-| **Dependências** | `safety`/`pip-audit` sem HIGH/CRITICAL CVEs | ⬜ Pendente |
-| **Código** | `bandit` sem HIGH/CRITICAL findings | ⬜ Pendente |
-| **Código** | Sem hardcoded secrets (`trufflehog`, `git-secrets`) | ⬜ Pendente |
-| **Runtime** | HSTS com `max-age >= 31536000` | ✅ Implementado |
-| **Runtime** | Security headers em todos os serviços | ✅ Implementado |
-| **Runtime** | Rate limiting no `/analyze` | ✅ Implementado |
-| **SAST** | `bandit` + `semgrep` sem issues HIGH+ | ⬜ Pendente |
-| **DAST** | OWASP ZAP sem issues MEDIUM+ | ⬜ Pendente |
-| **LLM** | Sanitização de input antes de enviar ao Claude | ⬜ Pendente |
-| **LLM** | Validação Pydantic de output do Claude | ⬜ Pendente |
-| **LLM** | `score_threshold=0.70` no Qdrant | ⬜ Pendente |
-| **Logs** | Nenhuma API key em logs | ✅ Correto |
-| **Logs** | Stack traces não expostos em respostas HTTP | ✅ Implementado |
+| Categoria        | Verificação                                                 | Status                                                     |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
+| **Secrets**      | `API_KEY` configurado e não vazio em produção               | ⬜ Pendente (deployment)                                   |
+| **Secrets**      | `ANTHROPIC_API_KEY` em secret manager (não em `.env`)       | ⬜ Pendente (deployment)                                   |
+| **Secrets**      | `REDIS_PASSWORD` configurado                                | ⬜ Pendente (deployment)                                   |
+| **Config**       | `enable_docs=False` em produção                             | ✅ Implementado (`@model_validator` — 3 serviços)          |
+| **Config**       | `GET /prometheus/metrics` protegido por auth ou IP restrito | ⬜ Pendente                                                |
+| **Container**    | Dockerfile executa como usuário não-root                    | ✅ Implementado (`USER appuser` — 3 Dockerfiles)           |
+| **Container**    | Imagens Docker escaneadas por CVEs (`trivy image`)          | ⬜ Pendente (SBOM/grype cobre pacotes; image scan ausente) |
+| **Dependências** | `safety`/`pip-audit` sem HIGH/CRITICAL CVEs                 | ✅ Implementado (`pip-audit` no `sast.yml`)                |
+| **Código**       | `bandit` sem HIGH/CRITICAL findings                         | ✅ Implementado (`bandit -ll` no `sast.yml`)               |
+| **Código**       | Sem hardcoded secrets (`trufflehog`, `git-secrets`)         | ⬜ Pendente (não integrado no CI)                          |
+| **Runtime**      | HSTS com `max-age >= 31536000`                              | ✅ Implementado                                            |
+| **Runtime**      | Security headers em todos os serviços                       | ✅ Implementado                                            |
+| **Runtime**      | Rate limiting no `/analyze`                                 | ✅ Implementado                                            |
+| **SAST**         | `bandit` + `semgrep` sem issues HIGH+                       | ✅ Implementado (gate ativo no `sast.yml`)                 |
+| **DAST**         | OWASP ZAP sem issues MEDIUM+                                | ⬜ Pendente (`fail_action: false` — não bloqueia build)    |
+| **LLM**          | Sanitização de input antes de enviar ao Claude              | ✅ Implementado (`_sanitize_finding_text()`)               |
+| **LLM**          | Validação Pydantic de output do Claude                      | ✅ Implementado (`OrchestratorResponse`)                   |
+| **LLM**          | `score_threshold=0.70` no Qdrant                            | ✅ Implementado (`qdrant_service.py`)                      |
+| **Logs**         | Nenhuma API key em logs                                     | ✅ Correto                                                 |
+| **Logs**         | Stack traces não expostos em respostas HTTP                 | ✅ Implementado                                            |
 
 ---
 
@@ -1242,57 +1246,57 @@ limiter = Limiter(key_func=get_api_key_or_ip)
 
 ### Sprint 1 — Segurança Crítica ✅ Concluído
 
-| ID | Tarefa | Serviço | OWASP / Risco | Status |
-|---|---|---|---|---|
-| S1-01 | Adicionar `USER nonroot` em todos os Dockerfiles | Todos | Container Security | ✅ |
-| S1-02 | Exigir `API_KEY` não-vazio em produção (`@model_validator`) | Agent + KB | A01 / A07 | ✅ |
-| S1-03 | Desabilitar `/docs` e `/openapi.json` por padrão | Todos | A05 | ✅ |
-| S1-04 | Proteger `/kb/ingest` com `require_api_key` | Knowledge-Base | A01 / LLM04 | ✅ |
-| S1-05 | Sanitizar `findings` antes de inserir no prompt LLM | Agent | LLM01 / A03 | ✅ |
-| S1-06 | Adicionar `score_threshold=0.70` na busca vetorial | Knowledge-Base | LLM08 | ✅ |
-| S1-07 | Executar `safety`/`pip-audit` e corrigir CVEs HIGH/CRITICAL | Todos | A06 | ✅ |
+| ID    | Tarefa                                                      | Serviço        | OWASP / Risco      | Status |
+| ----- | ----------------------------------------------------------- | -------------- | ------------------ | ------ |
+| S1-01 | Adicionar `USER nonroot` em todos os Dockerfiles            | Todos          | Container Security | ✅     |
+| S1-02 | Exigir `API_KEY` não-vazio em produção (`@model_validator`) | Agent + KB     | A01 / A07          | ✅     |
+| S1-03 | Desabilitar `/docs` e `/openapi.json` por padrão            | Todos          | A05                | ✅     |
+| S1-04 | Proteger `/kb/ingest` com `require_api_key`                 | Knowledge-Base | A01 / LLM04        | ✅     |
+| S1-05 | Sanitizar `findings` antes de inserir no prompt LLM         | Agent          | LLM01 / A03        | ✅     |
+| S1-06 | Adicionar `score_threshold=0.70` na busca vetorial          | Knowledge-Base | LLM08              | ✅     |
+| S1-07 | Executar `safety`/`pip-audit` e corrigir CVEs HIGH/CRITICAL | Todos          | A06                | ✅     |
 
 ### Sprint 2 — Observabilidade e TDD ✅ Concluído
 
-| ID | Tarefa | Serviço | Pilar | Status |
-|---|---|---|---|---|
-| S2-01 | Adicionar `RequestLoggingMiddleware` ao Agent e KB | Agent + KB | Logs | ✅ |
-| S2-02 | Implementar `configure_telemetry` com `HTTPXInstrumentor` | Agent | Traces | ✅ |
-| S2-03 | Adicionar métricas Prometheus customizadas | Agent | Métricas | ✅ |
-| S2-04 | Implementar testes CUJ-01 a CUJ-10 (226 testes, ≥ 85% cobertura) | Todos | TDD | ✅ |
-| S2-05 | Configurar `pytest-cov` com threshold de 85% | Todos | TDD | ✅ |
-| S2-06 | Validação Pydantic de output do Claude (`OrchestratorResponse`) | Agent | LLM Security | ✅ |
-| S2-07 | Criar dashboard Grafana com Golden Signals | Infra | Observabilidade | ✅ |
+| ID    | Tarefa                                                           | Serviço    | Pilar           | Status |
+| ----- | ---------------------------------------------------------------- | ---------- | --------------- | ------ |
+| S2-01 | Adicionar `RequestLoggingMiddleware` ao Agent e KB               | Agent + KB | Logs            | ✅     |
+| S2-02 | Implementar `configure_telemetry` com `HTTPXInstrumentor`        | Agent      | Traces          | ✅     |
+| S2-03 | Adicionar métricas Prometheus customizadas                       | Agent      | Métricas        | ✅     |
+| S2-04 | Implementar testes CUJ-01 a CUJ-10 (226 testes, ≥ 85% cobertura) | Todos      | TDD             | ✅     |
+| S2-05 | Configurar `pytest-cov` com threshold de 85%                     | Todos      | TDD             | ✅     |
+| S2-06 | Validação Pydantic de output do Claude (`OrchestratorResponse`)  | Agent      | LLM Security    | ✅     |
+| S2-07 | Criar dashboard Grafana com Golden Signals                       | Infra      | Observabilidade | ✅     |
 
 ### Sprint 3 — SAST/DAST e CI/CD ✅ Concluído
 
-| ID | Tarefa | Serviço | Pipeline | Status |
-|---|---|---|---|---|
-| S3-01 | Integrar `bandit` + `semgrep` no GitHub Actions | Todos | SAST | ✅ |
-| S3-02 | Integrar `pip-audit` no CI | Todos | SAST | ✅ |
-| S3-03 | Integrar `checkov` para Dockerfile/docker-compose (SARIF) | Infra | SAST/IaC | ✅ |
-| S3-04 | Implementar OWASP ZAP baseline scan no CI | Todos | DAST | ✅ |
-| S3-05 | Implementar Schemathesis API fuzzing no CI | Log-Ingestion + KB | DAST | ✅ |
-| S3-06 | Security headers testados inline em `test_audit_config.py` | Todos | DAST | ✅ |
-| S3-07 | Contract tests entre serviços (via Schemathesis) | Todos | Qualidade | ✅ |
+| ID    | Tarefa                                                     | Serviço            | Pipeline  | Status |
+| ----- | ---------------------------------------------------------- | ------------------ | --------- | ------ |
+| S3-01 | Integrar `bandit` + `semgrep` no GitHub Actions            | Todos              | SAST      | ✅     |
+| S3-02 | Integrar `pip-audit` no CI                                 | Todos              | SAST      | ✅     |
+| S3-03 | Integrar `checkov` para Dockerfile/docker-compose (SARIF)  | Infra              | SAST/IaC  | ✅     |
+| S3-04 | Implementar OWASP ZAP baseline scan no CI                  | Todos              | DAST      | ✅     |
+| S3-05 | Implementar Schemathesis API fuzzing no CI                 | Log-Ingestion + KB | DAST      | ✅     |
+| S3-06 | Security headers testados inline em `test_audit_config.py` | Todos              | DAST      | ✅     |
+| S3-07 | Contract tests entre serviços (via Schemathesis)           | Todos              | Qualidade | ✅     |
 
 ### Sprint 4 — Maturidade SRE ✅ Concluído
 
-| ID | Tarefa | Serviço | Objetivo | Status |
-|---|---|---|---|---|
-| S4-01 | SLOs formais com error budget tracking | Log-Ingestion | SRE | ✅ |
-| S4-02 | E2E tests com `testcontainers-python` (10 testes: CUJ-E2E-01/02) | Log-Ingestion + KB | TDD | ✅ |
-| S4-03 | Load tests com `locust` — `check_slos.py` + CI `load-test.yml` | Todos | SRE | ✅ |
-| S4-04 | Circuit breaker para Anthropic API (`tenacity`) | Agent | Resiliência | ✅ |
-| S4-05 | Fallback de análise baseada em regras (`fallback_analyzer.py`) | Agent | Resiliência | ✅ |
-| S4-06 | Publicar SBOM com `syft`/`grype` | Todos | Supply Chain | ✅ |
-| S4-07 | Rotação automática de API Keys | Agent | A07 | ✅ |
+| ID    | Tarefa                                                           | Serviço            | Objetivo     | Status |
+| ----- | ---------------------------------------------------------------- | ------------------ | ------------ | ------ |
+| S4-01 | SLOs formais com error budget tracking                           | Log-Ingestion      | SRE          | ✅     |
+| S4-02 | E2E tests com `testcontainers-python` (10 testes: CUJ-E2E-01/02) | Log-Ingestion + KB | TDD          | ✅     |
+| S4-03 | Load tests com `locust` — `check_slos.py` + CI `load-test.yml`   | Todos              | SRE          | ✅     |
+| S4-04 | Circuit breaker para Anthropic API (`tenacity`)                  | Agent              | Resiliência  | ✅     |
+| S4-05 | Fallback de análise baseada em regras (`fallback_analyzer.py`)   | Agent              | Resiliência  | ✅     |
+| S4-06 | Publicar SBOM com `syft`/`grype`                                 | Todos              | Supply Chain | ✅     |
+| S4-07 | Rotação automática de API Keys                                   | Agent              | A07          | ✅     |
 
 ---
 
 ## 9. Building Secure & Reliable Systems — Mapeamento Google SRE
 
-> **Fonte:** Beyer, Blank-Edelman, Reese, Thorne — *Building Secure and Reliable Systems* (Google / O'Reilly, 2020). Disponível em: https://google.github.io/building-secure-and-reliable-systems/
+> **Fonte:** Beyer, Blank-Edelman, Reese, Thorne — _Building Secure and Reliable Systems_ (Google / O'Reilly, 2020). Disponível em: https://google.github.io/building-secure-and-reliable-systems/
 >
 > Esta seção mapeia os capítulos e princípios centrais do livro para decisões concretas de design, implementação e operação do AgenticAI-2-Incident-Response. Cada prática é acompanhada do gap identificado no código atual e da ação de implementação recomendada.
 
@@ -1304,29 +1308,29 @@ O livro estabelece que **segurança e confiabilidade são propriedades emergente
 
 #### Tensões e Trade-offs a Gerir
 
-| Tensão | Manifestação no Projeto | Decisão Recomendada |
-|---|---|---|
-| Segurança vs. Usabilidade | `API_KEY=''` facilita desenvolvimento mas cria risco em produção | Ambientes explícitos: dev sem auth, staging/prod com auth obrigatória via `APP_ENV` |
-| Confiabilidade vs. Consistência | KB indisponível → análise sem contexto histórico | Degradação graciosa já implementada ✅ — documentar no runbook o comportamento esperado |
-| Velocidade de Deploy vs. Segurança | CI/CD sem gates de SAST/DAST | Adicionar gates sem bloquear PRs por falsos positivos — usar baseline de supressão documentada |
-| Observabilidade vs. Privacidade | Logs detalhados expõem dados de infra | Definir níveis de sensibilidade por campo; nunca logar IPs de usuários em claro em produção |
+| Tensão                             | Manifestação no Projeto                                          | Decisão Recomendada                                                                            |
+| ---------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Segurança vs. Usabilidade          | `API_KEY=''` facilita desenvolvimento mas cria risco em produção | Ambientes explícitos: dev sem auth, staging/prod com auth obrigatória via `APP_ENV`            |
+| Confiabilidade vs. Consistência    | KB indisponível → análise sem contexto histórico                 | Degradação graciosa já implementada ✅ — documentar no runbook o comportamento esperado        |
+| Velocidade de Deploy vs. Segurança | CI/CD sem gates de SAST/DAST                                     | Adicionar gates sem bloquear PRs por falsos positivos — usar baseline de supressão documentada |
+| Observabilidade vs. Privacidade    | Logs detalhados expõem dados de infra                            | Definir níveis de sensibilidade por campo; nunca logar IPs de usuários em claro em produção    |
 
 #### Adversários a Considerar (Cap. 2)
 
 O livro classifica adversários por capacidade e motivação. Para este projeto:
 
-| Tipo de Adversário | Vetor de Ataque | Controle no Projeto |
-|---|---|---|
-| Insider malicioso | Injeção de chunks maliciosos na KB via `/kb/ingest` | Autenticar `/kb/ingest`; auditar todas as ingestões com log imutável |
-| Atacante externo oportunista | Abuso de `/analyze` para consumir créditos LLM | Rate limiting já implementado ✅; adicionar alertas de uso anômalo |
-| Atacante sofisticado | Prompt injection via findings de métricas manipuladas | Sanitização LLM01 (ver §7.3.1); validação Pydantic de output (ver §7.3.2) |
-| Falha acidental (não adversarial) | Bug no Claude SDK gera resposta malformada | Fallback de parsing por severidade máxima já implementado ✅ |
+| Tipo de Adversário                | Vetor de Ataque                                       | Controle no Projeto                                                       |
+| --------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| Insider malicioso                 | Injeção de chunks maliciosos na KB via `/kb/ingest`   | Autenticar `/kb/ingest`; auditar todas as ingestões com log imutável      |
+| Atacante externo oportunista      | Abuso de `/analyze` para consumir créditos LLM        | Rate limiting já implementado ✅; adicionar alertas de uso anômalo        |
+| Atacante sofisticado              | Prompt injection via findings de métricas manipuladas | Sanitização LLM01 (ver §7.3.1); validação Pydantic de output (ver §7.3.2) |
+| Falha acidental (não adversarial) | Bug no Claude SDK gera resposta malformada            | Fallback de parsing por severidade máxima já implementado ✅              |
 
 ---
 
 ### 9.2 Menor Privilégio e Confiança Mínima (Cap. 5)
 
-> *"Grant the minimum access necessary to perform a job function, and no more."*
+> _"Grant the minimum access necessary to perform a job function, and no more."_
 
 Este é o princípio mais diretamente aplicável ao design de multi-agentes do sistema.
 
@@ -1357,52 +1361,52 @@ ERRORS_TOOLS = [
 ```yaml
 # docker-compose.yml — adicionar restrições de rede
 networks:
-  ingestion-net:       # Log-Ingestion ↔ Redis (isolado)
-  agent-net:           # Agent ↔ Log-Ingestion ↔ KB
-  kb-net:              # KB ↔ Qdrant (isolado)
+  ingestion-net: # Log-Ingestion ↔ Redis (isolado)
+  agent-net: # Agent ↔ Log-Ingestion ↔ KB
+  kb-net: # KB ↔ Qdrant (isolado)
 
 services:
   api:
-    networks: [ingestion-net]   # Redis não acessível pelo Agent diretamente
+    networks: [ingestion-net] # Redis não acessível pelo Agent diretamente
 
   incident-response-agent:
-    networks: [agent-net]       # Acessa somente api e knowledge-base
+    networks: [agent-net] # Acessa somente api e knowledge-base
 
   knowledge-base:
     networks: [agent-net, kb-net]
 
   redis:
-    networks: [ingestion-net]   # NUNCA exposto ao agent ou KB
+    networks: [ingestion-net] # NUNCA exposto ao agent ou KB
 
   qdrant:
-    networks: [kb-net]          # NUNCA exposto ao agent ou Log-Ingestion
+    networks: [kb-net] # NUNCA exposto ao agent ou Log-Ingestion
 ```
 
 #### 9.2.3 Credenciais com Escopo Mínimo
 
-| Credencial | Escopo Atual | Escopo Recomendado |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | Uma key para todos os agentes | Considerar keys separadas por agente para auditoria granular de uso |
-| `API_KEY` (Incident Agent) | Uma key para todos os clientes | Múltiplas keys com claims diferentes (read-only vs. analyze) |
-| `QDRANT_API_KEY` | Leitura + escrita para todos | Key de leitura para o Agent; key de escrita apenas para o seeder |
-| `REDIS_PASSWORD` | Acesso total ao Redis | Considerar ACLs Redis por usuário (Redis 6+) |
+| Credencial                 | Escopo Atual                   | Escopo Recomendado                                                  |
+| -------------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`        | Uma key para todos os agentes  | Considerar keys separadas por agente para auditoria granular de uso |
+| `API_KEY` (Incident Agent) | Uma key para todos os clientes | Múltiplas keys com claims diferentes (read-only vs. analyze)        |
+| `QDRANT_API_KEY`           | Leitura + escrita para todos   | Key de leitura para o Agent; key de escrita apenas para o seeder    |
+| `REDIS_PASSWORD`           | Acesso total ao Redis          | Considerar ACLs Redis por usuário (Redis 6+)                        |
 
 ---
 
 ### 9.3 Design para Compreensibilidade (Cap. 6)
 
-> *"A system that cannot be understood cannot be made secure or reliable."*
+> _"A system that cannot be understood cannot be made secure or reliable."_
 
 O livro dedica um capítulo inteiro a este tema, argumentando que **complexidade é o maior inimigo da segurança**. Sistemas incompreensíveis são inseguros porque não conseguimos raciocinar sobre seus estados de falha.
 
 #### 9.3.1 Avaliação de Compreensibilidade do Projeto
 
-| Componente | Compreensibilidade | Risco | Ação |
-|---|---|---|---|
-| `SpecialistAgent.analyze()` — tool-use loop | ⚠️ Moderada | Loop sem limite de iterações pode divergir | Adicionar `MAX_TOOL_ITERATIONS = 5` com hard stop |
-| `_synthesize()` — prompt do orquestrador | ⚠️ Moderada | Prompt longo; difícil de testar todas as combinações | Versionar prompts como código; adicionar testes de prompt regression |
-| `ingestion.py` — pipeline Redis | ✅ Alta | Operações atômicas simples e previsíveis | Manter; documentar invariantes de dados |
-| `kb_client.search_kb()` — degradação graciosa | ✅ Alta | Comportamento em falha bem definido e documentado | Adicionar métrica de falhas de KB para alertas |
+| Componente                                    | Compreensibilidade | Risco                                                | Ação                                                                 |
+| --------------------------------------------- | ------------------ | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `SpecialistAgent.analyze()` — tool-use loop   | ⚠️ Moderada        | Loop sem limite de iterações pode divergir           | Adicionar `MAX_TOOL_ITERATIONS = 5` com hard stop                    |
+| `_synthesize()` — prompt do orquestrador      | ⚠️ Moderada        | Prompt longo; difícil de testar todas as combinações | Versionar prompts como código; adicionar testes de prompt regression |
+| `ingestion.py` — pipeline Redis               | ✅ Alta            | Operações atômicas simples e previsíveis             | Manter; documentar invariantes de dados                              |
+| `kb_client.search_kb()` — degradação graciosa | ✅ Alta            | Comportamento em falha bem definido e documentado    | Adicionar métrica de falhas de KB para alertas                       |
 
 #### 9.3.2 Limite de Iterações no Tool-Use Loop
 
@@ -1449,19 +1453,19 @@ logger.info("Analysis started", extra={"prompt_version": PROMPT_VERSION})
 
 ### 9.4 Design de Sistemas Resilientes (Cap. 8)
 
-> *"Design systems so that when (not if) components fail, the failure is contained and the system degrades gracefully."*
+> _"Design systems so that when (not if) components fail, the failure is contained and the system degrades gracefully."_
 
 #### 9.4.1 Mapeamento de Modos de Falha
 
 O livro recomenda criar uma **Failure Mode and Effects Analysis (FMEA)** para cada dependência crítica:
 
-| Dependência | Modo de Falha | Impacto Atual | Mitigação Recomendada |
-|---|---|---|---|
-| **Anthropic API** | Timeout / 429 / 500 | `POST /analyze` retorna 500 | Circuit breaker com `tenacity`; fallback para análise por regras |
-| **Redis** | Conexão recusada | Log-Ingestion para de funcionar completamente | Pool de conexões com retry; health check Redis no startup |
-| **Qdrant** | Indisponível | KB retorna `[]` graciosamente ✅ | Alertas de KB degradada; log de frequência de falhas |
-| **Anthropic API** | Resposta JSON inválida | Fallback para severidade máxima ✅ | Adicionar métrica `llm_parse_fallback_total` para monitorar frequência |
-| **Serviço de Métricas** | Indisponível quando Agent tenta consultar | Specialist retorna `{"error": "..."}` ao LLM | Retornar `SpecialistFinding(severity=WARNING, summary="Metrics unavailable")` explicitamente |
+| Dependência             | Modo de Falha                             | Impacto Atual                                 | Mitigação Recomendada                                                                        |
+| ----------------------- | ----------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Anthropic API**       | Timeout / 429 / 500                       | `POST /analyze` retorna 500                   | Circuit breaker com `tenacity`; fallback para análise por regras                             |
+| **Redis**               | Conexão recusada                          | Log-Ingestion para de funcionar completamente | Pool de conexões com retry; health check Redis no startup                                    |
+| **Qdrant**              | Indisponível                              | KB retorna `[]` graciosamente ✅              | Alertas de KB degradada; log de frequência de falhas                                         |
+| **Anthropic API**       | Resposta JSON inválida                    | Fallback para severidade máxima ✅            | Adicionar métrica `llm_parse_fallback_total` para monitorar frequência                       |
+| **Serviço de Métricas** | Indisponível quando Agent tenta consultar | Specialist retorna `{"error": "..."}` ao LLM  | Retornar `SpecialistFinding(severity=WARNING, summary="Metrics unavailable")` explicitamente |
 
 #### 9.4.2 Circuit Breaker para Anthropic API
 
@@ -1535,7 +1539,7 @@ def analyze_by_rules(metrics: dict) -> IncidentReport:
 
 ### 9.5 Práticas de Código Seguro (Caps. 12–13)
 
-> *"Code is the primary attack surface. Security must be built into the development process, not bolted on."*
+> _"Code is the primary attack surface. Security must be built into the development process, not bolted on."_
 
 #### 9.5.1 Code Review com Foco em Segurança
 
@@ -1545,20 +1549,24 @@ O livro recomenda checklists explícitas de segurança em code reviews. Para est
 ## Checklist de Security Review (adicionar ao PULL_REQUEST_TEMPLATE.md)
 
 ### Entradas e Validações
+
 - [ ] Todo input externo é validado por Pydantic antes de ser processado?
 - [ ] Campos de texto são truncados antes de serem inseridos em prompts LLM?
 - [ ] Novos endpoints têm autenticação e rate limiting?
 
 ### Secrets e Configuração
+
 - [ ] Nenhum secret hardcoded (API keys, passwords, tokens)?
 - [ ] Novos campos de configuração têm valores padrão seguros para produção?
 - [ ] Nenhum dado sensível é logado em nível INFO ou superior?
 
 ### Tratamento de Erros
+
 - [ ] Exceções são capturadas e retornam mensagens sem detalhes internos?
 - [ ] Novos caminhos de código têm testes de falha (não só happy path)?
 
 ### LLM-Específico
+
 - [ ] Dados externos inseridos em prompts são sanitizados?
 - [ ] Output do LLM é validado por schema Pydantic antes de uso?
 - [ ] Prompts novos ou modificados têm testes de regressão?
@@ -1624,7 +1632,7 @@ def test_kb_not_queried_when_all_findings_ok():
 
 ### 9.6 Testes para Segurança e Confiabilidade (Cap. 13)
 
-> *"Test at the boundaries — the places where your system meets the outside world and where internal components meet each other."*
+> _"Test at the boundaries — the places where your system meets the outside world and where internal components meet each other."_
 
 O livro identifica quatro categorias de testes que este projeto deve cobrir:
 
@@ -1733,16 +1741,16 @@ def test_sanitize_never_raises(text):
 
 ### 9.7 Mitigação de DoS (Cap. 10)
 
-> *"Availability is a security property. A system that can be made unavailable is insecure."*
+> _"Availability is a security property. A system that can be made unavailable is insecure."_
 
 #### 9.7.1 Superfície de Ataque de DoS por Endpoint
 
-| Endpoint | Vetor de DoS | Custo por Requisição | Controle Atual | Controle Adicional |
-|---|---|---|---|---|
-| `POST /analyze` | Abuso → consumo de créditos LLM ($$$) | Alto (4 chamadas Claude + 1 síntese) | Rate limit 10/min ✅ | Limite de budget mensal na Anthropic Dashboard; alertas de custo |
-| `POST /logs` | Flood de logs falsos → Redis OOM | Médio (escrita Redis) | Rate limit genérico | Validação de IP de origem; limite de `bytes_read` no schema |
-| `POST /kb/search` | Flood de buscas vetoriais → CPU Qdrant | Médio (embedding + busca) | Rate limit 60/min ✅ | Cache de resultados para queries repetidas |
-| `POST /kb/ingest` | Ingestão massiva → Qdrant disk OOM | Alto (embedding + escrita) | Nenhum ⚠️ | Auth obrigatória; limite de tamanho de chunk; rate limit severo (5/min) |
+| Endpoint          | Vetor de DoS                           | Custo por Requisição                 | Controle Atual       | Controle Adicional                                                      |
+| ----------------- | -------------------------------------- | ------------------------------------ | -------------------- | ----------------------------------------------------------------------- |
+| `POST /analyze`   | Abuso → consumo de créditos LLM ($$$)  | Alto (4 chamadas Claude + 1 síntese) | Rate limit 10/min ✅ | Limite de budget mensal na Anthropic Dashboard; alertas de custo        |
+| `POST /logs`      | Flood de logs falsos → Redis OOM       | Médio (escrita Redis)                | Rate limit genérico  | Validação de IP de origem; limite de `bytes_read` no schema             |
+| `POST /kb/search` | Flood de buscas vetoriais → CPU Qdrant | Médio (embedding + busca)            | Rate limit 60/min ✅ | Cache de resultados para queries repetidas                              |
+| `POST /kb/ingest` | Ingestão massiva → Qdrant disk OOM     | Alto (embedding + escrita)           | Nenhum ⚠️            | Auth obrigatória; limite de tamanho de chunk; rate limit severo (5/min) |
 
 #### 9.7.2 Proteção contra Request Smuggling e Payloads Maliciosos
 
@@ -1771,19 +1779,19 @@ app.add_middleware(RequestSizeLimitMiddleware)
 
 ### 9.8 Tratamento de Dados Sensíveis (Cap. 11)
 
-> *"Data that is not collected cannot be leaked. Data that is not stored cannot be stolen."*
+> _"Data that is not collected cannot be leaked. Data that is not stored cannot be stolen."_
 
 #### 9.8.1 Classificação de Dados no Projeto
 
-| Dado | Classificação | Onde Trafega | Controle |
-|---|---|---|---|
-| `ANTHROPIC_API_KEY` | 🔴 Secreto | Env var → Processo | Nunca logar; secret manager em produção |
-| `API_KEY` (cliente) | 🔴 Secreto | Header HTTP → Processo | Logar apenas hash SHA-256; comparação em tempo constante |
-| `REDIS_PASSWORD` | 🔴 Secreto | Env var → Connection string | Nunca logar; rotacionar periodicamente |
-| IPs de clientes (HAProxy logs) | 🟡 Sensível | `POST /logs` → Redis | Considerar anonimização (hash ou mascaramento) antes de armazenar |
-| Dados de métricas (RPS, erros) | 🟢 Interno | Redis → Agent → Claude | Podem vazar topologia da infra; não enviar a LLMs externos em produção crítica |
-| `IncidentReport` | 🟡 Confidencial | Agent → Cliente | Pode conter detalhes de infra; controlar quem pode chamar `/analyze` |
-| Chunks de post-mortems (KB) | 🟡 Confidencial | Qdrant → Agent → Claude | Podem conter informações sensíveis de incidentes passados; controlar acesso à KB |
+| Dado                           | Classificação   | Onde Trafega                | Controle                                                                         |
+| ------------------------------ | --------------- | --------------------------- | -------------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`            | 🔴 Secreto      | Env var → Processo          | Nunca logar; secret manager em produção                                          |
+| `API_KEY` (cliente)            | 🔴 Secreto      | Header HTTP → Processo      | Logar apenas hash SHA-256; comparação em tempo constante                         |
+| `REDIS_PASSWORD`               | 🔴 Secreto      | Env var → Connection string | Nunca logar; rotacionar periodicamente                                           |
+| IPs de clientes (HAProxy logs) | 🟡 Sensível     | `POST /logs` → Redis        | Considerar anonimização (hash ou mascaramento) antes de armazenar                |
+| Dados de métricas (RPS, erros) | 🟢 Interno      | Redis → Agent → Claude      | Podem vazar topologia da infra; não enviar a LLMs externos em produção crítica   |
+| `IncidentReport`               | 🟡 Confidencial | Agent → Cliente             | Pode conter detalhes de infra; controlar quem pode chamar `/analyze`             |
+| Chunks de post-mortems (KB)    | 🟡 Confidencial | Qdrant → Agent → Claude     | Podem conter informações sensíveis de incidentes passados; controlar acesso à KB |
 
 #### 9.8.2 Comparação de API Key em Tempo Constante
 
@@ -1807,7 +1815,7 @@ async def require_api_key(key: str = Security(_header)) -> None:
 
 ### 9.9 Investigação de Sistemas e Eventos (Cap. 15)
 
-> *"You cannot investigate what you cannot observe. Invest in forensic capabilities before you need them."*
+> _"You cannot investigate what you cannot observe. Invest in forensic capabilities before you need them."_
 
 #### 9.9.1 Auditoria de Eventos de Segurança
 
@@ -1847,7 +1855,7 @@ def log_auth_failure(request_id: str, ip: str, reason: str):
 
 #### 9.9.2 Capacidade de Debug de Incidentes da Própria Plataforma
 
-Para que o sistema possa ser investigado quando *ele próprio* sofre um incidente:
+Para que o sistema possa ser investigado quando _ele próprio_ sofre um incidente:
 
 ```python
 # app/debug_endpoint.py — endpoint de diagnóstico (somente em não-produção)
@@ -1872,7 +1880,7 @@ if settings.app_env != 'production':
 
 ### 9.10 Resposta a Incidentes e Gestão de Crises (Caps. 17–18)
 
-> *"Incident response is a skill. Like all skills, it requires practice. You should run drills before a real incident occurs."*
+> _"Incident response is a skill. Like all skills, it requires practice. You should run drills before a real incident occurs."_
 
 #### 9.10.1 Runbook — `POST /analyze` Degradado
 
@@ -1880,10 +1888,12 @@ if settings.app_env != 'production':
 ## Runbook: Incident Response Agent — /analyze retornando 500 ou 503
 
 ### Sintomas
+
 - POST /analyze retorna 500 de forma persistente
 - Tempo de resposta > 30s
 
 ### Diagnóstico (em ordem)
+
 1. Verificar saúde do próprio serviço:
    curl http://localhost:8001/health
 
@@ -1903,11 +1913,13 @@ if settings.app_env != 'production':
    https://status.anthropic.com
 
 ### Mitigação
+
 - Se Anthropic API indisponível: fallback automático deve ativar análise por regras
 - Se Log-Ingestion indisponível: specialists retornam WARNING com "Metrics unavailable"
 - Se KB indisponível: análise continua sem contexto histórico (already implemented ✅)
 
 ### Escalação
+
 - 5 min sem resolução → Escalar para engenheiro sênior
 - 15 min → Abrir incidente formal e notificar stakeholders
 ```
@@ -1926,38 +1938,45 @@ O projeto já possui `docs/post-mortems/` com 5 post-mortems reais. O livro reco
 **Status:** DRAFT | REVISÃO | FECHADO
 
 ### Impacto
+
 - Usuários afetados: N
 - Funcionalidade degradada: [descrição]
 - SLO impactado: [disponibilidade / latência / erro]
 
 ### Linha do Tempo
-| Horário (UTC) | Evento |
-|---|---|
-| HH:MM | Primeira anomalia detectada (Golden Signal: X) |
-| HH:MM | Alerta disparado |
-| HH:MM | Engenheiro on-call notificado |
-| HH:MM | Diagnóstico confirmado |
-| HH:MM | Mitigação aplicada |
-| HH:MM | Serviço restaurado |
+
+| Horário (UTC) | Evento                                         |
+| ------------- | ---------------------------------------------- |
+| HH:MM         | Primeira anomalia detectada (Golden Signal: X) |
+| HH:MM         | Alerta disparado                               |
+| HH:MM         | Engenheiro on-call notificado                  |
+| HH:MM         | Diagnóstico confirmado                         |
+| HH:MM         | Mitigação aplicada                             |
+| HH:MM         | Serviço restaurado                             |
 
 ### Causa Raiz
+
 [Análise dos 5 Porquês ou diagrama de causa-efeito]
 
 ### O que foi bem
+
 - [Detecção rápida via Golden Signal X]
 - [Fallback automático funcionou corretamente]
 
 ### O que pode melhorar
+
 - [Alerta deveria ter disparado 10 min antes]
 - [Runbook estava desatualizado]
 
 ### Itens de Ação
-| Ação | Responsável | Prazo | Issue |
-|---|---|---|---|
-| Adicionar alerta para [métrica Y] | @engenheiro | 2 semanas | #123 |
-| Atualizar runbook de [serviço Z] | @engenheiro | 1 semana | #124 |
+
+| Ação                              | Responsável | Prazo     | Issue |
+| --------------------------------- | ----------- | --------- | ----- |
+| Adicionar alerta para [métrica Y] | @engenheiro | 2 semanas | #123  |
+| Atualizar runbook de [serviço Z]  | @engenheiro | 1 semana  | #124  |
 
 ### Lições Aprendidas para a Knowledge Base
+
 [Chunks a adicionar ao Qdrant para enriquecer análises futuras]
 ```
 
@@ -1965,17 +1984,17 @@ O projeto já possui `docs/post-mortems/` com 5 post-mortems reais. O livro reco
 
 ### 9.11 Operacionalização Contínua (Cap. 20): Modelo de Engajamento SRE
 
-> *"Reliability work is never done. Build processes that continuously improve the system's posture."*
+> _"Reliability work is never done. Build processes that continuously improve the system's posture."_
 
 #### 9.11.1 Error Budget Policy
 
 Com os SLOs definidos na §3.2.1, o projeto deve ter uma política explícita de error budget:
 
-| SLO | Budget mensal (30 dias) | Ação quando budget < 50% | Ação quando budget esgotado |
-|---|---|---|---|
-| Disponibilidade ≥ 99.5% | 3h 36min de downtime | Priorizar reliability sobre features | Freeze de novas features; foco total em reliability |
-| Latência P95 < 500ms | 36h de P95 acima do threshold | Investigar regressões de performance | Rollback do último deploy |
-| Taxa de Erro 5xx < 1% | 7h 12min com error rate acima | Investigar causa raiz | Rollback imediato |
+| SLO                     | Budget mensal (30 dias)       | Ação quando budget < 50%             | Ação quando budget esgotado                         |
+| ----------------------- | ----------------------------- | ------------------------------------ | --------------------------------------------------- |
+| Disponibilidade ≥ 99.5% | 3h 36min de downtime          | Priorizar reliability sobre features | Freeze de novas features; foco total em reliability |
+| Latência P95 < 500ms    | 36h de P95 acima do threshold | Investigar regressões de performance | Rollback do último deploy                           |
+| Taxa de Erro 5xx < 1%   | 7h 12min com error rate acima | Investigar causa raiz                | Rollback imediato                                   |
 
 #### 9.11.2 Production Readiness Review (PRR)
 
@@ -1985,29 +2004,34 @@ O livro recomenda uma **Production Readiness Review** antes de qualquer novo ser
 ## PRR Checklist — AgenticAI-2-Incident-Response
 
 ### Arquitetura
+
 - [ ] Todos os SPOFs (Single Points of Failure) identificados e documentados?
 - [ ] Capacity planning realizado (quantos logs/s o Redis aguenta)?
 - [ ] Limites de escala documentados?
 
 ### Observabilidade
+
 - [ ] Golden Signals instrumentados para todos os serviços?
 - [ ] Alertas configurados para violações de SLO?
 - [ ] Dashboard Grafana revisado e aprovado pela equipe?
 - [ ] Distributed tracing funcionando entre todos os serviços?
 
 ### Confiabilidade
+
 - [ ] Testes de chaos engineering executados?
 - [ ] Runbooks escritos e validados?
 - [ ] Fallbacks testados em ambiente de staging?
 - [ ] Circuit breakers configurados e testados?
 
 ### Segurança
+
 - [ ] Checklist de pré-deploy da §7.4 completo?
 - [ ] Penetration test ou DAST executado?
 - [ ] Threat model revisado?
 - [ ] Dados sensíveis classificados e protegidos?
 
 ### Operações
+
 - [ ] On-call rotation configurada?
 - [ ] Alertas de pager calibrados (sem alert fatigue)?
 - [ ] Post-mortem do último incidente de staging fechado?
@@ -2016,12 +2040,11 @@ O livro recomenda uma **Production Readiness Review** antes de qualquer novo ser
 
 ---
 
-
 ---
 
 ### 9.12 Anatomy of an Incident — Google's Approach to Incident Management
 
-> **Fonte:** Sachto, Walcer, Yang — *Anatomy of an Incident: Google's Approach to Incident Management for Production Services* (O'Reilly / Google Cloud, 2022).
+> **Fonte:** Sachto, Walcer, Yang — _Anatomy of an Incident: Google's Approach to Incident Management for Production Services_ (O'Reilly / Google Cloud, 2022).
 >
 > Este livro é diretamente relevante ao projeto em dois níveis: (1) define as práticas que a **equipe que opera** o AgenticAI-2-Incident-Response deve seguir; e (2) fornece o modelo conceitual que os **próprios agentes de IA** devem incorporar ao gerar diagnósticos e recomendações.
 
@@ -2038,11 +2061,11 @@ Preparedness ──────────► Response ────────
               (post-mortem fecha o ciclo)
 ```
 
-| Fase | O que abrange | Implementação no Projeto |
-|---|---|---|
-| **Preparedness** | Monitoramento, alertas, runbooks, exercícios DiRT, treinamento on-call | Golden Signals (§3.1), runbooks (§9.10.1), testes de chaos (§9.6.2), PRR (§9.11.2) |
-| **Response** | Detecção da anomalia, decisão se é incidente, comunicação inicial | `POST /analyze` dispara análise; IncidentReport gerado em ~10s; engenheiro decide severidade |
-| **Mitigation & Recovery** | Mitigações urgentes, estabilização do sistema, postmortem | Recomendações do IncidentReport; runbook de mitigação; postmortem no `docs/post-mortems/` |
+| Fase                      | O que abrange                                                          | Implementação no Projeto                                                                     |
+| ------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Preparedness**          | Monitoramento, alertas, runbooks, exercícios DiRT, treinamento on-call | Golden Signals (§3.1), runbooks (§9.10.1), testes de chaos (§9.6.2), PRR (§9.11.2)           |
+| **Response**              | Detecção da anomalia, decisão se é incidente, comunicação inicial      | `POST /analyze` dispara análise; IncidentReport gerado em ~10s; engenheiro decide severidade |
+| **Mitigation & Recovery** | Mitigações urgentes, estabilização do sistema, postmortem              | Recomendações do IncidentReport; runbook de mitigação; postmortem no `docs/post-mortems/`    |
 
 **Gap crítico identificado:** O projeto automatiza a **detecção** (Preparedness → Response) mas não formaliza a **resposta organizada** (Response) nem o **ciclo de melhoria** (Recovery → Preparedness). As seções seguintes endereçam cada gap.
 
@@ -2076,13 +2099,13 @@ class IncidentReport(BaseModel):
 
 **Política de alertas recomendada para o projeto** (baseada no Cap. 1):
 
-| Condição | Canal | Urgência | Justificativa |
-|---|---|---|---|
-| `overall_severity = critical` | Page (PagerDuty/OpsGenie) | Imediata | Requer ação humana agora |
-| `overall_severity = warning` | Ticket / Slack | Próximas horas | Requer atenção, não emergência |
-| `overall_severity = ok` | Dashboard (pull mode) | Nenhuma | Informação para análise |
+| Condição                        | Canal                      | Urgência         | Justificativa                                               |
+| ------------------------------- | -------------------------- | ---------------- | ----------------------------------------------------------- |
+| `overall_severity = critical`   | Page (PagerDuty/OpsGenie)  | Imediata         | Requer ação humana agora                                    |
+| `overall_severity = warning`    | Ticket / Slack             | Próximas horas   | Requer atenção, não emergência                              |
+| `overall_severity = ok`         | Dashboard (pull mode)      | Nenhuma          | Informação para análise                                     |
 | KB indisponível durante análise | Alerta de baixa prioridade | Próximo dia útil | Degradação silenciosa — deve ser corrigida mas não bloqueia |
-| `/analyze` com `duration > 30s` | Alerta de engenharia | Próximas horas | Possível degradação do LLM |
+| `/analyze` com `duration > 30s` | Alerta de engenharia       | Próximas horas   | Possível degradação do LLM                                  |
 
 ---
 
@@ -2090,14 +2113,14 @@ class IncidentReport(BaseModel):
 
 O livro introduz a distinção entre **Component Responders** (especialistas em um único sistema) e **SoS Responders** (generalistas que coordenam múltiplos componentes). Esta arquitetura espelha **exatamente** o design do projeto:
 
-| Conceito do Livro | Equivalente no Projeto | Responsabilidade |
-|---|---|---|
-| Component Responder | `LatencyAgent` | Especialista em P50/P95/P99 — conhece apenas métricas de tempo de resposta |
-| Component Responder | `ErrorsAgent` | Especialista em taxas 4xx/5xx — conhece apenas métricas de erro |
-| Component Responder | `SaturationAgent` | Especialista em memória Redis e conexões |
-| Component Responder | `TrafficAgent` | Especialista em RPS e variações de tráfego |
-| SoS Responder / Tech IRT | `Orchestrator` (Claude) | Visão holística — sintetiza findings, consulta KB histórica, gera diagnóstico cross-component |
-| Postmortem Repository | `Knowledge-Base` (Qdrant) | "Shared repository of postmortems, shared broadly" |
+| Conceito do Livro        | Equivalente no Projeto    | Responsabilidade                                                                              |
+| ------------------------ | ------------------------- | --------------------------------------------------------------------------------------------- |
+| Component Responder      | `LatencyAgent`            | Especialista em P50/P95/P99 — conhece apenas métricas de tempo de resposta                    |
+| Component Responder      | `ErrorsAgent`             | Especialista em taxas 4xx/5xx — conhece apenas métricas de erro                               |
+| Component Responder      | `SaturationAgent`         | Especialista em memória Redis e conexões                                                      |
+| Component Responder      | `TrafficAgent`            | Especialista em RPS e variações de tráfego                                                    |
+| SoS Responder / Tech IRT | `Orchestrator` (Claude)   | Visão holística — sintetiza findings, consulta KB histórica, gera diagnóstico cross-component |
+| Postmortem Repository    | `Knowledge-Base` (Qdrant) | "Shared repository of postmortems, shared broadly"                                            |
 
 **Lição do caso Mayan Apocalypse (Cap. 6) aplicada ao projeto:**
 
@@ -2198,6 +2221,7 @@ async def test_critical_report_includes_root_cause_and_trigger():
 O Cap. 1 detalha os dois anti-padrões mais comuns de alertas:
 
 **Anti-padrão 1: Pager às 2h por algo não acionável**
+
 > "QPS aumentou 300% — isso é um serviço com tráfego bursty normal. Não deveria acordar ninguém."
 
 Aplicação ao projeto: alertas de `/analyze` com `severity=ok` **nunca** devem virar page. Configurar o sistema de alertas para:
@@ -2255,26 +2279,32 @@ O Cap. 2 recomenda **Wheel of Misfortune** — simulações de incidentes reais 
 ## Wheel of Misfortune — Cenários de Treinamento
 
 ### Cenário 1: Redis Saturation (baseado em INC-003)
+
 Contexto: Redis atingiu 95% de memória com maxmemory-policy: noeviction
 Papel do trainee: Engenheiro on-call que recebe o IncidentReport
 Objetivo: Executar as recomendações do agente em < 10 minutos
 Perguntas de debriefing:
-  - O diagnóstico do agente foi suficientemente específico?
-  - As recomendações estavam em ordem de prioridade correta?
-  - O similar_incident (INC-003) foi relevante?
+
+- O diagnóstico do agente foi suficientemente específico?
+- As recomendações estavam em ordem de prioridade correta?
+- O similar_incident (INC-003) foi relevante?
 
 ### Cenário 2: RPS Drop Zero (baseado em INC-004)
+
 Contexto: HAProxy caiu — RPS zerou há 6 minutos
 Objetivo: Identificar que a causa é externa ao sistema analisado
 Perguntas: O agente detectou o drop? Classificou como CRITICAL?
-  - O que a ferramenta pode e não pode diagnosticar?
+
+- O que a ferramenta pode e não pode diagnosticar?
 
 ### Cenário 3: KB Unavailable During Critical Incident
+
 Contexto: Qdrant down durante análise de incidente P1
 Objetivo: Verificar que similar_incidents=[] não bloqueia a análise
 Perguntas: O engenheiro sabia o que esperar? O runbook cobre isso?
 
 ### Cenário 4: LLM API Degraded (circuit breaker ativo)
+
 Contexto: Anthropic API com latência > 60s
 Objetivo: Verificar que fallback por regras produz diagnóstico útil
 Perguntas: O relatório de fallback é suficiente para agir?
@@ -2286,12 +2316,12 @@ Perguntas: O relatório de fallback é suficiente para agir?
 
 O livro apresenta o **IMAG** (Incident Management at Google), baseado no ICS dos bombeiros. Para o contexto do projeto de dissertação (equipe pequena), uma versão simplificada:
 
-| Papel IMAG | Responsabilidade | Para este Projeto |
-|---|---|---|
-| **Incident Commander (IC)** | Coordena resposta; delega; mantém visão holística | Engenheiro sênior que recebe o IncidentReport e lidera a resposta |
-| **Operations Lead** | Implementa as mitigações técnicas | Engenheiro on-call que executa as `recommendations` do relatório |
-| **Communications Lead** | Comunica status a stakeholders | Notifica usuários afetados; atualiza status page |
-| **Scribe** | Registra timeline, decisões e ações | Documento de incidente ao vivo → alimenta postmortem → alimenta KB |
+| Papel IMAG                  | Responsabilidade                                  | Para este Projeto                                                  |
+| --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| **Incident Commander (IC)** | Coordena resposta; delega; mantém visão holística | Engenheiro sênior que recebe o IncidentReport e lidera a resposta  |
+| **Operations Lead**         | Implementa as mitigações técnicas                 | Engenheiro on-call que executa as `recommendations` do relatório   |
+| **Communications Lead**     | Comunica status a stakeholders                    | Notifica usuários afetados; atualiza status page                   |
+| **Scribe**                  | Registra timeline, decisões e ações               | Documento de incidente ao vivo → alimenta postmortem → alimenta KB |
 
 **O papel do AgenticAI no IMAG:** o sistema age como um **suporte ao IC** — não substitui o Incident Commander, mas fornece o diagnóstico estruturado que permite ao IC tomar decisões informadas em segundos, em vez de minutos.
 
@@ -2318,20 +2348,22 @@ O Cap. 5 é inteiramente dedicado à **psychological safety** e à cultura de **
 ## Guia de Cultura Blameless para Post-Mortems (baseado em Anatomy of an Incident, Cap. 5)
 
 ### O que é blamelessness
+
 "Blamelessness é a mudança de responsabilidade de pessoas para sistemas e processos."
-Humanos nunca são a causa de incidentes — os sistemas e processos que *permitiram*
+Humanos nunca são a causa de incidentes — os sistemas e processos que _permitiram_
 o incidente são.
 
 ### Linguagem permitida vs. proibida nos post-mortems
 
-| ❌ Blameful | ✅ Blameless |
-|---|---|
-| "O engenheiro João cometeu o erro" | "O sistema não impediu a configuração inválida" |
-| "Falta de atenção causou o incidente" | "O processo de review não detectou a regressão" |
-| "Quem aprovou esse deploy?" | "O pipeline de CI não tinha cobertura para esse caso" |
-| "O on-call demorou para responder" | "O alerta não tinha urgência clara; o runbook estava desatualizado" |
+| ❌ Blameful                           | ✅ Blameless                                                        |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| "O engenheiro João cometeu o erro"    | "O sistema não impediu a configuração inválida"                     |
+| "Falta de atenção causou o incidente" | "O processo de review não detectou a regressão"                     |
+| "Quem aprovou esse deploy?"           | "O pipeline de CI não tinha cobertura para esse caso"               |
+| "O on-call demorou para responder"    | "O alerta não tinha urgência clara; o runbook estava desatualizado" |
 
 ### Perguntas padrão para cada post-mortem (Google SRE)
+
 1. O que foi bem? (Para reforçar)
 2. O que deu errado? (Para corrigir)
 3. Onde tivemos sorte? (Para eliminar dependência da sorte)
@@ -2394,37 +2426,36 @@ def _should_escalate(findings: list[SpecialistFinding]) -> bool:
 
 #### 9.13.10 Resumo: Mapeamento Anatomy of an Incident → Projeto
 
-| Capítulo | Conceito Central | Gap Atual | Implementação |
-|---|---|---|---|
-| Cap. 1 | Lifecycle: Preparedness → Response → Recovery | Ciclo não formalizado | Adicionar fase ao IncidentReport; PRR (§9.11.2) |
-| Cap. 1 | Métricas ≠ Alertas ≠ Incidentes | Sem política de alertas | AlertManager rules (§9.13.5); Counter de distribuição de severidade |
-| Cap. 1 | Fórmula TTD+TTR/TBF × Impact | Sem medição de impacto | Campos `analysis_duration_seconds`; registro de TTD/TTR pós-resolução |
-| Cap. 2 | Wheel of Misfortune / DiRT | Sem exercícios de treinamento | 4 cenários documentados (§9.13.6) |
-| Cap. 3 | Component Responders vs SoS | Bem implementado ✅ | Reforçar prompt do orquestrador com linguagem SoS explícita |
-| Cap. 3 | Common Protocol (IMAG/ICS) | Sem estrutura formal de resposta | Adaptar IMAG para equipe pequena (§9.13.7) |
-| Cap. 3 | Incident não deve durar > 3 dias | Sem time-boxing | Campos `incident_phase` e `escalation_recommended` |
-| Cap. 4 | Generic Mitigations ("buckets") | Recomendações genéricas | Enriquecer KB com mitigações genéricas por tipo de incidente |
-| Cap. 5 | Root Cause vs. Trigger | Diagnóstico não separa os dois | Campos `root_causes` e `triggers` no IncidentReport (§9.13.4) |
-| Cap. 5 | Blameless Postmortems | Post-mortems existem, sem guia formal | Guia de linguagem blameless (§9.13.8); validação na ingestão KB |
-| Cap. 5 | Psychological Safety | Sem política explícita | Adicionar ao onboarding da equipe; guia de linguagem blameless |
-| Cap. 6 | Mayan Apocalypse: SoS coordination | Orquestrador implementado ✅ | Detectar cenários multi-CRITICAL (§9.13.9) |
-
+| Capítulo | Conceito Central                              | Gap Atual                             | Implementação                                                         |
+| -------- | --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------- |
+| Cap. 1   | Lifecycle: Preparedness → Response → Recovery | Ciclo não formalizado                 | Adicionar fase ao IncidentReport; PRR (§9.11.2)                       |
+| Cap. 1   | Métricas ≠ Alertas ≠ Incidentes               | Sem política de alertas               | AlertManager rules (§9.13.5); Counter de distribuição de severidade   |
+| Cap. 1   | Fórmula TTD+TTR/TBF × Impact                  | Sem medição de impacto                | Campos `analysis_duration_seconds`; registro de TTD/TTR pós-resolução |
+| Cap. 2   | Wheel of Misfortune / DiRT                    | Sem exercícios de treinamento         | 4 cenários documentados (§9.13.6)                                     |
+| Cap. 3   | Component Responders vs SoS                   | Bem implementado ✅                   | Reforçar prompt do orquestrador com linguagem SoS explícita           |
+| Cap. 3   | Common Protocol (IMAG/ICS)                    | Sem estrutura formal de resposta      | Adaptar IMAG para equipe pequena (§9.13.7)                            |
+| Cap. 3   | Incident não deve durar > 3 dias              | Sem time-boxing                       | Campos `incident_phase` e `escalation_recommended`                    |
+| Cap. 4   | Generic Mitigations ("buckets")               | Recomendações genéricas               | Enriquecer KB com mitigações genéricas por tipo de incidente          |
+| Cap. 5   | Root Cause vs. Trigger                        | Diagnóstico não separa os dois        | Campos `root_causes` e `triggers` no IncidentReport (§9.13.4)         |
+| Cap. 5   | Blameless Postmortems                         | Post-mortems existem, sem guia formal | Guia de linguagem blameless (§9.13.8); validação na ingestão KB       |
+| Cap. 5   | Psychological Safety                          | Sem política explícita                | Adicionar ao onboarding da equipe; guia de linguagem blameless        |
+| Cap. 6   | Mayan Apocalypse: SoS coordination            | Orquestrador implementado ✅          | Detectar cenários multi-CRITICAL (§9.13.9)                            |
 
 ### 9.13 Resumo: Mapeamento Capítulos → Ações no Projeto
 
-| Capítulo | Tema Central | Gap Identificado | Sprint |
-|---|---|---|---|
-| Cap. 2 | Entender Adversários | Threat model não documentado | S1 |
-| Cap. 5 | Menor Privilégio | Agentes com acesso amplo; redes não isoladas | S1 |
-| Cap. 6 | Compreensibilidade | Tool-use loop sem limite; prompts não versionados | S2 |
-| Cap. 8 | Resiliência | Sem circuit breaker; sem fallback de regras | S2 |
-| Cap. 10 | Mitigação de DoS | `/kb/ingest` sem auth; sem limite de body size | S1 |
-| Cap. 11 | Dados Sensíveis | API Key sem comparação em tempo constante; IPs não anonimizados | S1 |
-| Cap. 12 | Código Seguro | Sem PRR template; sem checklist de security review | S2 |
-| Cap. 13 | Testes | Sem property-based tests; sem chaos engineering | S3 |
-| Cap. 15 | Investigação | Sem audit log separado; sem endpoint de debug | S2 |
-| Cap. 17–18 | Resposta a Incidentes | Runbooks não formalizados; PRR não documentada | S2 |
-| Cap. 20 | Modelo SRE | Error Budget Policy não definida; PRR não formalizada | S4 |
+| Capítulo   | Tema Central          | Gap Identificado                                                | Sprint |
+| ---------- | --------------------- | --------------------------------------------------------------- | ------ |
+| Cap. 2     | Entender Adversários  | Threat model não documentado                                    | S1     |
+| Cap. 5     | Menor Privilégio      | Agentes com acesso amplo; redes não isoladas                    | S1     |
+| Cap. 6     | Compreensibilidade    | Tool-use loop sem limite; prompts não versionados               | S2     |
+| Cap. 8     | Resiliência           | Sem circuit breaker; sem fallback de regras                     | S2     |
+| Cap. 10    | Mitigação de DoS      | `/kb/ingest` sem auth; sem limite de body size                  | S1     |
+| Cap. 11    | Dados Sensíveis       | API Key sem comparação em tempo constante; IPs não anonimizados | S1     |
+| Cap. 12    | Código Seguro         | Sem PRR template; sem checklist de security review              | S2     |
+| Cap. 13    | Testes                | Sem property-based tests; sem chaos engineering                 | S3     |
+| Cap. 15    | Investigação          | Sem audit log separado; sem endpoint de debug                   | S2     |
+| Cap. 17–18 | Resposta a Incidentes | Runbooks não formalizados; PRR não documentada                  | S2     |
+| Cap. 20    | Modelo SRE            | Error Budget Policy não definida; PRR não formalizada           | S4     |
 
 ---
 
@@ -2432,7 +2463,7 @@ def _should_escalate(findings: list[SpecialistFinding]) -> bool:
 
 ## 10. Fundamentação Acadêmica — RSL Agentic AI em Incident Response
 
-> **Fonte:** Souza Júnior, V. O. — *Agentic AI Copilot para Resposta a Incidentes: Uma Revisão da Literatura* (PPGCA / Unisinos, 2025). Revisão Sistemática da Literatura conduzida segundo Kitchenham et al. (2009). 19 estudos selecionados de 110 identificados (IEEE Xplore, ACM Digital Library, Google Scholar), período 2020–2025, com 78,95% dos estudos publicados em 2024–2025.
+> **Fonte:** Souza Júnior, V. O. — _Agentic AI Copilot para Resposta a Incidentes: Uma Revisão da Literatura_ (PPGCA / Unisinos, 2025). Revisão Sistemática da Literatura conduzida segundo Kitchenham et al. (2009). 19 estudos selecionados de 110 identificados (IEEE Xplore, ACM Digital Library, Google Scholar), período 2020–2025, com 78,95% dos estudos publicados em 2024–2025.
 >
 > Esta seção consolida os achados da RSL como **fundamentação científica direta do projeto**, mapeando cada Research Question respondida pela revisão para decisões de design, implementação e avaliação do AgenticAI-2-Incident-Response.
 
@@ -2442,17 +2473,17 @@ def _should_escalate(findings: list[SpecialistFinding]) -> bool:
 
 A RSL confirma que a arquitetura implementada no projeto está alinhada com o estado da arte. O padrão **orquestrador + agentes especialistas com papéis definidos** é identificado como referência pela literatura de maior impacto:
 
-> *"No domínio de IR, Sapkota et al. (2026) explicitam esse princípio ao descrever um fluxo com quatro agentes especializados (classificador de ameaça, investigador de logs, analista de compliance e planejador de mitigação), reforçando que 'agentic' é, sobretudo, orquestração de multiagente e não apenas um agente com ferramentas."*
+> _"No domínio de IR, Sapkota et al. (2026) explicitam esse princípio ao descrever um fluxo com quatro agentes especializados (classificador de ameaça, investigador de logs, analista de compliance e planejador de mitigação), reforçando que 'agentic' é, sobretudo, orquestração de multiagente e não apenas um agente com ferramentas."_
 
-| Padrão Identificado na RSL | Implementação no Projeto | Referência (RSL) |
-|---|---|---|
-| Arquitetura hierárquica multiagente | `SpecialistAgent` × 4 + `Orchestrator` | HE, 2025; PATI, 2025; SAPKOTA, 2026 |
-| Agentes especializados com escopo limitado | Latency, Errors, Saturation, Traffic — cada um com apenas suas tools | BANDI, 2025; ACHARYA, 2025 |
-| Orquestrador com visão holística | `_synthesize()` sintetiza findings + KB + Claude | HE, 2025; MISHRA, 2025 |
-| Memória persistente para contexto histórico | Knowledge Base (Qdrant) com chunks de post-mortems | ADABARA, 2025; ZHANG, 2025 |
-| Tool-use loop com controle de iterações | `SpecialistAgent.analyze()` com `MAX_TOOL_ITERATIONS` | BANDI, 2025; KUMAR, 2024 |
-| Validação cruzada antes da resposta final | Pydantic `OrchestratorResponse` valida output do LLM | MISHRA, 2025; BANDI, 2025 |
-| Degradação graciosa (KB indisponível) | `kb_client` retorna `[]` em qualquer erro | BANDI, 2025; ACHARYA, 2025 |
+| Padrão Identificado na RSL                  | Implementação no Projeto                                             | Referência (RSL)                    |
+| ------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| Arquitetura hierárquica multiagente         | `SpecialistAgent` × 4 + `Orchestrator`                               | HE, 2025; PATI, 2025; SAPKOTA, 2026 |
+| Agentes especializados com escopo limitado  | Latency, Errors, Saturation, Traffic — cada um com apenas suas tools | BANDI, 2025; ACHARYA, 2025          |
+| Orquestrador com visão holística            | `_synthesize()` sintetiza findings + KB + Claude                     | HE, 2025; MISHRA, 2025              |
+| Memória persistente para contexto histórico | Knowledge Base (Qdrant) com chunks de post-mortems                   | ADABARA, 2025; ZHANG, 2025          |
+| Tool-use loop com controle de iterações     | `SpecialistAgent.analyze()` com `MAX_TOOL_ITERATIONS`                | BANDI, 2025; KUMAR, 2024            |
+| Validação cruzada antes da resposta final   | Pydantic `OrchestratorResponse` valida output do LLM                 | MISHRA, 2025; BANDI, 2025           |
+| Degradação graciosa (KB indisponível)       | `kb_client` retorna `[]` em qualquer erro                            | BANDI, 2025; ACHARYA, 2025          |
 
 #### Ciclo Operacional Confirmado pela RSL
 
@@ -2463,7 +2494,7 @@ Failure Perception → Root Cause Analysis → Assisted Remediation
        (Golden Signals)      (4 specialists)        (IncidentReport)
 ```
 
-> *"A remediação ainda é majoritariamente tratada como recomendação, não como execução automática, justamente por risco e falta de confiança em produção."* (ZHANG, 2025; DIAZ-DE-ARCAYA, 2023)
+> _"A remediação ainda é majoritariamente tratada como recomendação, não como execução automática, justamente por risco e falta de confiança em produção."_ (ZHANG, 2025; DIAZ-DE-ARCAYA, 2023)
 
 Esta é a **decisão de design central do projeto**: o sistema atua como **copiloto** (Human-on-the-Loop), gerando diagnóstico e recomendações priorizadas, mas preservando a **decisão de execução ao engenheiro on-call**. Isso é cientificamente justificado pela RSL e pelo estado atual da área.
 
@@ -2473,11 +2504,11 @@ Esta é a **decisão de design central do projeto**: o sistema atua como **copil
 
 A RSL mapeia dois modelos de supervisão humana relevantes ao projeto:
 
-| Modelo | Definição | Adoção no Projeto |
-|---|---|---|
-| **Human-in-the-Loop (HITL)** | Humano aprova cada ação individual do agente | ❌ Não adotado — reduziria o benefício de velocidade |
+| Modelo                       | Definição                                                 | Adoção no Projeto                                                    |
+| ---------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Human-in-the-Loop (HITL)** | Humano aprova cada ação individual do agente              | ❌ Não adotado — reduziria o benefício de velocidade                 |
 | **Human-on-the-Loop (HOTL)** | Agente age autonomamente; humano monitora e pode intervir | ✅ **Modelo atual** — agente analisa, humano decide sobre remediação |
-| **Full Autonomy** | Agente executa ações diretamente em produção | ❌ Fora do escopo — RSL confirma falta de confiança/maturidade |
+| **Full Autonomy**            | Agente executa ações diretamente em produção              | ❌ Fora do escopo — RSL confirma falta de confiança/maturidade       |
 
 O modo **HOTL** é o ponto ótimo atual identificado pela literatura para IR em produção: maximiza redução de TTD sem eliminar supervisão humana nas decisões de alto impacto.
 
@@ -2495,23 +2526,23 @@ HOTL (atual) → HOTL com guardrails executáveis → Full Autonomy em escopos l
 
 ### 10.3 Guardrails Técnicos e Executáveis (RQ2 + RQ4)
 
-> *"Guardrails efetivos precisam ser técnicos e executáveis, não apenas políticas em prompt."* (MISHRA, 2025; BANDI, 2025)
+> _"Guardrails efetivos precisam ser técnicos e executáveis, não apenas políticas em prompt."_ (MISHRA, 2025; BANDI, 2025)
 
 Este achado da RSL valida e fundamenta as implementações de segurança do SDD (§7.3). O framework **RRE** (Retail Resilience Engine — MISHRA, 2025) usa um loop de confiabilidade inspirado em TDD como mecanismo de validação antes de mudanças — diretamente análogo à abordagem de testes do projeto.
 
 #### Mapeamento Guardrails RSL → Implementações do SDD
 
-| Guardrail (RSL) | Risco Mitigado | Implementação no Projeto (referência SDD) |
-|---|---|---|
-| Validação de schema do output LLM | Alucinação / output malformado | `OrchestratorResponse` Pydantic (§7.3.2) |
-| Sanitização de input antes do prompt | Prompt injection (LLM01:2025) | `_sanitize_finding_text()` (§7.3.1) |
-| Limite de iterações no tool-use loop | Loop infinito / consumo ilimitado | `MAX_TOOL_ITERATIONS = 5` (§9.3.2) |
-| Score threshold na busca vetorial | Contaminação da KB por chunks irrelevantes | `score_threshold=0.70` Qdrant (§7.3.4) |
-| Autenticação na ingestão da KB | Memory poisoning (§5.3 da RSL) | `require_api_key` em `/kb/ingest` (§7.3.3) |
-| Comparação de API Key em tempo constante | Timing attack | `hmac.compare_digest` (§9.8.2) |
-| Circuit breaker para Anthropic API | Falha em cascata (LLM indisponível) | `tenacity` + `fallback_analyzer.py` (§9.4.2–9.4.3) |
-| Audit log imutável | Accountability gap (§5.4 da RSL) | `app/audit.py` (§9.9.1) |
-| Limite de tamanho de body (64 KB) | DoS / unbounded consumption (LLM10) | `RequestSizeLimitMiddleware` (§9.7.2) |
+| Guardrail (RSL)                          | Risco Mitigado                             | Implementação no Projeto (referência SDD)          |
+| ---------------------------------------- | ------------------------------------------ | -------------------------------------------------- |
+| Validação de schema do output LLM        | Alucinação / output malformado             | `OrchestratorResponse` Pydantic (§7.3.2)           |
+| Sanitização de input antes do prompt     | Prompt injection (LLM01:2025)              | `_sanitize_finding_text()` (§7.3.1)                |
+| Limite de iterações no tool-use loop     | Loop infinito / consumo ilimitado          | `MAX_TOOL_ITERATIONS = 5` (§9.3.2)                 |
+| Score threshold na busca vetorial        | Contaminação da KB por chunks irrelevantes | `score_threshold=0.70` Qdrant (§7.3.4)             |
+| Autenticação na ingestão da KB           | Memory poisoning (§5.3 da RSL)             | `require_api_key` em `/kb/ingest` (§7.3.3)         |
+| Comparação de API Key em tempo constante | Timing attack                              | `hmac.compare_digest` (§9.8.2)                     |
+| Circuit breaker para Anthropic API       | Falha em cascata (LLM indisponível)        | `tenacity` + `fallback_analyzer.py` (§9.4.2–9.4.3) |
+| Audit log imutável                       | Accountability gap (§5.4 da RSL)           | `app/audit.py` (§9.9.1)                            |
+| Limite de tamanho de body (64 KB)        | DoS / unbounded consumption (LLM10)        | `RequestSizeLimitMiddleware` (§9.7.2)              |
 
 ---
 
@@ -2519,15 +2550,15 @@ Este achado da RSL valida e fundamenta as implementações de segurança do SDD 
 
 A RSL identifica as métricas mais utilizadas na literatura para avaliar sistemas de Agentic AI em IR. Para a dissertação, estas são as métricas que devem ser instrumentadas e reportadas:
 
-| Métrica (RSL) | Definição | Instrumentação no Projeto |
-|---|---|---|
-| **MTTD** (Mean Time to Detect) | Tempo entre início do incidente e notificação do engenheiro | `IncidentReport.analysis_duration_seconds` — tempo de `POST /analyze` |
-| **MTTR** (Mean Time to Repair/Resolve) | Tempo entre notificação e mitigação efetiva | Campo a ser preenchido pós-resolução (§9.13.2) |
-| **Redução de Carga Cognitiva** | Número de decisões que o engenheiro precisa tomar manualmente | Número de `recommendations` geradas vs. analisadas manualmente |
-| **Similarity Index** (MISHRA, 2025) | Aproximação das decisões do agente às decisões humanas esperadas | Comparar `overall_severity` do agente com classificação manual de SRE experiente |
-| **Taxa de Acerto de Severidade** | `overall_severity` correto vs. severidade real do incidente | Validação com post-mortems históricos (`docs/post-mortems/`) |
-| **KB Hit Rate** | Proporção de análises que retornaram `similar_incidents` relevantes | `kb_search_results_count` histogram (§3.2.2) |
-| **False Positive Rate** | Proporção de análises `critical` que não eram incidentes reais | Registro pós-análise pelo engenheiro |
+| Métrica (RSL)                          | Definição                                                           | Instrumentação no Projeto                                                        |
+| -------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **MTTD** (Mean Time to Detect)         | Tempo entre início do incidente e notificação do engenheiro         | `IncidentReport.analysis_duration_seconds` — tempo de `POST /analyze`            |
+| **MTTR** (Mean Time to Repair/Resolve) | Tempo entre notificação e mitigação efetiva                         | Campo a ser preenchido pós-resolução (§9.13.2)                                   |
+| **Redução de Carga Cognitiva**         | Número de decisões que o engenheiro precisa tomar manualmente       | Número de `recommendations` geradas vs. analisadas manualmente                   |
+| **Similarity Index** (MISHRA, 2025)    | Aproximação das decisões do agente às decisões humanas esperadas    | Comparar `overall_severity` do agente com classificação manual de SRE experiente |
+| **Taxa de Acerto de Severidade**       | `overall_severity` correto vs. severidade real do incidente         | Validação com post-mortems históricos (`docs/post-mortems/`)                     |
+| **KB Hit Rate**                        | Proporção de análises que retornaram `similar_incidents` relevantes | `kb_search_results_count` histogram (§3.2.2)                                     |
+| **False Positive Rate**                | Proporção de análises `critical` que não eram incidentes reais      | Registro pós-análise pelo engenheiro                                             |
 
 ```python
 # app/models/report.py — campos de avaliação científica para a dissertação
@@ -2553,18 +2584,18 @@ class IncidentReport(BaseModel):
 
 A RSL (§4, §5.4) identifica quatro categorias de risco para sistemas agênticos em produção. Todos são endereçados no SDD:
 
-| Categoria de Risco (RSL) | Risco Específico | Controle no Projeto | §SDD |
-|---|---|---|---|
-| **Segurança Adversarial** | Prompt injection via dados de métricas | `_sanitize_finding_text()` + delimitadores XML | §7.3.1 |
-| **Segurança Adversarial** | Memory poisoning da Knowledge Base | Auth em `/kb/ingest`; validação de chunks | §7.3.3 / §9.13.8 |
-| **Robustez** | Alucinação / output malformado do LLM | `OrchestratorResponse` Pydantic + fallback | §7.3.2 / §9.4.3 |
-| **Robustez** | Tool-use loop divergente | `MAX_TOOL_ITERATIONS = 5` | §9.3.2 |
-| **Governança** | Accountability gap (quem decidiu o quê?) | Audit log separado com `trace_id` | §9.9.1 |
-| **Governança** | Shadow agents / ações não autorizadas | HOTL: nenhuma ação automática em produção | §10.2 |
-| **Governança** | Ausência de kill-switch | Circuit breaker + `fallback_analyzer.py` | §9.4.2–9.4.3 |
-| **Confiança** | Falta de explicabilidade (XAI) | `diagnosis` + `root_causes` + `triggers` auditáveis | §9.13.4 |
-| **Confiança** | Confidencialidade de dados de infra | Dados sensíveis não enviados ao LLM em claro | §9.8.1 |
-| **Custo** | Unbounded token consumption | `max_tokens=2048`; limite de chunks KB | §9.7.1 |
+| Categoria de Risco (RSL)  | Risco Específico                         | Controle no Projeto                                 | §SDD             |
+| ------------------------- | ---------------------------------------- | --------------------------------------------------- | ---------------- |
+| **Segurança Adversarial** | Prompt injection via dados de métricas   | `_sanitize_finding_text()` + delimitadores XML      | §7.3.1           |
+| **Segurança Adversarial** | Memory poisoning da Knowledge Base       | Auth em `/kb/ingest`; validação de chunks           | §7.3.3 / §9.13.8 |
+| **Robustez**              | Alucinação / output malformado do LLM    | `OrchestratorResponse` Pydantic + fallback          | §7.3.2 / §9.4.3  |
+| **Robustez**              | Tool-use loop divergente                 | `MAX_TOOL_ITERATIONS = 5`                           | §9.3.2           |
+| **Governança**            | Accountability gap (quem decidiu o quê?) | Audit log separado com `trace_id`                   | §9.9.1           |
+| **Governança**            | Shadow agents / ações não autorizadas    | HOTL: nenhuma ação automática em produção           | §10.2            |
+| **Governança**            | Ausência de kill-switch                  | Circuit breaker + `fallback_analyzer.py`            | §9.4.2–9.4.3     |
+| **Confiança**             | Falta de explicabilidade (XAI)           | `diagnosis` + `root_causes` + `triggers` auditáveis | §9.13.4          |
+| **Confiança**             | Confidencialidade de dados de infra      | Dados sensíveis não enviados ao LLM em claro        | §9.8.1           |
+| **Custo**                 | Unbounded token consumption              | `max_tokens=2048`; limite de chunks KB              | §9.7.1           |
 
 ---
 
@@ -2574,15 +2605,16 @@ A RSL identifica 6 lacunas de pesquisa (§5.1–§5.6). Cada uma representa tant
 
 #### Lacuna §5.1 — Transição de Recomendação para Execução Autônoma Verificável
 
-> *"O gap central reside na falta de confiança em permitir que agentes ajam diretamente em sistemas de produção devido ao risco de cascatas de erro e à ausência de mecanismos de reversão."* (ZHANG, 2025; BANDI, 2025)
+> _"O gap central reside na falta de confiança em permitir que agentes ajam diretamente em sistemas de produção devido ao risco de cascatas de erro e à ausência de mecanismos de reversão."_ (ZHANG, 2025; BANDI, 2025)
 
 **Status no projeto:** O sistema opera em HOTL (recomendação) — **isso é correto e cientificamente justificado** pelo estado da arte. A contribuição original seria:
+
 - Propor e prototipar um mecanismo de **execução verificável** para remediações de baixo risco (ex: alterar parâmetro de configuração Redis com rollback automático)
 - Definir critérios formais para classificar ações como "safe-to-automate" vs. "human-required"
 
 #### Lacuna §5.2 — Exploração de Traces com LLMs
 
-> *"Traces são fundamentais para entender interações entre microsserviços, mas sua alta complexidade e volume dificultam o processamento por modelos de linguagem."* (ZHANG, 2025)
+> _"Traces são fundamentais para entender interações entre microsserviços, mas sua alta complexidade e volume dificultam o processamento por modelos de linguagem."_ (ZHANG, 2025)
 
 **Status no projeto:** OpenTelemetry já instrumentado (§3.4), mas traces não são enviados ao LLM — gap endereçável:
 
@@ -2598,7 +2630,7 @@ TRACE_TOOL = {
 
 #### Lacuna §5.3 — Integridade de Memória e Conhecimento Contraditório
 
-> *"Sistemas agênticos dependem de memória persistente, o que os torna vulneráveis a envenenamento de memória (memory poisoning) e à persistência de dados sensíveis ou maliciosos."* (ADABARA, 2025)
+> _"Sistemas agênticos dependem de memória persistente, o que os torna vulneráveis a envenenamento de memória (memory poisoning) e à persistência de dados sensíveis ou maliciosos."_ (ADABARA, 2025)
 
 **Status no projeto:** KB autenticada (§7.3.3) e com score threshold (§7.3.4). Gap residual:
 
@@ -2615,7 +2647,7 @@ async def detect_contradictory_chunks(new_chunk: str, existing_chunks: list[str]
 
 #### Lacuna §5.4 — Governança, Accountability e Riscos Adversariais
 
-> *"Existe um lacuna de responsabilização (accountability gap) quando múltiplos agentes colaboram para uma decisão errônea."* (ADABARA, 2025; KSHETRI, 2025)
+> _"Existe um lacuna de responsabilização (accountability gap) quando múltiplos agentes colaboram para uma decisão errônea."_ (ADABARA, 2025; KSHETRI, 2025)
 
 **Status no projeto:** Audit log implementado (§9.9.1). Contribuição adicional de alto impacto para a dissertação:
 
@@ -2634,7 +2666,7 @@ class AgentDecisionAudit(BaseModel):
 
 #### Lacuna §5.5 — Raciocínio Causal vs. Correlação Estatística
 
-> *"A maioria dos agentes atuais opera com base em correlações estatísticas, falhando em compreender relações de causa e efeito."* (SAPKOTA, 2026; ADABARA, 2025)
+> _"A maioria dos agentes atuais opera com base em correlações estatísticas, falhando em compreender relações de causa e efeito."_ (SAPKOTA, 2026; ADABARA, 2025)
 
 **Status no projeto:** Campos `root_causes[]` e `triggers[]` já adicionados (§9.13.4) — **contribuição direta ao gap**. Evolução possível:
 
@@ -2653,7 +2685,7 @@ For each trigger, ask: "Would the incident have occurred WITHOUT this event, eve
 
 #### Lacuna §5.6 — Eficiência de Recursos e SLMs
 
-> *"O custo de inferência e a latência em tempo real são limitadores concretos para a percepção de falhas em produção."* (BROHI, 2025; BANDI, 2025)
+> _"O custo de inferência e a latência em tempo real são limitadores concretos para a percepção de falhas em produção."_ (BROHI, 2025; BANDI, 2025)
 
 **Status no projeto:** `claude-sonnet-4-6` (balance entre custo e qualidade). Métricas a coletar para a dissertação:
 
@@ -2674,17 +2706,17 @@ class AnalysisCostMetrics(BaseModel):
 
 Com base na RSL, o projeto se posiciona no **quadrante de maior maturidade** identificado pela literatura:
 
-| Dimensão | Estado da Arte (RSL) | Este Projeto |
-|---|---|---|
-| Arquitetura | Multiagente hierárquico com especialistas | ✅ Implementado (4 specialists + orchestrator) |
-| Autonomia | HOTL como padrão recomendado | ✅ Implementado |
-| Memória | KB persistente para contexto histórico | ✅ Implementado (Qdrant + post-mortems) |
-| Guardrails | Técnicos e executáveis (não apenas prompt) | ✅ Implementado (Pydantic, rate limiting, sanitização) |
-| Observabilidade | Golden Signals + OTEL como requisito | ✅ Implementado (Prometheus + OTEL) |
-| Governança | Audit trail + override humano | ⚠️ Parcial (audit log definido, não implantado) |
-| Execução autônoma | Gap reconhecido — não recomendado ainda | ✅ Conscientemente fora do escopo |
-| Traces como input LLM | Lacuna crítica identificada | ⚠️ OTEL instrumentado, mas não usado pelo LLM |
-| Causal reasoning | Gap identificado | ✅ Parcialmente endereçado (`root_causes` + `triggers`) |
+| Dimensão              | Estado da Arte (RSL)                       | Este Projeto                                            |
+| --------------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Arquitetura           | Multiagente hierárquico com especialistas  | ✅ Implementado (4 specialists + orchestrator)          |
+| Autonomia             | HOTL como padrão recomendado               | ✅ Implementado                                         |
+| Memória               | KB persistente para contexto histórico     | ✅ Implementado (Qdrant + post-mortems)                 |
+| Guardrails            | Técnicos e executáveis (não apenas prompt) | ✅ Implementado (Pydantic, rate limiting, sanitização)  |
+| Observabilidade       | Golden Signals + OTEL como requisito       | ✅ Implementado (Prometheus + OTEL)                     |
+| Governança            | Audit trail + override humano              | ⚠️ Parcial (audit log definido, não implantado)         |
+| Execução autônoma     | Gap reconhecido — não recomendado ainda    | ✅ Conscientemente fora do escopo                       |
+| Traces como input LLM | Lacuna crítica identificada                | ⚠️ OTEL instrumentado, mas não usado pelo LLM           |
+| Causal reasoning      | Gap identificado                           | ✅ Parcialmente endereçado (`root_causes` + `triggers`) |
 
 **Conclusão do posicionamento:** O projeto implementa o estado da arte em arquitetura multiagente e operação HOTL, e endereça parcialmente três das seis lacunas identificadas pela RSL — o que representa contribuição científica genuína para a dissertação.
 
@@ -2710,50 +2742,49 @@ Método: Replay dos dados de métricas correspondentes a cada incidente
 
 #### Métricas de Validação
 
-| Métrica | Método de Coleta | Critério de Sucesso |
-|---|---|---|
-| **Acurácia de Severidade** | `overall_severity` vs. severidade real do post-mortem | ≥ 80% de acerto nos 5 incidentes |
-| **Relevância das Recomendações** | Comparar `recommendations` com ações reais do post-mortem (Similarity Index) | ≥ 70% de sobreposição semântica |
-| **KB Hit Rate** | Proporção de incidentes com `similar_incidents` não vazio e relevante | ≥ 60% nos incidentes com histórico disponível |
-| **Tempo de Análise (TTD proxy)** | `analysis_duration_seconds` | P95 < 30s |
-| **Separação Root Cause / Trigger** | `root_causes` e `triggers` distintos e corretos | Avaliação qualitativa por SRE experiente |
-| **Custo por Análise** | `input_tokens + output_tokens × preço Claude` | < USD 0,10 por análise |
+| Métrica                            | Método de Coleta                                                             | Critério de Sucesso                           |
+| ---------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------- |
+| **Acurácia de Severidade**         | `overall_severity` vs. severidade real do post-mortem                        | ≥ 80% de acerto nos 5 incidentes              |
+| **Relevância das Recomendações**   | Comparar `recommendations` com ações reais do post-mortem (Similarity Index) | ≥ 70% de sobreposição semântica               |
+| **KB Hit Rate**                    | Proporção de incidentes com `similar_incidents` não vazio e relevante        | ≥ 60% nos incidentes com histórico disponível |
+| **Tempo de Análise (TTD proxy)**   | `analysis_duration_seconds`                                                  | P95 < 30s                                     |
+| **Separação Root Cause / Trigger** | `root_causes` e `triggers` distintos e corretos                              | Avaliação qualitativa por SRE experiente      |
+| **Custo por Análise**              | `input_tokens + output_tokens × preço Claude`                                | < USD 0,10 por análise                        |
 
 #### Ameaças à Validade
 
-| Ameaça | Tipo | Mitigação |
-|---|---|---|
-| Corpus pequeno (5 incidentes) | Validade externa | Ampliar com incidentes sintéticos derivados dos reais; replicar em outros domínios |
-| Post-mortems escritos após o fato | Validade interna | Usar somente campos de métricas reais; não contaminar com diagnósticos já conhecidos |
-| Avaliador conhece os incidentes | Viés de confirmação | Blind evaluation: avaliador externo sem acesso aos post-mortems compara IncidentReport |
-| `claude-sonnet-4-6` não determinístico | Validade interna | Executar cada cenário 3× com `temperature=0`; reportar variância |
+| Ameaça                                 | Tipo                | Mitigação                                                                              |
+| -------------------------------------- | ------------------- | -------------------------------------------------------------------------------------- |
+| Corpus pequeno (5 incidentes)          | Validade externa    | Ampliar com incidentes sintéticos derivados dos reais; replicar em outros domínios     |
+| Post-mortems escritos após o fato      | Validade interna    | Usar somente campos de métricas reais; não contaminar com diagnósticos já conhecidos   |
+| Avaliador conhece os incidentes        | Viés de confirmação | Blind evaluation: avaliador externo sem acesso aos post-mortems compara IncidentReport |
+| `claude-sonnet-4-6` não determinístico | Validade interna    | Executar cada cenário 3× com `temperature=0`; reportar variância                       |
 
 ---
 
 ### 10.9 Referências Cruzadas RSL × SDD
 
-| Paper RSL | Achado Principal | Seção(ões) do SDD Fundamentada(s) |
-|---|---|---|
-| P1 — ADABARA, 2025 | Guardrails técnicos; memory poisoning; accountability gap | §7.3, §9.4, §9.9.1, §10.5 |
-| P3 — BROHI, 2025 | Landscape de Agentic AI; SLMs como alternativa eficiente | §2.1, §10.6.6 |
-| P4 — HE, 2025 | Padrão orquestrador+especialistas+revisor+tester | §2.3, §9.13.3, §10.1 |
-| P5 — ZHANG, 2025 | Ciclo LLM4AIOps; traces subexplorados; custo de latência | §3.1, §10.3, §10.6.2 |
-| P6 — PATI, 2025 | Taxonomia de Agentic AI; níveis de autonomia | §10.2 |
-| P9 — SAPKOTA, 2026 | AI Agents vs Agentic AI; 4-agent IR pattern | §2.3, §10.1, §10.6.5 |
-| P10 — ACHARYA, 2025 | Survey abrangente; HOTL como padrão recomendado | §10.2, §10.7 |
-| P12 — ANDREONI, 2024 | Segurança e resiliência com GenAI | §7.1, §7.2, §10.5 |
-| P13 — MISHRA, 2025 | Framework RRE com TDD; Similarity Index | §4.1, §9.3.2, §10.3, §10.4 |
-| P15 — BANDI, 2025 | Guardrails executáveis; avaliação de sistemas agênticos | §10.3, §10.5 |
-| P16 — DIAZ-DE-ARCAYA, 2023 | AIOps+MLOps; remediação como recomendação | §10.1, §10.6.1 |
-| P17 — CHAMOLA, 2023 | XAI; explicabilidade de decisões | §9.13.4, §10.5 |
-| P19 — TOUR, 2021 | Agent system mining; auditabilidade | §9.9.1, §10.6.4 |
-
+| Paper RSL                  | Achado Principal                                          | Seção(ões) do SDD Fundamentada(s) |
+| -------------------------- | --------------------------------------------------------- | --------------------------------- |
+| P1 — ADABARA, 2025         | Guardrails técnicos; memory poisoning; accountability gap | §7.3, §9.4, §9.9.1, §10.5         |
+| P3 — BROHI, 2025           | Landscape de Agentic AI; SLMs como alternativa eficiente  | §2.1, §10.6.6                     |
+| P4 — HE, 2025              | Padrão orquestrador+especialistas+revisor+tester          | §2.3, §9.13.3, §10.1              |
+| P5 — ZHANG, 2025           | Ciclo LLM4AIOps; traces subexplorados; custo de latência  | §3.1, §10.3, §10.6.2              |
+| P6 — PATI, 2025            | Taxonomia de Agentic AI; níveis de autonomia              | §10.2                             |
+| P9 — SAPKOTA, 2026         | AI Agents vs Agentic AI; 4-agent IR pattern               | §2.3, §10.1, §10.6.5              |
+| P10 — ACHARYA, 2025        | Survey abrangente; HOTL como padrão recomendado           | §10.2, §10.7                      |
+| P12 — ANDREONI, 2024       | Segurança e resiliência com GenAI                         | §7.1, §7.2, §10.5                 |
+| P13 — MISHRA, 2025         | Framework RRE com TDD; Similarity Index                   | §4.1, §9.3.2, §10.3, §10.4        |
+| P15 — BANDI, 2025          | Guardrails executáveis; avaliação de sistemas agênticos   | §10.3, §10.5                      |
+| P16 — DIAZ-DE-ARCAYA, 2023 | AIOps+MLOps; remediação como recomendação                 | §10.1, §10.6.1                    |
+| P17 — CHAMOLA, 2023        | XAI; explicabilidade de decisões                          | §9.13.4, §10.5                    |
+| P19 — TOUR, 2021           | Agent system mining; auditabilidade                       | §9.9.1, §10.6.4                   |
 
 ## 11. Referências
 
 ### RSL — Fundamentos Científicos do Projeto
 
-- **Souza Júnior, V. O.** — *Agentic AI Copilot para Resposta a Incidentes: Uma Revisão da Literatura* (PPGCA / Unisinos, 2025). RSL segundo Kitchenham et al. (2009). 19 estudos, IEEE Xplore + ACM + Google Scholar, 2020–2025.
+- **Souza Júnior, V. O.** — _Agentic AI Copilot para Resposta a Incidentes: Uma Revisão da Literatura_ (PPGCA / Unisinos, 2025). RSL segundo Kitchenham et al. (2009). 19 estudos, IEEE Xplore + ACM + Google Scholar, 2020–2025.
   - RQ1: Capacidades e autonomia (HITL/HOTL) → §10.2 deste SDD
   - RQ2: Arquiteturas multiagentes e guardrails → §10.1, §10.3
   - RQ3: Benefícios e métricas (MTTD/MTTR, Similarity Index) → §10.4
@@ -2761,23 +2792,24 @@ Método: Replay dos dados de métricas correspondentes a cada incidente
   - RQ5: Lacunas e direções futuras → §10.6
 
 **Estudos de maior relevância para o projeto (Alta Qualidade, QA ≥ 3.0):**
-- ADABARA, I. et al. — *Trustworthy agentic AI systems: a cross-layer review of architectures, threat models, and governance strategies for real-world deployment*. F1000Research, v. 14, p. 905, 2025. [P1]
-- HE, J.; TREUDE, C.; LO, D. — *LLM-Based Multi-Agent Systems for Software Engineering*. ACM TOSEM, 2025. [P4]
-- SAPKOTA, R.; ROUMELIOTIS, K. I.; KARKEE, M. — *AI Agents vs. Agentic AI: A Conceptual taxonomy, applications and challenges*. Information Fusion, v. 126, 2026. [P9]
-- ACHARYA, D. B. et al. — *Agentic AI: Autonomous Intelligence for Complex Goals — A Comprehensive Survey*. IEEE Access, v. 13, p. 18912–18936, 2025. [P10]
-- MISHRA, L. N.; SENAPATI, B. — *Retail Resilience Engine: An Agentic AI Framework for Building Reliable Retail Systems With TDD Approach*. IEEE Access, v. 13, p. 50226–50243, 2025. [P13]
-- BANDI, A. et al. — *The Rise of Agentic AI: A Review of Definitions, Frameworks, Architectures, Applications, Evaluation Metrics, and Challenges*. Future Internet, 2025. [P15]
-- ZHANG, L. et al. — *A Survey of AIOps in the Era of Large Language Models*. ACM Computing Surveys, 2025. [P5]
-- DIAZ-DE-ARCAYA, J. et al. — *A Joint Study of the Challenges, Opportunities, and Roadmap of MLOps and AIOps: A Systematic Survey*. ACM Computing Surveys, v. 56, n. 4, 2024. [P16]
-- CHAMOLA, V. et al. — *A Review of Trustworthy and Explainable Artificial Intelligence (XAI)*. IEEE Access, v. 11, p. 78994–79015, 2023. [P17]
-- ANDREONI, M. et al. — *Enhancing Autonomous System Security and Resilience With Generative AI: A Comprehensive Survey*. IEEE Access, v. 12, p. 109470–109493, 2024. [P12]
+
+- ADABARA, I. et al. — _Trustworthy agentic AI systems: a cross-layer review of architectures, threat models, and governance strategies for real-world deployment_. F1000Research, v. 14, p. 905, 2025. [P1]
+- HE, J.; TREUDE, C.; LO, D. — _LLM-Based Multi-Agent Systems for Software Engineering_. ACM TOSEM, 2025. [P4]
+- SAPKOTA, R.; ROUMELIOTIS, K. I.; KARKEE, M. — _AI Agents vs. Agentic AI: A Conceptual taxonomy, applications and challenges_. Information Fusion, v. 126, 2026. [P9]
+- ACHARYA, D. B. et al. — _Agentic AI: Autonomous Intelligence for Complex Goals — A Comprehensive Survey_. IEEE Access, v. 13, p. 18912–18936, 2025. [P10]
+- MISHRA, L. N.; SENAPATI, B. — _Retail Resilience Engine: An Agentic AI Framework for Building Reliable Retail Systems With TDD Approach_. IEEE Access, v. 13, p. 50226–50243, 2025. [P13]
+- BANDI, A. et al. — _The Rise of Agentic AI: A Review of Definitions, Frameworks, Architectures, Applications, Evaluation Metrics, and Challenges_. Future Internet, 2025. [P15]
+- ZHANG, L. et al. — _A Survey of AIOps in the Era of Large Language Models_. ACM Computing Surveys, 2025. [P5]
+- DIAZ-DE-ARCAYA, J. et al. — _A Joint Study of the Challenges, Opportunities, and Roadmap of MLOps and AIOps: A Systematic Survey_. ACM Computing Surveys, v. 56, n. 4, 2024. [P16]
+- CHAMOLA, V. et al. — _A Review of Trustworthy and Explainable Artificial Intelligence (XAI)_. IEEE Access, v. 11, p. 78994–79015, 2023. [P17]
+- ANDREONI, M. et al. — _Enhancing Autonomous System Security and Resilience With Generative AI: A Comprehensive Survey_. IEEE Access, v. 12, p. 109470–109493, 2024. [P12]
 
 ### SRE e Observabilidade
 
-- Beyer, Jones, Petoff, Murphy — *Site Reliability Engineering* (O'Reilly, 2016) — https://sre.google/sre-book/
-- Beyer, Murphy, Rensin, Kawahara, Thorne — *The Site Reliability Workbook* (O'Reilly, 2018) — https://sre.google/workbook/
-- Beyer, Blank-Edelman, Reese, Thorne — *Building Secure and Reliable Systems* (Google / O'Reilly, 2020) — https://google.github.io/building-secure-and-reliable-systems/
-- Sachto, Walcer, Yang — *Anatomy of an Incident: Google's Approach to Incident Management for Production Services* (O'Reilly / Google Cloud, 2022)
+- Beyer, Jones, Petoff, Murphy — _Site Reliability Engineering_ (O'Reilly, 2016) — https://sre.google/sre-book/
+- Beyer, Murphy, Rensin, Kawahara, Thorne — _The Site Reliability Workbook_ (O'Reilly, 2018) — https://sre.google/workbook/
+- Beyer, Blank-Edelman, Reese, Thorne — _Building Secure and Reliable Systems_ (Google / O'Reilly, 2020) — https://google.github.io/building-secure-and-reliable-systems/
+- Sachto, Walcer, Yang — _Anatomy of an Incident: Google's Approach to Incident Management for Production Services_ (O'Reilly / Google Cloud, 2022)
   - Cap. 1: What Is an Incident? / Lifecycle → §9.13.1, §9.13.2 deste SDD
   - Cap. 2: Disaster Role-Playing / Wheel of Misfortune → §9.13.6
   - Cap. 3: Component vs. SoS Responders / IMAG/ICS → §9.13.3, §9.13.7
@@ -2826,15 +2858,15 @@ Método: Replay dos dados de métricas correspondentes a cada incidente
 
 ### Padrões e Metodologias
 
-- TDD — Kent Beck, *Test-Driven Development: By Example* (2002)
+- TDD — Kent Beck, _Test-Driven Development: By Example_ (2002)
 - DORA Metrics — https://dora.dev/
 - CIS Benchmarks for Docker — https://www.cisecurity.org/benchmark/docker
 - SLSA Supply Chain Security Framework — https://slsa.dev/
 
 ---
 
-*SDD v1.3 — AgenticAI-2-Incident-Response — PPGCA / Unisinos — Maio 2026*
+_SDD v1.3 — AgenticAI-2-Incident-Response — PPGCA / Unisinos — Maio 2026_
 
-*Seções 9–10 incorporam: Building Secure and Reliable Systems (Google / O'Reilly, 2020), Anatomy of an Incident (O'Reilly / Google Cloud, 2022) e RSL Agentic AI Copilot para Resposta a Incidentes (Souza Júnior, PPGCA/Unisinos, 2025)*
+_Seções 9–10 incorporam: Building Secure and Reliable Systems (Google / O'Reilly, 2020), Anatomy of an Incident (O'Reilly / Google Cloud, 2022) e RSL Agentic AI Copilot para Resposta a Incidentes (Souza Júnior, PPGCA/Unisinos, 2025)_
 
-*Seção 9 incorpora práticas de: Building Secure and Reliable Systems (Google / O'Reilly, 2020)*
+_Seção 9 incorpora práticas de: Building Secure and Reliable Systems (Google / O'Reilly, 2020)_
