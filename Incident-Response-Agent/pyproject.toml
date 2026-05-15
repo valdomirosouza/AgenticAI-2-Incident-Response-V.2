@@ -1,0 +1,21 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=app --cov-report=term-missing --cov-fail-under=85"
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*", "app/telemetry.py"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.black]
+line-length = 110
+target-version = ["py312"]

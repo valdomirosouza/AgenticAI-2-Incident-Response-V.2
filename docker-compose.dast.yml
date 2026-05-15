@@ -1,0 +1,44 @@
+name: agenticai-dast
+
+# Sobrepõe docker-compose.yml para DAST com OWASP ZAP (SDD §6.3)
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dast.yml up --abort-on-container-exit
+
+services:
+  zap-log-ingestion:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: zap-log-ingestion
+    command: >
+      zap-baseline.py
+      -t http://log-ingestion:8000
+      -r /zap/wrk/zap-log-ingestion.html
+      -J /zap/wrk/zap-log-ingestion.json
+      -I
+    volumes:
+      - ./zap-reports:/zap/wrk:rw
+    depends_on:
+      log-ingestion:
+        condition: service_healthy
+    networks:
+      - agent-net
+
+  zap-knowledge-base:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: zap-knowledge-base
+    command: >
+      zap-baseline.py
+      -t http://knowledge-base:8002
+      -r /zap/wrk/zap-knowledge-base.html
+      -J /zap/wrk/zap-knowledge-base.json
+      -I
+    volumes:
+      - ./zap-reports:/zap/wrk:rw
+    depends_on:
+      knowledge-base:
+        condition: service_healthy
+    networks:
+      - agent-net
+
+networks:
+  agent-net:
+    external: true
+    name: agenticai-incident-response_agent-net

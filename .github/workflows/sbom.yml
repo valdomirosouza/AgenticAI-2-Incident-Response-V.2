@@ -1,0 +1,90 @@
+name: SBOM & Vulnerability Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Gera SBOM (syft) + varre CVEs (grype) para os 3 serviços Python.
+# Artefatos SPDX JSON retidos 90 dias; resultados SARIF enviados ao
+# GitHub Security tab (aba "Code scanning alerts") — SDD §9.6 / A08:2021.
+
+jobs:
+  sbom:
+    name: SBOM — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # required for upload-sarif
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: Log-Ingestion-and-Metrics
+            slug: log-ingestion
+          - service: Incident-Response-Agent
+            slug: incident-agent
+          - service: Knowledge-Base
+            slug: knowledge-base
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Instalar syft e grype (binários Go — sem dependências Python) ───────
+      - name: Install syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b /usr/local/bin v1.4.1
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin v0.79.0
+
+      # ── Gerar SBOM em formato SPDX JSON ─────────────────────────────────────
+      - name: Generate SBOM (syft)
+        run: |
+          syft scan dir:${{ matrix.service }} \
+            --output spdx-json=${{ matrix.slug }}.spdx.json \
+            --quiet
+        # Varre o diretório completo do serviço: código + requirements.txt
+
+      # ── Varredura de CVEs (grype) ────────────────────────────────────────────
+      - name: Scan vulnerabilities (grype)
+        id: grype
+        run: |
+          grype sbom:${{ matrix.slug }}.spdx.json \
+            --output sarif \
+            --file grype-${{ matrix.slug }}.sarif \
+            --fail-on critical \
+            --quiet || true
+        # --fail-on critical: falha o step se encontrar CVE crítico
+        # || true: não bloqueia o upload dos artefatos se grype falhar
+
+      # ── Enviar resultados SARIF ao GitHub Security tab ───────────────────────
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: grype-${{ matrix.slug }}.sarif
+          category: grype-${{ matrix.slug }}
+        continue-on-error: true  # não bloqueia se repositório não tiver advanced security
+
+      # ── Publicar SBOM como artefato (supply chain evidence) ─────────────────
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sbom-${{ matrix.slug }}-${{ github.sha }}
+          path: ${{ matrix.slug }}.spdx.json
+          retention-days: 90
+
+      # ── Falhar o job se grype encontrou CVEs críticos ────────────────────────
+      - name: Enforce no critical CVEs
+        run: |
+          grype sbom:${{ matrix.slug }}.spdx.json \
+            --fail-on critical \
+            --quiet

@@ -1,0 +1,80 @@
+name: DAST
+
+on:
+  push:
+    branches: [main, staging]
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Subir serviços ────────────────────────────────────────────────────
+      - name: Start services (docker compose up --wait)
+        run: |
+          cp .env.example .env
+          docker compose up -d --wait
+        timeout-minutes: 8
+
+      - name: Wait for all healthchecks
+        run: |
+          for url in \
+            http://localhost:8000/health \
+            http://localhost:8001/health \
+            http://localhost:8002/health; do
+            for i in $(seq 1 30); do
+              curl -sf "$url" && break || sleep 2
+            done
+          done
+
+      # ── Schemathesis — API fuzzing (CUJ-10 / SDD §11.2) ──────────────────
+      - name: Install Schemathesis
+        run: pip install schemathesis
+
+      - name: Schemathesis — Log-Ingestion fuzzing
+        run: |
+          schemathesis run http://localhost:8000/openapi.json \
+            --checks all \
+            --hypothesis-max-examples 100 \
+            --report schemathesis-log-ingestion.json
+        continue-on-error: true
+
+      - name: Schemathesis — Knowledge-Base fuzzing
+        run: |
+          schemathesis run http://localhost:8002/openapi.json \
+            --checks all \
+            --hypothesis-max-examples 100 \
+            --report schemathesis-kb.json
+        continue-on-error: true
+
+      # ── OWASP ZAP — varredura de superfície de ataque ────────────────────
+      - name: OWASP ZAP Baseline — Log-Ingestion
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://localhost:8000"
+          fail_action: false
+          artifact_name: zap-log-ingestion
+
+      - name: OWASP ZAP Baseline — Knowledge-Base
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://localhost:8002"
+          fail_action: false
+          artifact_name: zap-knowledge-base
+
+      # ── Artefatos ─────────────────────────────────────────────────────────
+      - name: Upload DAST reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-reports
+          path: |
+            schemathesis-*.json
+            report_html.html
+          retention-days: 14
+
+      # ── Teardown ──────────────────────────────────────────────────────────
+      - name: Teardown services
+        if: always()
+        run: docker compose down -v

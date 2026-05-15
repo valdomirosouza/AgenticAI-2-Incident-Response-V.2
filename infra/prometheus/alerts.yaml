@@ -1,0 +1,39 @@
+groups:
+  - name: incident-agent-alerts
+    rules:
+      # Page apenas em CRITICAL — ação imediata (SDD §9.13.5)
+      - alert: IncidentCritical
+        expr: increase(specialist_finding_severity_total{severity="critical"}[1m]) > 0
+        for: 0m
+        labels:
+          severity: page
+        annotations:
+          summary: "CRITICAL incident detected by AI agent"
+          description: "One or more specialist agents reported CRITICAL severity."
+
+      # Ticket em WARNING — ação nas próximas horas
+      - alert: IncidentWarning
+        expr: increase(specialist_finding_severity_total{severity="warning"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "WARNING signal detected — review within 2h"
+
+      # Alerta de análise lenta (degradação do LLM)
+      - alert: AnalysisSlowP95
+        expr: histogram_quantile(0.95, rate(incident_analysis_duration_seconds_bucket[10m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "POST /analyze P95 latency > 30s — possible LLM degradation"
+
+      # Alerta de KB indisponível durante análises
+      - alert: KBDegradedFrequent
+        expr: rate(kb_search_results_count_bucket{le="0"}[15m]) > 0.5
+        for: 10m
+        labels:
+          severity: low
+        annotations:
+          summary: "KB returning zero results frequently — check Qdrant health"

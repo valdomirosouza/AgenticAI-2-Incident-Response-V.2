@@ -1,0 +1,74 @@
+name: Load Test (S4-03)
+
+on:
+  workflow_dispatch:
+    inputs:
+      users:
+        description: "Número de usuários simultâneos"
+        required: false
+        default: "100"
+      spawn_rate:
+        description: "Taxa de spawn (usuários/s)"
+        required: false
+        default: "10"
+      run_time:
+        description: "Duração do teste (ex: 60s, 2m)"
+        required: false
+        default: "60s"
+
+jobs:
+  load-test-ingest:
+    name: "Load Test — Log-Ingestion (SLO: P95 < 100ms)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Subir apenas log-ingestion + redis ───────────────────────────────
+      - name: Start Log-Ingestion + Redis
+        run: |
+          cp .env.example .env
+          docker compose up -d redis log-ingestion --wait
+        timeout-minutes: 5
+
+      - name: Wait for Log-Ingestion health
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8000/health && break || sleep 3
+          done
+
+      # ── Locust headless ──────────────────────────────────────────────────
+      - name: Install Locust
+        run: pip install -r load-tests/requirements.txt
+
+      - name: Run load test (headless)
+        run: |
+          cd load-tests
+          mkdir -p results
+          locust -f locustfile.py \
+            --host http://localhost:8000 \
+            --users ${{ github.event.inputs.users }} \
+            --spawn-rate ${{ github.event.inputs.spawn_rate }} \
+            --run-time ${{ github.event.inputs.run_time }} \
+            --headless \
+            --csv results/ingest \
+            --only-summary \
+            --loglevel WARNING
+
+      # ── Validar SLOs ─────────────────────────────────────────────────────
+      - name: Check SLOs
+        run: python load-tests/check_slos.py load-tests/results/ingest_stats.csv
+
+      # ── Artefatos ────────────────────────────────────────────────────────
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results
+          path: load-tests/results/
+          retention-days: 30
+
+      # ── Teardown ─────────────────────────────────────────────────────────
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

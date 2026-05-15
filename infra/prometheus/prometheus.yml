@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yaml"
+
+scrape_configs:
+  - job_name: log-ingestion
+    static_configs:
+      - targets: ["log-ingestion:8000"]
+    metrics_path: /prometheus/metrics
+
+  - job_name: incident-response-agent
+    static_configs:
+      - targets: ["incident-response-agent:8001"]
+    metrics_path: /prometheus/metrics
+
+  - job_name: knowledge-base
+    static_configs:
+      - targets: ["knowledge-base:8002"]
+    metrics_path: /prometheus/metrics

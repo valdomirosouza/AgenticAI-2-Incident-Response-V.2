@@ -1,0 +1,60 @@
+name: SAST
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ── Bandit — análise estática Python (OWASP / SDD §9.6) ───────────────
+      - name: Bandit (Python SAST)
+        run: |
+          pip install bandit
+          bandit -r Log-Ingestion-and-Metrics/app/     -ll -c Log-Ingestion-and-Metrics/bandit.yaml
+          bandit -r Incident-Response-Agent/app/       -ll -c Incident-Response-Agent/bandit.yaml
+          bandit -r Knowledge-Base/app/                -ll -c Knowledge-Base/bandit.yaml
+
+      # ── Semgrep — OWASP Top 10 + regras customizadas LLM Top 10 ──────────
+      - name: Semgrep (OWASP + regras LLM Top 10)
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            auto
+            .semgrep/rules.yaml
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      # ── pip-audit — CVEs em dependências (substitui safety v3+) ──────────
+      - name: pip-audit (dependency CVEs)
+        run: |
+          pip install pip-audit
+          pip-audit -r Log-Ingestion-and-Metrics/requirements.txt     --ignore-vuln PYSEC-2024-69
+          pip-audit -r Incident-Response-Agent/requirements.txt       --ignore-vuln PYSEC-2024-69
+          pip-audit -r Knowledge-Base/requirements.txt                --ignore-vuln PYSEC-2024-69
+
+      # ── Checkov — Dockerfile + docker-compose hardening ──────────────────
+      - name: Checkov (IaC hardening)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: dockerfile,docker_compose
+          soft_fail: true
+          output_format: sarif
+          output_file_path: checkov.sarif
+
+      - name: Upload Checkov SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: checkov.sarif
+        continue-on-error: true

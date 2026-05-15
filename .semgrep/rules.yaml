@@ -1,0 +1,33 @@
+rules:
+  - id: no-hardcoded-api-key
+    patterns:
+      - pattern: $KEY = "sk-ant-..."
+      - pattern: API_KEY = "..."
+    message: "Hardcoded API key detectada — use variáveis de ambiente"
+    severity: ERROR
+    languages: [python]
+
+  - id: anthropic-key-in-log
+    patterns:
+      - pattern: logger.$FUNC(..., anthropic_api_key, ...)
+    message: "API key sendo logada — risco de exposição (SDD SAST-02)"
+    severity: ERROR
+    languages: [python]
+
+  - id: json-loads-without-exception-handling
+    patterns:
+      - pattern: json.loads(...)
+      - pattern-not-inside: |
+          try:
+            ...
+    message: "json.loads sem try/except pode gerar 500 em produção (SDD SAST-04)"
+    severity: WARNING
+    languages: [python]
+
+  - id: prompt-injection-risk
+    patterns:
+      - pattern: f"...{$VAR.details}..."
+      - pattern: f"...{$VAR.summary}..."
+    message: "Campo externo inserido em f-string de prompt LLM sem sanitização (SDD LLM01:2025)"
+    severity: WARNING
+    languages: [python]

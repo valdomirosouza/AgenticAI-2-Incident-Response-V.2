@@ -1,0 +1,30 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=app --cov-report=term-missing --cov-fail-under=85"
+markers = [
+    "e2e: end-to-end tests requiring a live Docker daemon (deselect with -m 'not e2e')",
+]
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*", "app/telemetry.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "if __name__ == .__main__.:",
+    "pragma: no cover",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.black]
+line-length = 110
+target-version = ["py312"]
