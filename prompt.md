@@ -245,6 +245,25 @@ Detectou ausência de repositório git (projeto sem `.git`). Inicializou `git in
 
 ---
 
+### 14:45 BRT — Prompt #20
+
+**Usuário:**
+> O Spec-Driven Development (SDD) e Harness Engineering estão atualizados e alinhados neste projeto?
+
+**Claude:**  
+Realizou auditoria comparativa entre o SDD e o código real. Identificou e corrigiu 9 desalinhamentos:
+- **§4.5**: contagens de testes (IRA 122→174, Log-Ingestion 55→77) e cobertura atualizadas
+- **§4.6**: job descriptions do `ci.yml` corrigidos; `sbom.yml` adicionado à seção de CI/CD
+- **§7.1 A03:2021**: `🔴 RISCO` → `✅ OK` (`_sanitize_finding_text()` implementado)
+- **§7.1 A06:2021**: `⚠️ A VERIFICAR` → `✅ OK` (`pip-audit` + `grype` no CI)
+- **§5.4 SAST-03**: finding aberto → `✅ MITIGADO`
+- **§5.4 SAST-07**: "Falta CSP" → `✅ MITIGADO` (`SecurityHeadersMiddleware`)
+- **§7.2 LLM Top 10**: tabela expandida com coluna Status; LLM01/03/04/05/08/09/10 → ✅; LLM02/07 → ⚠️ PARCIAL
+- **§2.6**: adicionado diagrama 2.6.2b — fluxo de rotação de API Keys (S4-07)
+- SDD v1.6.0 → v1.7.0
+
+---
+
 ### 14:20 BRT — Prompt #19
 
 **Usuário:**
@@ -278,3 +297,4 @@ Working tree estava limpo (nenhuma alteração desde o commit `d5a98db`). Regist
 | 17 | 15/05 12:00 | vamos para o próximo (S4-07) | Rotação de API Keys — key_manager.py, /admin/*, 174 testes, 98.55% cov |
 | 18 | 15/05 12:30 | commit tudo e atualiza o prompt.md | git init + primeiro commit do projeto completo (Sprints 1–4 ✅) |
 | 19 | 15/05 14:20 | commit tudo e atualiza o prompt.md | Working tree já limpo; registrado este prompt e commitado prompt.md |
+| 20 | 15/05 14:45 | SDD e Harness Engineering alinhados? | Auditoria completa — 9 gaps corrigidos; SDD v1.7.0 |

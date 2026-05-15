@@ -5,7 +5,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.6.0 — Maio 2026 |
+| Versão | 1.7.0 — Maio 2026 |
 | Status | Sprint 4 CONCLUÍDO ✅ — S4-01 S4-02 S4-03 S4-04 S4-05 S4-06 S4-07 todos ✅ — Sprints 1–4 completos |
 | Projeto | Dissertação de Mestrado — PPGCA / Unisinos |
 | Repositório | github.com/valdomirosouza/AgenticAI-2-Incident-Response |
@@ -267,6 +267,41 @@ sequenceDiagram
 
     IRA-->>ENG: IncidentReport {overall_severity, title,<br/>diagnosis, recommendations, findings, similar_incidents}
     deactivate IRA
+```
+
+---
+
+#### 2.6.2b Rotação de API Keys (S4-07)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant ADM as Administrador
+    participant IRA as Incident-Response-Agent<br/>:8001
+    participant KM as KeyManager<br/>(in-memory)
+
+    ADM->>IRA: POST /admin/rotate-key (X-API-Key: ADMIN_KEY)
+    activate IRA
+    IRA->>IRA: require_admin_key — hmac.compare_digest(ADMIN_KEY)
+    IRA->>KM: generate_key() → secrets.token_urlsafe(32)
+    KM->>KM: add_rotated_key(new_key)<br/>_extra_keys[key] = now()
+    KM-->>IRA: new_key
+    IRA-->>ADM: {new_key, active_keys_count, rotated_at}
+    deactivate IRA
+
+    note over ADM,KM: Chave antiga (API_KEY env) permanece válida durante a transição.<br/>Para persistir: atualizar API_KEY no .env e reiniciar.
+
+    ADM->>IRA: POST /analyze (X-API-Key: new_key)
+    IRA->>KM: is_valid(new_key, settings.api_key)
+    note over KM: Valida contra env keys + _extra_keys<br/>hmac.compare_digest em cada chave
+    KM-->>IRA: True
+    IRA-->>ADM: 200 OK
+
+    opt revogar chaves antigas
+        ADM->>IRA: POST /admin/revoke-legacy (X-API-Key: ADMIN_KEY)
+        IRA->>KM: revoke_extra_keys() — _extra_keys.clear()
+        IRA-->>ADM: {revoked_extra_keys, active_keys_count}
+    end
 ```
 
 ---
@@ -656,9 +691,9 @@ def mock_anthropic_ok():
 
 | Métrica | IRA | Log-Ingestion | Knowledge-Base | Meta | Ferramenta |
 |---|---|---|---|---|---|
-| Code Coverage (linhas) | 98.41% | 94.06% | 97.60% | ≥ 85% | `pytest-cov --cov-report=html` |
-| Code Coverage (branches) | 98% | 94% | 98% | ≥ 75% | `pytest-cov --branch` |
-| Total de testes | 122 | 55 (+ 4 E2E) | 49 (+ 6 E2E) | ≥ 95 | `pytest -q` |
+| Code Coverage (linhas) | 99.35% | 95.61% | 97.60% | ≥ 85% | `pytest-cov --cov-report=html` |
+| Code Coverage (branches) | 99% | 95% | 98% | ≥ 75% | `pytest-cov --branch` |
+| Total de testes | 174 | 77 (+ 4 E2E) | 49 (+ 6 E2E) | ≥ 95 | `pytest -q` |
 | Tempo de execução | < 1s | < 1s | < 1s | < 10s | `pytest --duration=10` |
 | Testes flaky | 0 | 0 | 0 | 0 | CI tracking |
 | Mutation Score | Não medido | Não medido | Não medido | ≥ 70% | `mutmut` |
@@ -668,8 +703,8 @@ def mock_anthropic_ok():
 **Workflow `ci.yml`** — dispara em todo push/PR para `main`/`staging`:
 
 ```
-job: test-incident-agent   → pytest --cov --cov-fail-under=85 (IRA — 122 testes, 98.41%)
-job: test-log-ingestion    → pytest --cov --cov-fail-under=85 (Log-Ingestion — 55 testes, 94.06%)
+job: test-incident-agent   → pytest --cov --cov-fail-under=85 (IRA — 174 testes, 99.35%)
+job: test-log-ingestion    → pytest --cov --cov-fail-under=85 (Log-Ingestion — 77 testes, 95.61%)
 job: test-knowledge-base   → pytest --cov --cov-fail-under=85 (KB — 49 testes, 97.60%; usa requirements-test.txt sem torch)
 job: build                 → docker compose build --parallel (smoke test de containerização)
 ```
@@ -689,6 +724,15 @@ checkov -d .              → IaC Dockerfile + docker-compose (SARIF upload)
 docker compose up -d --wait   → sobe os 3 serviços + Redis + Qdrant
 schemathesis run ...          → fuzzing 100 exemplos por serviço
 OWASP ZAP baseline            → varredura Log-Ingestion + Knowledge-Base
+```
+
+**Workflow `sbom.yml`** — dispara em push/PR para `main` e `workflow_dispatch`:
+
+```
+syft scan dir:<serviço>  → gera SBOM SPDX JSON por serviço (matrix: 3 jobs paralelos)
+grype sbom:<slug>.spdx   → varre CVEs; --fail-on critical bloqueia o build
+upload-sarif             → GitHub Security tab (Code Scanning Alerts)
+upload-artifact          → sbom-<slug>-<sha>.spdx.json (90 dias)
 ```
 
 **Workflow `load-test.yml`** — dispara por `workflow_dispatch` (manual):
@@ -770,11 +814,11 @@ rules:
 |---|---|---|---|---|---|
 | SAST-01 | `config.py` (todos) | 🟡 MEDIUM | Secret Management | `api_key` default vazio: auth desabilitada por padrão; risco se `.env` não for configurado em prod | Exigir `API_KEY` não-vazio em produção via `@model_validator` |
 | SAST-02 | `config.py` (agent) | 🟡 MEDIUM | Secret Management | `anthropic_api_key` default vazio: sem erro de startup claro | Falhar no startup se `ANTHROPIC_API_KEY` ausente em não-dev |
-| SAST-03 | `orchestrator.py` | 🟡 MEDIUM | Input Validation | `kb_query` construído por f-string com conteúdo de `findings` — possível prompt injection | Sanitizar `findings` antes de construir o query; limitar tamanho de `details` |
+| SAST-03 | `orchestrator.py` | ✅ MITIGADO | Input Validation | `_sanitize_finding_text()` sanitiza `summary`/`details` (remove tags HTML/system, limita a 500 chars); delimitadores XML `<finding ...>` no prompt; `kb_query` usa apenas summaries sanitizados | Implementado em `orchestrator.py` — §7.3.1 |
 | SAST-04 | `base.py` (specialist) | 🟢 LOW | Error Handling | `tool_handlers` genérico: exceções retornam `{"error": str(exc)}` ao LLM — pode vazar stack traces | Retornar mensagens sanitizadas sem detalhes técnicos para o LLM |
 | SAST-05 | `Dockerfile` (todos) | 🟡 MEDIUM | Container Security | Prováveis execuções como `root` (não confirmado) | Adicionar `USER nonroot`; usar imagens `slim` |
 | SAST-06 | `requirements.txt` | ✅ MITIGADO | Supply Chain | CVEs varridos por `grype` via SBOM (S4-06 ✅); `pip-audit` no CI; artefatos SPDX retidos 90 dias | SBOM gerado por `syft`; grype bloqueia build em CVE crítico |
-| SAST-07 | `main.py` (todos) | 🟢 LOW | Security Headers | Falta `Content-Security-Policy` nos headers | Adicionar `Content-Security-Policy: default-src 'self'` |
+| SAST-07 | `main.py` (todos) | ✅ MITIGADO | Security Headers | `SecurityHeadersMiddleware` adiciona `Content-Security-Policy: default-src 'self'`, HSTS, X-Frame-Options, X-Content-Type-Options em todos os serviços | Implementado em `app/middleware/security_headers.py` |
 
 ### 5.5 Dockerfile Seguro — Padrão
 
@@ -1044,10 +1088,10 @@ jobs:
 |---|---|---|---|
 | A01:2021 | Broken Access Control | ⚠️ PARCIAL | `API_KEY=''` desabilita auth; deve ser obrigatória em produção |
 | A02:2021 | Cryptographic Failures | ✅ OK | Secrets via env vars; HSTS; nenhuma secret em logs |
-| A03:2021 | Injection | 🔴 RISCO | `kb_query` construído com f-string de dados externos — avaliar prompt injection |
+| A03:2021 | Injection | ✅ OK | `_sanitize_finding_text()` (MAX_FINDING_LENGTH=500) sanitiza findings; delimitadores XML `<finding ...>` isolam dados externos no prompt; `kb_query` limitado aos summaries sanitizados |
 | A04:2021 | Insecure Design | ✅ OK | Degradação graciosa; rate limiting; separação de responsabilidades |
 | A05:2021 | Security Misconfiguration | 🔴 RISCO | `/docs` exposto por padrão; Prometheus metrics sem auth |
-| A06:2021 | Vulnerable and Outdated Components | ⚠️ A VERIFICAR | Executar `safety`/`pip-audit`; pinnar versões com hashes |
+| A06:2021 | Vulnerable and Outdated Components | ✅ OK | `pip-audit` no `sast.yml`; `grype` via SBOM no `sbom.yml` (bloqueia CVE crítico); artefatos SPDX JSON retidos 90 dias |
 | A07:2021 | Authentication Failures | ✅ OK | Multi-key support (S4-07 ✅): `API_KEY` suporta lista CSV; `POST /admin/rotate-key` gera nova chave sem downtime; `ADMIN_KEY` separa acesso admin; timing-safe `hmac.compare_digest` |
 | A08:2021 | Software and Data Integrity | ✅ OK | SBOM gerado por `syft` (SPDX JSON) + CVEs varridos por `grype` no CI (`sbom.yml`); artefatos retidos 90 dias |
 | A09:2021 | Security Logging Failures | ⚠️ PARCIAL | Logs estruturados apenas no Log-Ingestion; sem alertas automáticos |
@@ -1057,18 +1101,18 @@ jobs:
 
 > Este mapeamento é especialmente crítico: o projeto usa LLMs (Claude) como componente central de decisão.
 
-| ID | Risco | Manifestação no Projeto | Mitigação |
-|---|---|---|---|
-| LLM01:2025 | Prompt Injection | `findings` de especialistas inseridos no prompt do orquestrador sem sanitização | Sanitizar `summary`/`details`; usar delimitadores XML explícitos; limitar tamanho |
-| LLM02:2025 | Sensitive Information Disclosure | Claude recebe dados de métricas que podem identificar infraestrutura interna | Anonimizar IPs, hostnames antes do envio ao LLM |
-| LLM03:2025 | Supply Chain | Dependência direta do Anthropic SDK e disponibilidade da API Claude | Implementar circuit breaker; fallback para análise baseada em regras |
-| LLM04:2025 | Data and Model Poisoning | KB (Qdrant) pode ser poluída por post-mortems mal-formados ou maliciosos | Autenticar `/kb/ingest`; validar tamanho e formato dos chunks |
-| LLM05:2025 | Improper Output Handling | JSON da resposta do Claude parseado sem validação de schema | Usar Pydantic para validar output do LLM antes de construir `IncidentReport` |
-| LLM06:2025 | Excessive Agency | Agentes têm acesso irrestrito a todas as métricas | Menor privilégio: cada agente acessa somente suas próprias métricas |
-| LLM07:2025 | System Prompt Leakage | `_SYSTEM_PROMPT` e prompts de especialistas podem aparecer em logs DEBUG | Nunca logar system prompts; classificar como dados sensíveis |
-| LLM08:2025 | Vector and Embedding Weaknesses | Sem filtro de score mínimo — chunks irrelevantes podem contaminar o diagnóstico | Adicionar `score_threshold=0.70` no Qdrant |
-| LLM09:2025 | Misinformation | Claude pode gerar diagnósticos incorretos com alta confiança | Incluir disclaimer no `IncidentReport`; nunca executar ações automaticamente |
-| LLM10:2025 | Unbounded Consumption | Sem limite de tokens de input para o orquestrador (muitos chunks KB) | Limitar número máximo de chunks e tamanho total do prompt |
+| ID | Risco | Manifestação no Projeto | Mitigação Implementada | Status |
+|---|---|---|---|---|
+| LLM01:2025 | Prompt Injection | `findings` inseridos no prompt do orquestrador | `_sanitize_finding_text()` (MAX=500 chars, remove tags system/human/assistant); delimitadores XML `<finding ...>`; `kb_query` truncado | ✅ |
+| LLM02:2025 | Sensitive Information Disclosure | Claude recebe métricas que podem identificar infraestrutura | Métricas são agregadas (contadores, percentis) — sem IPs ou hostnames individuais no payload | ⚠️ PARCIAL |
+| LLM03:2025 | Supply Chain | Dependência direta do Anthropic SDK e disponibilidade da API | Circuit breaker (S4-04): CLOSED→OPEN→HALF_OPEN; fallback rule-based (S4-05); tenacity retry com backoff | ✅ |
+| LLM04:2025 | Data and Model Poisoning | KB (Qdrant) pode ser poluída por post-mortems maliciosos | `require_api_key` em `/kb/ingest`; `ChunkValidator` valida tamanho (max 2000 chars) e formato dos chunks | ✅ |
+| LLM05:2025 | Improper Output Handling | JSON da resposta do Claude parseado sem validação | `OrchestratorResponse` (Pydantic) valida schema antes de construir `IncidentReport`; fallback em `ValidationError` | ✅ |
+| LLM06:2025 | Excessive Agency | Agentes têm acesso irrestrito a todas as métricas | Modelo HOTL: agente analisa, humano decide; sem ações automáticas de remediação | ✅ |
+| LLM07:2025 | System Prompt Leakage | System prompts podem aparecer em logs DEBUG | `ORCHESTRATOR_SYSTEM_PROMPT_V1` nunca logado; logs contêm apenas metadados (severity, duration) | ⚠️ PARCIAL |
+| LLM08:2025 | Vector and Embedding Weaknesses | Chunks irrelevantes podem contaminar diagnóstico | `score_threshold=0.70` configurado no `QdrantService.search()`; top_k=5 limitado | ✅ |
+| LLM09:2025 | Misinformation | Claude pode gerar diagnósticos incorretos com alta confiança | HOTL: humano valida antes de agir; `incident_commander_brief` explicita incertezas | ✅ |
+| LLM10:2025 | Unbounded Consumption | Muitos chunks KB podem inflar o prompt do orquestrador | `kb_results[:5]` limita chunks; `_sanitize_finding_text()` trunca cada finding; `max_tokens=1024` no synthesis call | ✅ |
 
 ### 7.3 Implementações de Segurança Recomendadas
 
