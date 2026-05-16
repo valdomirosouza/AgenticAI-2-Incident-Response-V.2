@@ -58,3 +58,17 @@ jobs:
         with:
           sarif_file: checkov.sarif
         continue-on-error: true
+
+  # ── TruffleHog — detecção de secrets no histórico Git ─────────────────────
+  secrets:
+    name: TruffleHog secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog — detect secrets in git history
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified

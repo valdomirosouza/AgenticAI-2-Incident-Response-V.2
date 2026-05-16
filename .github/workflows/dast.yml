@@ -53,14 +53,14 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:8000"
-          fail_action: false
+          fail_action: true
           artifact_name: zap-log-ingestion
 
       - name: OWASP ZAP Baseline — Knowledge-Base
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:8002"
-          fail_action: false
+          fail_action: true
           artifact_name: zap-knowledge-base
 
       # ── Artefatos ─────────────────────────────────────────────────────────

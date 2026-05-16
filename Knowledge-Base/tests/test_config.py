@@ -16,6 +16,20 @@ def test_production_requires_docs_disabled():
         Settings(app_env="production", api_key="secret", enable_docs=True)
 
 
+def test_staging_requires_api_key():
+    from app.config import Settings
+
+    with pytest.raises(ValidationError, match="API_KEY"):
+        Settings(app_env="staging", api_key="")
+
+
+def test_staging_with_api_key_passes():
+    from app.config import Settings
+
+    s = Settings(app_env="staging", api_key="staging-key")
+    assert s.api_key == "staging-key"
+
+
 def test_development_allows_no_api_key():
     from app.config import Settings
     s = Settings(app_env="development", api_key="", enable_docs=True)
