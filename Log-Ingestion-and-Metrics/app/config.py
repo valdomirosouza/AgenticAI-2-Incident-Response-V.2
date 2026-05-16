@@ -1,4 +1,4 @@
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,11 +19,24 @@ class Settings(BaseSettings):
     # Vazio em development = sem autenticação. Obrigatório em staging/production.
     prometheus_api_key: str = ""
 
+    # CORS — origens permitidas (security-by-design: nunca wildcard em produção)
+    # Múltiplas origens separadas por vírgula: "https://app.example.com,https://admin.example.com"
+    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_origins(cls, v: str | list) -> list[str]:
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
+
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
         if self.app_env in ("production", "staging"):
             if not self.prometheus_api_key:
                 raise ValueError("PROMETHEUS_API_KEY obrigatório em produção e staging (A05)")
+            if "*" in self.allowed_origins:
+                raise ValueError("ALLOWED_ORIGINS não pode ser wildcard (*) em produção (A05)")
         if self.app_env == "production" and self.enable_docs:
             raise ValueError("enable_docs deve ser False em produção")
         return self

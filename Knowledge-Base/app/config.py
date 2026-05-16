@@ -1,4 +1,4 @@
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,11 +20,23 @@ class Settings(BaseSettings):
     # all-MiniLM-L6-v2 cross-lingual cosine similarity peaks at ~0.38 for this pair.
     min_similarity_score: float = 0.30
 
+    # CORS — origens permitidas (security-by-design: nunca wildcard em produção)
+    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_origins(cls, v: str | list) -> list[str]:
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
+
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
         if self.app_env in ("production", "staging"):
             if not self.api_key:
                 raise ValueError("API_KEY obrigatório em produção e staging (A01/A05)")
+            if "*" in self.allowed_origins:
+                raise ValueError("ALLOWED_ORIGINS não pode ser wildcard (*) em produção (A05)")
         if self.app_env == "production":
             if self.enable_docs:
                 raise ValueError("enable_docs deve ser False em produção")

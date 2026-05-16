@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.auth import require_prometheus_key
@@ -34,6 +35,13 @@ app = FastAPI(
 
 configure_telemetry(app, settings.service_name, settings.otlp_endpoint)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
+)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware)

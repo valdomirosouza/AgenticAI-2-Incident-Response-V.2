@@ -29,6 +29,7 @@ docs/adr/
 | [ADR-2026-0010](active/ADR-2026-0010-circuit-breaker-fallback-anthropic.md)   | Circuit breaker com fallback rule-based para Anthropic API | Architecture | Accepted | 2026-05-15 |
 | [ADR-2026-0011](active/ADR-2026-0011-pydantic-v2-llm-output-validation.md)    | Pydantic v2 para validação de output do LLM                | Security     | Accepted | 2026-05-15 |
 | [ADR-2026-0012](active/ADR-2026-0012-docker-compose-orchestration.md)         | Docker Compose como orquestração (não Kubernetes)          | Infra        | Accepted | 2026-05-14 |
+| [ADR-2026-0013](active/ADR-2026-0013-inter-service-trust-model.md)            | Modelo de confiança inter-serviço (HTTP + API Key vs mTLS) | Security     | Accepted | 2026-05-16 |
 
 ## Processo
 
