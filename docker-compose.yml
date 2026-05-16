@@ -16,7 +16,6 @@ volumes:
   prometheus-data:
 
 services:
-
   # ──────────────────────────────────────────────────────────
   # Serviço 1 — Log-Ingestion-and-Metrics (:8000)
   # ──────────────────────────────────────────────────────────
@@ -40,10 +39,16 @@ services:
         condition: service_healthy
     networks:
       - ingestion-net
-      - agent-net        # Exposto ao agent para consultas de métricas
+      - agent-net # Exposto ao agent para consultas de métricas
       - observability-net
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -81,7 +86,13 @@ services:
       - agent-net
       - observability-net
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -114,7 +125,13 @@ services:
       - kb-net
       - observability-net
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -127,19 +144,22 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
+    # --requirepass is only injected when REDIS_PASSWORD is non-empty to avoid
+    # redis-server consuming the next flag as the password value on empty expansion
     command: >
-      redis-server
-      --requirepass ${REDIS_PASSWORD:-}
+      sh -c 'exec redis-server
+      $${REDIS_PASSWORD:+--requirepass $$REDIS_PASSWORD}
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
-      --save ""
+      --save ""'
     ports:
       - "6379:6379"
     networks:
       - ingestion-net
     healthcheck:
       # CMD-SHELL permite expansão de parâmetro: passa -a apenas se REDIS_PASSWORD não-vazio
-      test: ["CMD-SHELL", "redis-cli ${REDIS_PASSWORD:+-a $REDIS_PASSWORD} ping"]
+      test:
+        ["CMD-SHELL", "redis-cli ${REDIS_PASSWORD:+-a $REDIS_PASSWORD} ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -154,18 +174,19 @@ services:
     container_name: qdrant
     ports:
       - "6333:6333"
-      - "6334:6334"  # gRPC
+      - "6334:6334" # gRPC
     volumes:
       - qdrant-storage:/qdrant/storage
-    environment:
-      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-}
+    # QDRANT__SERVICE__API_KEY intentionally omitted: setting it to "" enables auth
+    # with an empty key and breaks the client. Set QDRANT_API_KEY in .env for prod.
     networks:
       - kb-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      # qdrant:v1.18.0 image has no curl/wget — use bash /dev/tcp to check port
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
     restart: unless-stopped
 
   # ──────────────────────────────────────────────────────────

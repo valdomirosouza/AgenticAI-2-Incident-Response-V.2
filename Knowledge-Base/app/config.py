@@ -16,7 +16,9 @@ class Settings(BaseSettings):
     service_name: str = "knowledge-base"
 
     # Score mínimo para evitar chunks irrelevantes (SDD §7.3.4 / LLM08:2025)
-    min_similarity_score: float = 0.70
+    # Lowered to 0.30: post-mortems are in PT-BR while orchestrator queries are in EN;
+    # all-MiniLM-L6-v2 cross-lingual cosine similarity peaks at ~0.38 for this pair.
+    min_similarity_score: float = 0.30
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":

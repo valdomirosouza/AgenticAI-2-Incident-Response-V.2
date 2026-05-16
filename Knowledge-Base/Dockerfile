@@ -5,10 +5,16 @@ RUN groupadd --gid 1001 appuser && \
 
 WORKDIR /app
 
+# Model cache inside /app so appuser can read it at runtime
+ENV HF_HOME=/app/.cache \
+    SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence_transformers \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface
+
 COPY requirements.txt .
-# sentence-transformers baixa modelos na primeira execução; cache no build
+# sentence-transformers downloads model during build; cache is owned by appuser
 RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+    python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')" && \
+    chown -R appuser:appuser /app/.cache
 
 COPY --chown=appuser:appuser . .
 

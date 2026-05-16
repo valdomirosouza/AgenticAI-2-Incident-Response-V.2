@@ -5,6 +5,7 @@ Cada especialista herda desta classe e define suas próprias tools e system prom
 
 import json
 import logging
+import re
 from abc import ABC, abstractmethod
 
 import anthropic
@@ -98,7 +99,12 @@ class SpecialistAgent(ABC):
         for block in response.content:
             if hasattr(block, "text"):
                 try:
-                    data = json.loads(block.text)
+                    text = block.text.strip()
+                    # Claude sometimes wraps JSON in markdown fences despite instructions
+                    start, end = text.find("{"), text.rfind("}")
+                    if start >= 0 and end > start:
+                        text = text[start : end + 1]
+                    data = json.loads(text)
                     return SpecialistFinding(
                         specialist=self.name,
                         severity=Severity(data.get("severity", "warning")),

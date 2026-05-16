@@ -11,7 +11,12 @@ class OrchestratorResponse(BaseModel):
     recommendations: list[str] = Field(min_length=1, max_length=5)
     root_causes: list[str] = Field(default_factory=list, max_length=5)
     triggers: list[str] = Field(default_factory=list, max_length=5)
-    incident_commander_brief: str = Field(default="", max_length=300)
+    incident_commander_brief: str = Field(default="")
+
+    @field_validator("incident_commander_brief", mode="before")
+    @classmethod
+    def truncate_brief(cls, v: object) -> str:
+        return str(v)[:300] if v else ""
 
     @field_validator("recommendations", mode="before")
     @classmethod

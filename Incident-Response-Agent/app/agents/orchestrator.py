@@ -123,6 +123,10 @@ async def _synthesize(findings: list[SpecialistFinding], kb_results: list[dict])
         )
 
         body = next((b.text for b in response.content if hasattr(b, "text")), "")
+        # Strip markdown code fences Claude may add despite "Respond ONLY with JSON" instruction
+        start, end = body.find("{"), body.rfind("}")
+        if start >= 0 and end > start:
+            body = body[start : end + 1]
         data = json.loads(body)
         validated = OrchestratorResponse(**data)
 
