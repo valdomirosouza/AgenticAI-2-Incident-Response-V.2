@@ -579,13 +579,13 @@ Os itens abaixo **não foram implementados** nesta sessão e permanecem como tra
 - [x] **ZAP gate** — ✅ `fail_action: true` nos 2 scans (commit `b42fb96`)
 - [x] **trufflehog/git-secrets** — ✅ Job `secrets` no `sast.yml` com `--only-verified` (commit `b42fb96`)
 - [x] **A01/A05** — ✅ `API_KEY` obrigatória em `staging` e `production`; +8 testes (commit `b42fb96`)
-- [ ] **trivy image** — Integrar scan de imagem Docker no CI (complemento ao grype SBOM)
+- [x] **trivy image** — ✅ Job `trivy` no `sast.yml` com `trivy fs` (CRITICAL, ignore-unfixed) — commit `7aa20cf`
+- [x] **pip-compile --generate-hashes** — ✅ `requirements.in` criados; LI + IRA + KB-test com SHA-256 hashes; Dockerfiles LI/IRA com `--require-hashes` — commit `7aa20cf`
+- [x] **LLM07** — ✅ `PROMPT_CLASSIFICATION="SENSITIVE"` em `prompts.py`; 2 regras Semgrep; 3 testes no-leak — commit `7aa20cf`
 - [ ] **Prometheus auth** — Proteger `GET /prometheus/metrics` por auth básica ou IP restrito
 - [ ] **LLM02** — Anonimizar IPs/hostnames nas métricas antes de enviar ao Claude
-- [ ] **LLM07** — Classificação formal de system prompts como dados sensíveis
 - [ ] **A09** — Alertas automáticos em Grafana/PagerDuty para breaching de SLOs
 - [ ] **Mutmut** — Mutation testing (meta: ≥ 70% mutation score)
-- [ ] **pip-compile --generate-hashes** — Pinnar dependências com hashes para supply chain completo
 - [ ] **Defesa da dissertação** — Apresentação dos resultados MTTD/MTTR ao orientador
 
-**Testes totais (após Sessão 3):** 308 — LI 77 (96.96%) · IRA 180 (98.31%) · KB 51 (97.63%)
+**Testes totais:** 311 — LI 77 (96.96%) · IRA 183 (98.31%) · KB 51 (97.63%)

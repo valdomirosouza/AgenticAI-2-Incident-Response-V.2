@@ -728,6 +728,45 @@ Adicionou prompts #50–#52 ao prompt.md. Atualizou SESSION_MEMORY.md §15 (iten
 
 ---
 
+### 00:05 BRT — Prompt #53
+
+**Usuário:**
+
+> vamos para o próximo
+
+**Claude:**  
+Apresentou 7 itens pendentes com impacto e complexidade. Recomendou trivy + pip-compile + LLM07 (3 de baixa complexidade). Usuário confirmou.
+
+---
+
+### 00:10 BRT — Prompt #54
+
+**Usuário:**
+
+> trivy + pip-compile + LLM07
+
+**Claude:**  
+Implementou os 3 itens — commit `7aa20cf`:
+
+- **Trivy** (`sast.yml`): novo job `trivy` com `aquasecurity/trivy-action` fs scan — `exit-code: 1`, `severity: CRITICAL`, `ignore-unfixed: true`. Sem build Docker, escaneia pacotes Python + IaC.
+- **pip-compile** (`--generate-hashes`): criados `requirements.in` para LI, IRA, KB e `requirements-test.in` para KB. `requirements.txt` de LI e IRA + `requirements-test.txt` do KB regenerados com SHA-256 hashes (transitive deps incluídas). KB main req omitido (torch ~800 MB). Dockerfiles LI e IRA atualizados com `pip install --require-hashes`.
+- **LLM07** (System Prompt Leakage): `PROMPT_CLASSIFICATION = "SENSITIVE"` + docstring em `prompts.py`; 2 regras Semgrep (`system-prompt-leakage`, `system-prompt-in-response`) em `.semgrep/rules.yaml`; `test_llm07_prompt_leakage.py` com 3 testes (marker + no-leak em `/analyze`).
+
+Coberturas finais: IRA 98.31% (183 testes) · KB 97.63% (51) · LI 96.96% (77) = **311 testes totais**.
+
+---
+
+### 00:15 BRT — Prompt #55
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #53–#55 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com os 3 novos itens concluídos e contagem de testes.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -783,4 +822,7 @@ Adicionou prompts #50–#52 ao prompt.md. Atualizou SESSION_MEMORY.md §15 (iten
 | 49  | 16/05 23:35     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #48–#49 registrados                                                         |
 | 50  | 16/05 23:45     | vamos para o próximo                                | Lista de 10 itens pendentes apresentada; ZAP+TruffleHog+A01/A05 escolhidos          |
 | 51  | 16/05 23:50     | ZAP gate + trufflehog + A01/A05                     | commit b42fb96 — 308 testes ✅, IRA 98.31%, KB 97.63%; 3 itens segurança fechados   |
-| 52  | 16/05 23:55     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
+| 52  | 16/05 23:55     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #50–#52 registrados                                                         |
+| 53  | 16/05 00:05     | vamos para o próximo                                | 7 itens pendentes apresentados; trivy+pip-compile+LLM07 escolhidos                  |
+| 54  | 16/05 00:10     | trivy + pip-compile + LLM07                         | commit 7aa20cf — 311 testes ✅; trivy CI, hashes supply chain, LLM07 semgrep        |
+| 55  | 16/05 00:15     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
