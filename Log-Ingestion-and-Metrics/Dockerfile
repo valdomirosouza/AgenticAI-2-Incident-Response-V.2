@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Dependências antes do código para aproveitar cache de layer
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 COPY --chown=appuser:appuser . .
 

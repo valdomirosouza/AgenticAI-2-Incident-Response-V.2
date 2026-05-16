@@ -59,6 +59,23 @@ jobs:
           sarif_file: checkov.sarif
         continue-on-error: true
 
+  # ── Trivy — CVE scan em filesystem + imagens (supply chain / SDD §5) ────────
+  trivy:
+    name: Trivy FS scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy — filesystem CVE scan (pacotes Python + IaC)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          exit-code: "1"
+          severity: CRITICAL
+          ignore-unfixed: true
+
   # ── TruffleHog — detecção de secrets no histórico Git ─────────────────────
   secrets:
     name: TruffleHog secret scan

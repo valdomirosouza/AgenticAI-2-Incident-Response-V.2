@@ -1,9 +1,15 @@
 """
 Prompts versionados para todos os agentes (SDD §9.3.3).
 PROMPT_VERSION é logado em cada análise para reproducibilidade científica.
+
+CLASSIFICAÇÃO DE SEGURANÇA: SENSÍVEL (OWASP LLM07:2025 — System Prompt Leakage)
+- Nunca logar o conteúdo de SYSTEM_PROMPT em produção.
+- Nunca expor system prompts em respostas de API ou mensagens de erro.
+- Nunca colocar credenciais ou segredos dentro de system prompts.
 """
 
 PROMPT_VERSION = "1.0.0"
+PROMPT_CLASSIFICATION = "SENSITIVE"  # LLM07:2025 — não logar, não expor em respostas
 
 LATENCY_SYSTEM_PROMPT_V1 = """You are a Latency Specialist Agent for SRE incident response.
 Your role is to analyze HAProxy response time metrics (P50, P95, P99 percentiles).

@@ -31,3 +31,21 @@ rules:
     message: "Campo externo inserido em f-string de prompt LLM sem sanitização (SDD LLM01:2025)"
     severity: WARNING
     languages: [python]
+
+  - id: system-prompt-leakage
+    patterns:
+      - pattern: logger.$FUNC(..., $PROMPT, ...)
+      - metavariable-regex:
+          metavariable: $PROMPT
+          regex: ".*SYSTEM_PROMPT.*|.*_PROMPT_V.*"
+    message: "System prompt sendo logado — exposição de lógica interna do agente (OWASP LLM07:2025)"
+    severity: ERROR
+    languages: [python]
+
+  - id: system-prompt-in-response
+    patterns:
+      - pattern: return {..., "system_prompt": ..., ...}
+      - pattern: JSONResponse(content={..., "system_prompt": ..., ...})
+    message: "System prompt exposto em resposta de API (OWASP LLM07:2025)"
+    severity: ERROR
+    languages: [python]
