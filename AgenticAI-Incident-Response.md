@@ -2069,6 +2069,35 @@ Preparedness ──────────► Response ────────
 
 **Gap crítico identificado:** O projeto automatiza a **detecção** (Preparedness → Response) mas não formaliza a **resposta organizada** (Response) nem o **ciclo de melhoria** (Recovery → Preparedness). As seções seguintes endereçam cada gap.
 
+#### Ciclo Cognitivo PRAL dos Agentes Especialistas
+
+O ciclo Google SRE descreve o **processo organizacional** de gestão de incidentes. No nível interno do agente de IA, o projeto implementa o **Ciclo PRAL** — o loop cognitivo pelo qual cada execução de `POST /analyze` é processada:
+
+| Fase PRAL     | Componente                          | O que ocorre                                                                 |
+| ------------- | ----------------------------------- | ---------------------------------------------------------------------------- |
+| **Perceive**  | 4 SpecialistAgents via tool-use     | `GET /metrics/*` coletam Golden Signals em paralelo (`asyncio.gather`)       |
+| **Reasoning** | OrchestratorAgent + Claude API      | Síntese causal: hipóteses, root cause vs. trigger, KB retrieval (`kb_score`) |
+| **Act**       | Engenheiro on-call — modelo HOTL    | Agente recomenda com `incident_commander_brief`; humano decide e executa     |
+| **Learn**     | Post-mortem → `seed_kb.py` → Qdrant | Incidente vetorizado na KB; próximo **Perceive** parte com mais contexto     |
+
+```
+PERCEIVE ──► REASONING ──► ACT
+   ▲                         │
+   └─────── LEARN ───────────┘
+         (KB retroalimentada)
+```
+
+O **L** é o diferencial entre um sistema reativo e um sistema que melhora com cada incidente: cada post-mortem seeded aumenta a densidade vetorial da Knowledge Base, tornando o próximo **Reasoning** mais preciso (KB score mais alto, recomendações mais específicas) e o **Act** mais rápido (engenheiro age com mais contexto histórico).
+
+**Mapeamento PRAL × Google SRE Lifecycle:**
+
+| PRAL          | Google SRE Lifecycle                       |
+| ------------- | ------------------------------------------ |
+| **Perceive**  | Response — detecção da anomalia            |
+| **Reasoning** | Response — decisão de severidade e triagem |
+| **Act**       | Mitigation & Recovery — remediação         |
+| **Learn**     | Preparedness — postmortem fecha o ciclo    |
+
 ---
 
 #### 9.13.2 Métricas ≠ Alertas ≠ Incidentes — Calibração dos Golden Signals
@@ -2308,6 +2337,21 @@ Perguntas: O engenheiro sabia o que esperar? O runbook cobre isso?
 Contexto: Anthropic API com latência > 60s
 Objetivo: Verificar que fallback por regras produz diagnóstico útil
 Perguntas: O relatório de fallback é suficiente para agir?
+
+### Cenário 5: Blue/Green Deploy Failure — Readiness Probe Ausente (EXECUTADO)
+
+Contexto: Deploy blue/green sem readiness probe HTTP; HAProxy usa health check TCP
+Objetivo: Validar ciclo PRAL completo com padrão de latência bimodal (P50 normal + P95/P99 crítico)
+Hipótese: O sistema identifica falha em subconjunto de instâncias e recupera contexto de incidente similar via KB
+Resultado: ✅ EXECUTADO — INC-003 (2026-05-15)
+
+- Ciclo PRAL completo: 7m40s (MTTD < 2 min, MTTR ~18 min)
+- KB retrieval: INC-002 recuperado com score=0.534 (similar deploy regression)
+- Diagnóstico: "bimodal latency pattern — v2 enters pool before startup complete"
+- Remediação: engenheiro executou rollback para v1 (HOTL — sem ação autônoma do agente)
+- Post-mortem: docs/post-mortems/INC-003-bluegreen-deploy-failure.md
+- KB seeded: 16 chunks, total corpus = 34 chunks (INC-001:8 + INC-002:10 + INC-003:16)
+  Perguntas respondidas: O agente identificou o padrão bimodal? Sim. A KB recuperou incidente similar? Sim (score 0.534). O engenheiro conseguiu agir com base no IncidentReport? Sim.
 ```
 
 ---
@@ -2487,16 +2531,21 @@ A RSL confirma que a arquitetura implementada no projeto está alinhada com o es
 
 #### Ciclo Operacional Confirmado pela RSL
 
-A RSL consolida o ciclo como:
+A RSL consolida o ciclo como o **Ciclo PRAL** (Perceive → Reasoning → Act → Learn) — ciclo cognitivo dos agentes implementado neste projeto (ver §9.13.1):
 
 ```
-Failure Perception → Root Cause Analysis → Assisted Remediation
-       (Golden Signals)      (4 specialists)        (IncidentReport)
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Ciclo PRAL — Confirmado pela RSL                 │
+│                                                                     │
+│  P  Perceive    →   R  Reasoning   →   A  Act      →   L  Learn    │
+│  (Golden Signals)   (4 specialists      (IncidentReport  (KB seed  │
+│                      + Claude LLM)       → Eng on-call)  Qdrant)   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 > _"A remediação ainda é majoritariamente tratada como recomendação, não como execução automática, justamente por risco e falta de confiança em produção."_ (ZHANG, 2025; DIAZ-DE-ARCAYA, 2023)
 
-Esta é a **decisão de design central do projeto**: o sistema atua como **copiloto** (Human-on-the-Loop), gerando diagnóstico e recomendações priorizadas, mas preservando a **decisão de execução ao engenheiro on-call**. Isso é cientificamente justificado pela RSL e pelo estado atual da área.
+Esta é a **decisão de design central do projeto**: o sistema atua como **copiloto** (Human-on-the-Loop), gerando diagnóstico e recomendações priorizadas, mas preservando a **decisão de execução ao engenheiro on-call**. A fase **Act** do ciclo PRAL é sempre executada pelo engenheiro humano — nunca pelo agente de forma autônoma. Isso é cientificamente justificado pela RSL e pelo estado atual da área.
 
 ---
 
@@ -2729,15 +2778,26 @@ Baseado na RSL (RQ3) e no modelo de avaliação de Kitchenham et al. (2009), o s
 #### Cenário de Avaliação
 
 ```
-Corpus de validação: 5 post-mortems reais do repositório (docs/post-mortems/)
+Corpus de validação: 6 post-mortems do repositório (docs/post-mortems/)
+
+  Cenários planejados (Wheel of Misfortune — §9.13.6):
   ├── INC-001: 401 Checkout Auth Service Regression
   ├── INC-002: P99/5xx Backend Deploy Regression
-  ├── INC-003: Redis Saturation OOM (noeviction)
+  ├── INC-003-planned: Redis Saturation OOM (noeviction)       [hipotético]
   ├── INC-004: RPS Zero — HAProxy Down Outage
   └── INC-005: Catalog Service Latency Regression
 
+  Cenário executado (validação real do ciclo PRAL — 2026-05-15):
+  └── INC-003: Blue/Green Deploy Failure — Readiness Probe Ausente  ✅ EXECUTADO
+        Padrão: latência bimodal (P50 normal + P95/P99 crítico)
+        KB retrieval: INC-002 recuperado (score=0.534)
+        MTTD < 2 min | MTTR ~18 min | SEV1
+        Post-mortem: docs/post-mortems/INC-003-bluegreen-deploy-failure.md
+        KB corpus após seed: 34 chunks (INC-001:8 + INC-002:10 + INC-003:16)
+
 Método: Replay dos dados de métricas correspondentes a cada incidente
          → POST /analyze → comparar IncidentReport com diagnóstico real do post-mortem
+         → Para INC-003 executado: resultado real disponível para comparação direta
 ```
 
 #### Métricas de Validação

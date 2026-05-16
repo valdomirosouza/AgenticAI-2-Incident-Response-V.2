@@ -546,6 +546,17 @@ O sistema opera no ciclo cognitivo PRAL, que mapeia diretamente ao fluxo do Agen
 | KB search retorna 0 resultados         | Post-mortems PT-BR vs queries EN; cosine máx ~0.38, threshold=0.70               | `min_similarity_score: 0.70 → 0.30`                                 |
 | KB model 403 PermissionError           | Modelo baixado como root, lido como `appuser` (sem home dir)                     | `HF_HOME=/app/.cache` + `chown -R appuser` no Dockerfile            |
 
+### SDD Atualizado (2026-05-16) — Ciclo PRAL + INC-003
+
+`AgenticAI-Incident-Response.md` (SDD v1.7.0) atualizado em 4 edits (prompt #47):
+
+| Edit | Seção   | O que foi adicionado/alterado                                                                                     |
+| ---- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| 1    | §9.13.1 | Subseção "Ciclo Cognitivo PRAL dos Agentes Especialistas" — tabela, diagrama ASCII, cross-ref PRAL × SRE          |
+| 2    | §10.1   | Diagrama genérico substituído por diagrama PRAL nomeado; texto reforça que fase Act é sempre do engenheiro (HOTL) |
+| 3    | §9.13.6 | Cenário 5 adicionado ao Wheel of Misfortune: INC-003 EXECUTADO (2026-05-15), com métricas reais                   |
+| 4    | §10.8   | Corpus distingue cenários hipotéticos dos executados; INC-003 real documentado (34 chunks, score=0.534)           |
+
 ---
 
 ## 15. Próximos Passos Sugeridos

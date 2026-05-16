@@ -643,6 +643,22 @@ Corrigiu o mapeamento do ciclo PRAL — nomenclatura correta é o ciclo cognitiv
 
 ---
 
+### 23:15 BRT — Prompt #47
+
+**Usuário:**
+
+> Atualiza o SDD com o ciclo PRAL e o INC-003
+
+**Claude:**  
+Atualizou `AgenticAI-Incident-Response.md` (SDD v1.7.0) em 4 edits:
+
+- **Edit 1 — §9.13.1:** Adicionou subseção "Ciclo Cognitivo PRAL dos Agentes Especialistas" com tabela (Perceive/Reasoning/Act/Learn × Componente × O que ocorre), diagrama ASCII de retroalimentação e tabela de cross-reference PRAL × Google SRE Lifecycle.
+- **Edit 2 — §10.1:** Substituiu diagrama genérico `Failure Perception → Root Cause Analysis → Assisted Remediation` pelo diagrama PRAL nomeado, explicitando que a fase Act é sempre executada pelo engenheiro (HOTL — nunca pelo agente de forma autônoma).
+- **Edit 3 — §9.13.6:** Adicionou Cenário 5 no Wheel of Misfortune como cenário EXECUTADO (INC-003 — 2026-05-15): padrão bimodal confirmado, KB retrieval INC-002 score=0.534, MTTD<2min, MTTR=18min, post-mortem seeded (34 chunks total).
+- **Edit 4 — §10.8:** Atualizou corpus de avaliação distinguindo cenários planejados (hipotéticos) do INC-003 executado (real), com métricas reais: 34 chunks KB, score=0.534, MTTD/MTTR medidos.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -693,3 +709,4 @@ Corrigiu o mapeamento do ciclo PRAL — nomenclatura correta é o ciclo cognitiv
 | 44  | 16/05 22:50     | Atualiza o prompt.md e SESSION_MEMORY.md            | Sessão 3 registrada; commit + push                                                  |
 | 45  | 16/05 22:55     | Novo cenário E2E completo + Ciclo PRAL + Postmortem | INC-003 (deploy blue/green): severity=critical, MTTD<2min, MTTR=18min; KB=34 chunks |
 | 46  | 16/05 23:05     | Correção: PRAL = Perceive→Reasoning→Act→Learn       | Ciclo PRAL remapeado; SESSION_MEMORY §15b + prompt.md atualizados                   |
+| 47  | 16/05 23:15     | Atualiza o SDD com o ciclo PRAL e o INC-003         | SDD §9.13.1 + §10.1 + §9.13.6 + §10.8 atualizados (4 edits — PRAL + INC-003 real)   |
