@@ -582,10 +582,10 @@ Os itens abaixo **não foram implementados** nesta sessão e permanecem como tra
 - [x] **trivy image** — ✅ Job `trivy` no `sast.yml` com `trivy fs` (CRITICAL, ignore-unfixed) — commit `7aa20cf`
 - [x] **pip-compile --generate-hashes** — ✅ `requirements.in` criados; LI + IRA + KB-test com SHA-256 hashes; Dockerfiles LI/IRA com `--require-hashes` — commit `7aa20cf`
 - [x] **LLM07** — ✅ `PROMPT_CLASSIFICATION="SENSITIVE"` em `prompts.py`; 2 regras Semgrep; 3 testes no-leak — commit `7aa20cf`
-- [ ] **Prometheus auth** — Proteger `GET /prometheus/metrics` por auth básica ou IP restrito
-- [ ] **LLM02** — Anonimizar IPs/hostnames nas métricas antes de enviar ao Claude
+- [x] **Prometheus auth** — ✅ `require_prometheus_key` + `Depends()` no Instrumentator; obrigatório em staging/production; 5 testes — commit `3458116`
+- [x] **LLM02** — ✅ `_sanitize_finding_text` redacta IPv4, IPv6 e FQDNs internos (`[IP_REDACTED]`, `[HOST_REDACTED]`); 5 testes — commit `3458116`
 - [ ] **A09** — Alertas automáticos em Grafana/PagerDuty para breaching de SLOs
 - [ ] **Mutmut** — Mutation testing (meta: ≥ 70% mutation score)
 - [ ] **Defesa da dissertação** — Apresentação dos resultados MTTD/MTTR ao orientador
 
-**Testes totais:** 311 — LI 77 (96.96%) · IRA 183 (98.31%) · KB 51 (97.63%)
+**Testes totais:** 321 — LI 82 (96.89%) · IRA 188 (98.32%) · KB 51 (97.63%)

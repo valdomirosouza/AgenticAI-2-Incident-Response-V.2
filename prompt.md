@@ -767,6 +767,44 @@ Adicionou prompts #53–#55 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com o
 
 ---
 
+### 00:20 BRT — Prompt #56
+
+**Usuário:**
+
+> seguimos com estes
+
+**Claude:**  
+Confirmou Prometheus auth + LLM02. Leu `main.py`, `orchestrator.py`, `config.py` e arquivos de testes para entender o escopo.
+
+---
+
+### 00:25 BRT — Prompt #57
+
+**Usuário:**
+
+> _(implementação Prometheus auth + LLM02)_
+
+**Claude:**  
+Implementou os 2 itens — commit `3458116`:
+
+- **Prometheus auth (A05)**: `prometheus_api_key` em LI `config.py` (obrigatório em staging/production); `app/auth.py` com `require_prometheus_key` (`hmac.compare_digest`, bypass em development); `Instrumentator().expose()` com `Depends(require_prometheus_key)` em `main.py`; `test_prometheus_auth.py` com 5 testes (open/401-sem-key/200-key-válida/401-key-errada/staging-required).
+- **LLM02** (Sensitive Information Disclosure): `_sanitize_finding_text` em `orchestrator.py` estendida com redaction de IPv4 (`[IP_REDACTED]`), IPv6 e FQDNs internos (`*.internal`, `*.prod`, `*.corp`, `*.staging`, `*.dev`) com `[HOST_REDACTED]`; 5 testes novos em `test_orchestrator.py`.
+
+Coberturas: IRA 98.32% (188 testes) · LI 96.89% (82 testes) = **321 testes totais**.
+
+---
+
+### 00:30 BRT — Prompt #58
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #56–#58 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com os 2 itens concluídos e contagem de 321 testes.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -825,4 +863,7 @@ Adicionou prompts #53–#55 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com o
 | 52  | 16/05 23:55     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #50–#52 registrados                                                         |
 | 53  | 16/05 00:05     | vamos para o próximo                                | 7 itens pendentes apresentados; trivy+pip-compile+LLM07 escolhidos                  |
 | 54  | 16/05 00:10     | trivy + pip-compile + LLM07                         | commit 7aa20cf — 311 testes ✅; trivy CI, hashes supply chain, LLM07 semgrep        |
-| 55  | 16/05 00:15     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
+| 55  | 16/05 00:15     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #53–#55 registrados                                                         |
+| 56  | 16/05 00:20     | seguimos com estes                                  | Prometheus auth + LLM02 confirmados                                                 |
+| 57  | 16/05 00:25     | (implementação)                                     | commit 3458116 — 321 testes ✅; Prometheus auth A05 + LLM02 IP/host redaction       |
+| 58  | 16/05 00:30     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
