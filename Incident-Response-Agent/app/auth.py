@@ -9,6 +9,7 @@ from app.key_manager import has_any_keys, is_valid
 logger = logging.getLogger(__name__)
 
 _header = APIKeyHeader(name="X-API-Key", auto_error=False)
+_prometheus_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 async def require_api_key(key: str | None = Security(_header)) -> None:
@@ -17,6 +18,15 @@ async def require_api_key(key: str | None = Security(_header)) -> None:
         return  # auth desabilitada (API_KEY não configurada)
     if not key or not is_valid(key, settings.api_key):
         logger.warning("Auth failure", extra={"reason": "invalid_or_missing_api_key"})
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
+async def require_prometheus_key(key: str | None = Security(_prometheus_header)) -> None:
+    """Protege GET /prometheus/metrics (A05 — bypass em development)."""
+    if not settings.prometheus_api_key:
+        return  # development: sem autenticação
+    if not key or not _hmac.compare_digest(key.encode(), settings.prometheus_api_key.encode()):
+        logger.warning("Prometheus auth failure", extra={"reason": "invalid_or_missing_key"})
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 

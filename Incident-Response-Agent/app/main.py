@@ -1,13 +1,14 @@
-from fastapi import FastAPI
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from fastapi import Depends, FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from app.auth import require_prometheus_key
 from app.config import settings
 from app.limiter import limiter
 from app.middleware import RequestLoggingMiddleware, RequestSizeLimitMiddleware, SecurityHeadersMiddleware
-from app.routers import analyze, health
-from app.routers import admin
+from app.routers import admin, analyze, health
 
 
 app = FastAPI(
@@ -24,6 +25,12 @@ app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware)
+
+Instrumentator().instrument(app).expose(
+    app,
+    endpoint="/prometheus/metrics",
+    dependencies=[Depends(require_prometheus_key)],
+)
 
 app.include_router(health.router)
 app.include_router(analyze.router)

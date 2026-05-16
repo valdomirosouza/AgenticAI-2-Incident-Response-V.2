@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # Modelo Claude
     model: str = "claude-sonnet-4-6"
 
+    # Prometheus scrape endpoint auth (A05 — obrigatório em staging/production)
+    prometheus_api_key: str = ""
+
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
         if self.app_env in ("production", "staging"):
