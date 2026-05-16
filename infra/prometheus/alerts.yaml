@@ -1,7 +1,219 @@
 groups:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Recording rules — métricas derivadas calculadas a cada scrape pelo Prometheus
+  # Evita dependência de chamadas externas para alertas de SLO (OWASP A09:2021)
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: slo-recording-rules
+    interval: 15s
+    rules:
+      # Taxa de erros 5xx nos últimos 5 minutos (janela deslizante)
+      - record: job:haproxy_5xx_rate5m:ratio
+        expr: >
+          sum(rate(haproxy_logs_ingested_total{status_class="5xx"}[5m]))
+          /
+          sum(rate(haproxy_logs_ingested_total[5m]))
+
+      # Taxa de erros LLM (error + validation_error) nos últimos 5 minutos
+      - record: job:llm_error_rate5m:ratio
+        expr: >
+          sum(rate(llm_calls_total{outcome=~"error|validation_error"}[5m]))
+          /
+          (sum(rate(llm_calls_total[5m])) > 0)
+
+      # Chamadas com circuit open nos últimos 10 minutos
+      - record: job:llm_circuit_open10m:increase
+        expr: sum(increase(llm_calls_total{outcome="circuit_open"}[10m]))
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # SLO Alerts — Log-Ingestion-and-Metrics (SDD §3.2.1 / OWASP A09:2021)
+  # Targets: availability 99.5% | latency_p95 99.0% | latency_p99 99.9%
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: slo-alerts
+    rules:
+      # Disponibilidade: taxa 5xx > 0.5% por 5 minutos
+      - alert: SLOAvailabilityBreaching
+        expr: 100 * job:haproxy_5xx_rate5m:ratio > 0.5
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: 'SLO BREACH — availability: 5xx rate {{ $value | printf "%.2f" }}% > 0.5%'
+          description: >
+            Taxa de erros 5xx ultrapassou o threshold de 0.5% por mais de 5 minutos.
+            Error budget do SLO de disponibilidade (99.5%) está sendo consumido.
+            Ação: verificar backends HAProxy, logs do serviço, health do Redis.
+
+      # At-risk: 5xx > 0.25% (50% do budget consumido) — alerta precoce
+      - alert: SLOAvailabilityAtRisk
+        expr: 100 * job:haproxy_5xx_rate5m:ratio > 0.25
+        for: 10m
+        labels:
+          severity: warning
+          slo: availability
+        annotations:
+          summary: 'SLO at risk — availability: 5xx rate {{ $value | printf "%.2f" }}% (threshold 0.5%)'
+          description: >
+            Taxa de 5xx acima de 0.25% por 10 minutos — 50%+ do error budget consumido.
+            Ação preventiva: revisar backends antes de atingir breaching.
+
+      # Latência P95 > 500ms — proxy via Instrumentator do endpoint /logs
+      - alert: SLOLatencyP95Breaching
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="log-ingestion", handler="/logs"}[5m]))
+            by (le)
+          ) * 1000 > 500
+        for: 5m
+        labels:
+          severity: critical
+          slo: latency_p95
+        annotations:
+          summary: 'SLO BREACH — latency P95: {{ $value | printf "%.0f" }}ms > 500ms'
+          description: >
+            P95 de latência do endpoint /logs ultrapassou 500ms por 5 minutos.
+            Ação: verificar Redis sorted sets, backends HAProxy, CPU do host.
+
+      # Latência P99 > 1000ms
+      - alert: SLOLatencyP99Breaching
+        expr: >
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket{job="log-ingestion", handler="/logs"}[5m]))
+            by (le)
+          ) * 1000 > 1000
+        for: 5m
+        labels:
+          severity: critical
+          slo: latency_p99
+        annotations:
+          summary: 'SLO BREACH — latency P99: {{ $value | printf "%.0f" }}ms > 1000ms'
+          description: >
+            P99 de latência do endpoint /logs ultrapassou 1000ms por 5 minutos.
+            SLO de 99.9% está sendo violado. Ação imediata necessária.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # LLM Health Alerts — Incident-Response-Agent (OWASP A09:2021 + AI Governance)
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: llm-health-alerts
+    rules:
+      # Taxa de erro LLM > 5% por 5 minutos
+      - alert: LLMHighErrorRate
+        expr: 100 * job:llm_error_rate5m:ratio > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'LLM error rate {{ $value | printf "%.1f" }}% > 5% — Anthropic API degraded'
+          description: >
+            Mais de 5% das chamadas ao Claude resultaram em erro ou falha de validação
+            nos últimos 5 minutos. Verificar: status da API Anthropic, logs do IRA,
+            estado do circuit breaker.
+
+      # Circuit breaker abriu recorrentemente (> 3 vezes em 10 minutos)
+      - alert: LLMCircuitOpenRecurring
+        expr: job:llm_circuit_open10m:increase > 3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'LLM circuit breaker opened {{ $value | printf "%.0f" }} times in 10min'
+          description: >
+            O circuit breaker da Anthropic API abriu mais de 3 vezes nos últimos 10 minutos.
+            Análises estão degradadas para fallback rule-based (ADR-2026-0010).
+            Ação: verificar status.anthropic.com, quotas de API, logs do IRA.
+
+      # Falhas de validação Pydantic no output do LLM (LLM05:2025)
+      - alert: LLMOutputValidationFailures
+        expr: increase(llm_output_validation_failures_total[10m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $value | printf "%.0f" }} LLM output validation failures in 10min (LLM05)'
+          description: >
+            Claude está retornando JSON malformado ou com schema incorreto com frequência.
+            Ação: revisar PROMPT_VERSION, checar se o modelo foi atualizado, verificar logs
+            de ValidationError no IRA.
+
+      # Detecção de prompt injection ou IP leakage (LLM01 + LLM02)
+      - alert: PromptInjectionDetected
+        expr: increase(prompt_injection_sanitized_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prompt injection/sensitive data detected and sanitized ({{ $labels.sanitization_type }})"
+          description: >
+            O sistema detectou e sanitizou conteúdo suspeito antes de enviar ao Claude.
+            Tipo: {{ $labels.sanitization_type }} (tag_removal=injeção, ip_redaction=IP exposto,
+            host_redaction=hostname interno). Revisar fonte dos findings para investigar origin.
+
+      # Análise LLM lenta — P95 > 30s (degradação do serviço Claude)
+      - alert: AnalysisSlowP95
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(llm_call_duration_seconds_bucket{call_type="synthesis"}[10m]))
+            by (le)
+          ) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'LLM synthesis P95 {{ $value | printf "%.0f" }}s > 30s — Claude API slow'
+          description: >
+            Chamadas de síntese ao Claude estão demorando mais de 30s no P95.
+            SLO de análise (/analyze ≤ 60s) em risco. Verificar latência da Anthropic API.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Infrastructure Alerts — todos os serviços (OWASP A09:2021)
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: infrastructure-alerts
+    rules:
+      # Serviço indisponível para Prometheus (up == 0)
+      - alert: ServiceDown
+        expr: up{job=~"log-ingestion|incident-response-agent|knowledge-base"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is DOWN (Prometheus cannot scrape)"
+          description: >
+            O serviço {{ $labels.job }} não está respondendo ao scrape do Prometheus
+            por mais de 1 minuto. Verificar: docker compose ps, health endpoint,
+            logs do container.
+
+      # Redis próximo do limite de memória (> 200 MB de 256 MB — 78%)
+      - alert: RedisSaturationHigh
+        expr: redis_memory_usage_bytes > 209715200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory {{ $value | humanize }}B > 200MB (limit: 256MB)"
+          description: >
+            Redis está usando mais de 200MB (78% do limite de 256MB configurado via allkeys-lru).
+            Política allkeys-lru está ativa mas pode causar eviction de métricas recentes.
+            Ação: revisar TTL de sorted sets, considerar aumentar maxmemory.
+
+      # Redis crítico (> 240 MB de 256 MB — 94%)
+      - alert: RedisSaturationCritical
+        expr: redis_memory_usage_bytes > 251658240
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis memory CRITICAL: {{ $value | humanize }}B > 240MB (limit: 256MB)"
+          description: >
+            Redis está usando mais de 240MB (94% do limite). Eviction agressiva em andamento.
+            Métricas de Golden Signals podem estar sendo perdidas.
+            Ação imediata: docker compose restart redis ou aumentar maxmemory.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Incident Agent Alerts — originais preservados (SDD §9.13.5)
+  # ─────────────────────────────────────────────────────────────────────────
   - name: incident-agent-alerts
     rules:
-      # Page apenas em CRITICAL — ação imediata (SDD §9.13.5)
+      # Page apenas em CRITICAL — ação imediata
       - alert: IncidentCritical
         expr: increase(specialist_finding_severity_total{severity="critical"}[1m]) > 0
         for: 0m
@@ -20,16 +232,7 @@ groups:
         annotations:
           summary: "WARNING signal detected — review within 2h"
 
-      # Alerta de análise lenta (degradação do LLM)
-      - alert: AnalysisSlowP95
-        expr: histogram_quantile(0.95, rate(incident_analysis_duration_seconds_bucket[10m])) > 30
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "POST /analyze P95 latency > 30s — possible LLM degradation"
-
-      # Alerta de KB indisponível durante análises
+      # KB indisponível durante análises
       - alert: KBDegradedFrequent
         expr: rate(kb_search_results_count_bucket{le="0"}[15m]) > 0.5
         for: 10m
