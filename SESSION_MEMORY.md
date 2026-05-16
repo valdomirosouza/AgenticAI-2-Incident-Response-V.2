@@ -477,23 +477,59 @@ Validação do projeto recém-criado. **Gaps identificados e corrigidos:**
 ## 14. Histórico de Commits
 
 ```
+1e374ff  fix: corrige 6 bugs de produção descobertos no cenário de teste E2E
+a47973f  docs: atualiza prompt.md com prompt #24
+2d1ec04  docs: SESSION_MEMORY.md + prompt.md atualizado com prompts #22 e #23
+bc4655b  docs: atualiza prompt.md com prompt #21
+2755d8c  docs: SDD v1.7.0 — auditoria de alinhamento SDD×Harness (9 gaps corrigidos)
 45154dc  docs: atualiza prompt.md com prompts #37–#41
 ca7dea2  docs: adiciona diagrama Mermaid flowchart na seção Arquitetura do README
 9009e8b  docs: adiciona README.md na raiz do projeto
 681e736  docs: atualiza SESSION_MEMORY.md com resultados de testes confirmados
-1b0240e  docs: atualiza prompt.md com prompts #34–#36
-d51d992  docs: atualiza prompt.md com prompts #32–#33
-0d50710  docs: atualiza SESSION_MEMORY.md com estado da Sessão 2
-61579cb  docs: atualiza prompt.md com prompts #30–#31 (criação do repo GitHub)
-01413a5  docs: atualiza prompt.md com prompts #25–#29 (Sessão 2)
 573dcf8  docs: adiciona CLAUDE.md e corrige stales no SDD §3.2.2 e §7.4
-2755d8c  docs: SDD v1.7.0 — auditoria de alinhamento SDD×Harness (9 gaps corrigidos)
 d5a98db  feat: projeto completo — Sprints 1–4 concluídos
 ```
 
 **Branch:** `main` — publicado em https://github.com/valdomirosouza/AgenticAI-2-Incident-Response-V.2  
 **Arquivos commitados:** 133 arquivos, 11.302 inserções no commit inicial  
 **`.claude/` excluído** via `.gitignore` — dados de sessão privados não versionados
+
+---
+
+## 15b. Sessão 3 — Cenário de Teste E2E (2026-05-16)
+
+### Roteiro executado:
+
+**Fase 0 — Infraestrutura:** Stack completa iniciada com `docker compose up -d --wait`
+
+**Fase 1 — Seed KB:** `seed_kb.py` → 18 chunks (INC-001: 8 chunks, INC-002: 10 chunks) em Qdrant `postmortems`
+
+**Fase 2 — Baseline:** 50 logs HAProxy ingeridos (status_code=200, time_response=80–150ms)
+
+**Fase 3 — Injeção de incidente:** 30 logs alta latência (800–2500ms, mix 200/5xx) + 20 logs 5xx puros (3000–8000ms)
+
+**Fase 4 — Análise:** `POST /analyze` → `IncidentReport` com:
+
+- `overall_severity: critical`
+- `llm_calls_count: 5` (4 especialistas + 1 síntese)
+- `kb_chunks_retrieved: 3`, `kb_score_max: 0.37`
+- `escalation_recommended: true`
+- `similar_incidents: [3 UUIDs Qdrant]`
+- `analysis_duration_seconds: 32.2s`
+
+**Fase 5 — SLOs:** Todos 3 SLOs `health: "breaching"` confirmado
+
+### 6 bugs de produção encontrados e corrigidos (commit 1e374ff):
+
+| Bug                                    | Causa                                                                            | Correção                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Redis não iniciava                     | `--requirepass` com `${REDIS_PASSWORD:-}` vazio consumia próximo flag como valor | `sh -c` com `$$REDIS_PASSWORD:+...`                                 |
+| Qdrant healthcheck falhava             | Imagem v1.18.0 sem `curl` ou `wget`                                              | `bash -c 'exec 3<>/dev/tcp/localhost/6333'`                         |
+| Qdrant 401 Unauthorized                | `QDRANT__SERVICE__API_KEY=""` habilita auth com chave vazia                      | Variável removida do docker-compose                                 |
+| Claude retorna JSON em markdown        | Apesar de "Respond ONLY with JSON", Claude usa `json`                            | `str.find('{')` + `str.rfind('}')` em `base.py` e `orchestrator.py` |
+| `OrchestratorResponse` ValidationError | `incident_commander_brief` > 300 chars rejeitado pelo Pydantic                   | Validator que trunca silenciosamente                                |
+| KB search retorna 0 resultados         | Post-mortems PT-BR vs queries EN; cosine máx ~0.38, threshold=0.70               | `min_similarity_score: 0.70 → 0.30`                                 |
+| KB model 403 PermissionError           | Modelo baixado como root, lido como `appuser` (sem home dir)                     | `HF_HOME=/app/.cache` + `chown -R appuser` no Dockerfile            |
 
 ---
 

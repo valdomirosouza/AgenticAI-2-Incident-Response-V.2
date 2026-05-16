@@ -566,6 +566,61 @@ Adicionou prompts #37–#41 e atualizou a tabela de resumo.
 
 ---
 
+## Sessão 3 — 16 de Maio de 2026
+
+---
+
+### 22:10 BRT — Prompt #42
+
+**Usuário:**
+
+> ajustei o .env com a API KEY
+
+**Claude:**  
+Confirmou ANTHROPIC_API_KEY presente no `.env`. Tentou iniciar `docker compose up -d --wait` mas encontrou conflito na porta 6379 (PID 99290 — Redis local). Sessão compactada com o bloqueio ativo.
+
+---
+
+### 22:15 BRT — Prompt #43 (retomada de contexto)
+
+**Usuário:**
+
+> _(sessão retomada automaticamente após compactação de contexto)_
+
+**Claude:**  
+Matou o PID 99290 que ocupava a porta 6379. Docker Desktop não estava ativo — lançou via `open -a Docker` e aguardou o daemon. Encontrou a V1 do projeto (`agenticai-2-incident-response`) ainda rodando e ocupando todas as portas (6379, 6333, 8000, 8001, 8002); parou os 5 containers. Ao tentar `docker compose up`, descobriu e corrigiu 4 bugs adicionais no docker-compose.yml e Dockerfiles, totalizando **6 bugs de produção** corrigidos durante o cenário E2E (commit `1e374ff`):
+
+| Bug                                                                    | Arquivo                       | Correção                         |
+| ---------------------------------------------------------------------- | ----------------------------- | -------------------------------- |
+| Redis não iniciava — `--requirepass` consumia `--maxmemory` como valor | `docker-compose.yml`          | `sh -c` com `$$REDIS_PASSWORD:+` |
+| Qdrant healthcheck falhava — imagem sem `curl`                         | `docker-compose.yml`          | `bash /dev/tcp`                  |
+| Qdrant 401 — `QDRANT__SERVICE__API_KEY=""` ativa auth                  | `docker-compose.yml`          | Variável removida                |
+| Claude envolve JSON em markdown fences                                 | `base.py` + `orchestrator.py` | `find('{')` / `rfind('}')`       |
+| `incident_commander_brief` > 300 chars rejeita Pydantic                | `llm_response.py`             | Validator que trunca             |
+| KB search retorna 0 — PT-BR vs EN, cosine máx ~0.38, threshold=0.70    | `config.py`                   | 0.70 → 0.30                      |
+| KB modelo 403 — baixado como root, lido como `appuser`                 | `Dockerfile`                  | `HF_HOME=/app/.cache` + `chown`  |
+
+**Cenário E2E executado com sucesso:**
+
+- Fase 1: Seed KB — 18 chunks (INC-001 + INC-002) em Qdrant
+- Fase 2: Baseline — 50 logs saudáveis (200 OK, 80–150ms)
+- Fase 3: Injeção — 30 alta latência (800–2500ms) + 20 erros 5xx (3000–8000ms)
+- Fase 4: `POST /analyze` → `overall_severity: critical`, `llm_calls_count: 5`, `kb_chunks_retrieved: 3`, `escalation_recommended: true`
+- Fase 5: `GET /metrics/slo-status` → `overall_health: "breaching"` (todos 3 SLOs)
+
+---
+
+### 22:50 BRT — Prompt #44
+
+**Usuário:**
+
+> Atualiza o prompt.md e SESSION_MEMORY.md com os prompts desta sessão
+
+**Claude:**  
+Adicionou §15b ao SESSION_MEMORY.md (Sessão 3 — roteiro E2E completo + tabela dos 7 bugs). Adicionou Sessão 3 ao prompt.md com prompts #42–#44 e atualizou tabela de resumo.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                  | Entrega                                                                            |
@@ -611,3 +666,6 @@ Adicionou prompts #37–#41 e atualizou a tabela de resumo.
 | 39  | 15/05 21:40     | inclua um README.md na raiz do projeto           | README.md criado (197 linhas); commit `9009e8b` publicado                          |
 | 40  | 15/05 21:50     | Diagrama Mermaid flowchart na seção Arquitetura  | System Overview flowchart (11 passos ①–⑪); commit `ca7dea2` publicado              |
 | 41  | 15/05 21:55     | Atualiza o prompt.md com os prompts desta sessão | Este registro                                                                      |
+| 42  | 16/05 22:10     | ajustei o .env com a API KEY                     | Confirmou API key; bloqueio na porta 6379 (V1 stack ativa)                         |
+| 43  | 16/05 22:15     | (retomada pós-compactação — cenário E2E)         | 6 bugs corrigidos; E2E completo: severity=critical, 5 LLM calls, 3 KB chunks       |
+| 44  | 16/05 22:50     | Atualiza o prompt.md e SESSION_MEMORY.md         | Sessão 3 registrada; commit + push                                                 |
