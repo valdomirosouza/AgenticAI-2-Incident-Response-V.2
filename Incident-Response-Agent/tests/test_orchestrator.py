@@ -57,6 +57,37 @@ def test_sanitize_clean_text_unchanged():
     assert _sanitize_finding_text(text) == text
 
 
+# ─── LLM02: anonymização de IPs e hostnames ───────────────────────────────────
+
+def test_sanitize_redacts_ipv4():
+    result = _sanitize_finding_text("Backend 192.168.1.42 returned 503")
+    assert "192.168.1.42" not in result
+    assert "[IP_REDACTED]" in result
+
+
+def test_sanitize_redacts_ipv6():
+    result = _sanitize_finding_text("Source: 2001:db8:85a3:0000:0000:8a2e:0370:7334")
+    assert "2001:db8" not in result
+    assert "[IP_REDACTED]" in result
+
+
+def test_sanitize_redacts_internal_fqdn():
+    result = _sanitize_finding_text("Host app-server.prod.internal timed out")
+    assert "app-server.prod.internal" not in result
+    assert "[HOST_REDACTED]" in result
+
+
+def test_sanitize_redacts_staging_fqdn():
+    result = _sanitize_finding_text("db.staging.corp: connection refused")
+    assert "db.staging.corp" not in result
+    assert "[HOST_REDACTED]" in result
+
+
+def test_sanitize_preserves_metric_values():
+    text = "P95=850ms, error_rate=3.2%, backends=4"
+    assert _sanitize_finding_text(text) == text
+
+
 # ─── _should_escalate ─────────────────────────────────────────────────────────
 
 def test_should_escalate_with_3_critical():

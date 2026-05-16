@@ -31,10 +31,21 @@ logger = logging.getLogger(__name__)
 
 MAX_FINDING_LENGTH = 500
 
+# LLM02:2025 — padrões para anonimização antes de envio ao Claude
+_RE_IPV4 = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
+_RE_IPV6 = re.compile(r"\b(?:[0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}\b")
+_RE_FQDN = re.compile(
+    r"\b(?:[a-zA-Z0-9-]+\.){2,}(?:internal|local|corp|prod|staging|dev|example\.com)\b",
+    re.IGNORECASE,
+)
+
 
 def _sanitize_finding_text(text: str) -> str:
-    """Remove tags que podem ser usadas em prompt injection (SDD §7.3.1 / LLM01:2025)."""
+    """Remove prompt injection tags e anonimiza IPs/hostnames (LLM01+LLM02:2025)."""
     text = re.sub(r"<\/?(?:human|assistant|system|prompt)>", "", text, flags=re.IGNORECASE)
+    text = _RE_IPV4.sub("[IP_REDACTED]", text)
+    text = _RE_IPV6.sub("[IP_REDACTED]", text)
+    text = _RE_FQDN.sub("[HOST_REDACTED]", text)
     return text[:MAX_FINDING_LENGTH]
 
 

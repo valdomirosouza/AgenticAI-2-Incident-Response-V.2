@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
+from app.auth import require_prometheus_key
 from app.config import settings
 from app.logging_config import configure_logging
 from app.telemetry import configure_telemetry
@@ -37,7 +38,11 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware)
 
-Instrumentator().instrument(app).expose(app, endpoint="/prometheus/metrics")
+Instrumentator().instrument(app).expose(
+    app,
+    endpoint="/prometheus/metrics",
+    dependencies=[Depends(require_prometheus_key)],
+)
 
 app.include_router(health.router)
 app.include_router(logs.router)
