@@ -179,11 +179,11 @@ python3.12 -m venv .venv
 
 ### Cobertura atual
 
-| Serviço                   | Testes          | Cobertura |
-| ------------------------- | --------------- | --------- |
-| Log-Ingestion-and-Metrics | 77 unit + 4 E2E | 96.96%    |
-| Incident-Response-Agent   | 174 unit        | 98.26%    |
-| Knowledge-Base            | 49 unit + 6 E2E | 97.60%    |
+| Serviço                   | Testes   | Cobertura |
+| ------------------------- | -------- | --------- |
+| Log-Ingestion-and-Metrics | 100 unit | 95.94%    |
+| Incident-Response-Agent   | 202 unit | 96.84%    |
+| Knowledge-Base            | 51 unit  | 96.02%    |
 
 ---
 
