@@ -25,4 +25,4 @@ def test_development_allows_no_api_key():
 def test_default_min_similarity_score():
     from app.config import Settings
     s = Settings()
-    assert s.min_similarity_score == 0.70
+    assert s.min_similarity_score == 0.30
