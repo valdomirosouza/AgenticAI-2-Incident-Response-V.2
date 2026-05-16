@@ -867,6 +867,60 @@ Adicionou prompts #59–#62 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com A
 
 ---
 
+### 01:20 BRT — Prompt #63
+
+**Usuário:**
+
+> vamos para o próximo
+
+**Claude:**  
+Apresentou os 4 itens restantes após ADRs: AI Governance (médio esforço, alto valor), SDLC Governance (médio), A09 alerting (baixo), Mutmut (alto esforço, baixo valor). Recomendou AI Governance como próximo — diretamente relevante à dissertação sobre Agentic AI. Usuário escolheu AI Governance.
+
+---
+
+### 01:30 BRT — Prompt #64
+
+**Usuário:**
+
+> AI Governance
+
+**Claude:**  
+Implementou o skill `ai-governance` em sua totalidade:
+
+**LLM Observability (Prometheus):**
+
+- `Incident-Response-Agent/app/llm_metrics.py` — 4 métricas: `llm_call_duration_seconds` (histogram, labels: call_type), `llm_calls_total` (counter, labels: call_type×outcome), `llm_output_validation_failures_total`, `prompt_injection_sanitized_total` (labels: tag_removal|ip_redaction|host_redaction)
+- `agents/specialists/base.py` — timing de cada chamada especialista + contadores circuit_open/success/error
+- `agents/orchestrator.py` — timing de síntese + contadores por outcome; `_sanitize_finding_text` incrementa `PROMPT_INJECTION_SANITIZED` ao detectar tags/IPs/FQDNs
+- `app/main.py` — `Instrumentator().expose()` com `require_prometheus_key` em `/prometheus/metrics`
+- `app/auth.py` — `require_prometheus_key` (hmac.compare_digest, bypass em development)
+- `app/config.py` — `prometheus_api_key` (obrigatório em staging/production — A05)
+
+**AI Traceability Headers:**
+
+- `orchestrator.py`, `base.py`, `prompts.py` — linha "AI-GENERATED ARTIFACT + spec reference" adicionada aos docstrings existentes
+
+**Documentação (`docs/ai-governance/`):**
+
+- `checklist.md` — 5 seções (Transparência, Fairness, Privacidade, Auditabilidade, Segurança de IA), todos os 17 itens marcados ✅ com evidência no código
+- `risk-classification.md` — sistema classificado como Medium Risk; tabela de controles mapeados (HOTL, Pydantic, circuit breaker, sanitização, LLM07, LLM10)
+
+**Testes:** 14 novos em `test_llm_metrics.py` — 202 total, 97.30% cobertura.
+Commit: `af37c55`
+
+---
+
+### 01:45 BRT — Prompt #65
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #63–#65 ao prompt.md. Atualizou SESSION_MEMORY.md com AI Governance concluído.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -932,4 +986,7 @@ Adicionou prompts #59–#62 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com A
 | 59  | 16/05 00:40     | leia a pasta skills e valide conformidade           | ~65% conformidade; ADRs (0%) e SDLC Governance (10%) como maiores gaps              |
 | 60  | 16/05 00:45     | sim, pode começar pelas ADRs (seguir template)      | ADRs 0001–0004 criadas + README.md índice; sessão compactada                        |
 | 61  | 16/05 01:00     | (retomada pós-compactação — ADRs 0005–0012)         | ADRs 0005–0012 criadas; commit `6fb775c` — 13 arquivos, 1.761 inserções             |
-| 62  | 16/05 01:10     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
+| 62  | 16/05 01:10     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #59–#62 registrados                                                         |
+| 63  | 16/05 01:20     | vamos para o próximo                                | AI Governance escolhido; plano: LLM observability + docs + traceability headers     |
+| 64  | 16/05 01:30     | AI Governance                                       | commit af37c55 — 202 testes ✅ 97.30%; 4 métricas Prometheus, checklist, risk class |
+| 65  | 16/05 01:45     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |

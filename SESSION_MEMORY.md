@@ -585,7 +585,7 @@ Os itens abaixo **não foram implementados** nesta sessão e permanecem como tra
 - [x] **Prometheus auth** — ✅ `require_prometheus_key` + `Depends()` no Instrumentator; obrigatório em staging/production; 5 testes — commit `3458116`
 - [x] **LLM02** — ✅ `_sanitize_finding_text` redacta IPv4, IPv6 e FQDNs internos (`[IP_REDACTED]`, `[HOST_REDACTED]`); 5 testes — commit `3458116`
 - [x] **Skills gap analysis** — ✅ 12 skill areas avaliadas; ~65% conformidade; ADRs e SDLC Governance identificados como gaps críticos
-- [x] **ADRs (12/12)** — ✅ Todas as 12 ADRs criadas em `docs/adr/active/`; commit `6fb775c`; cobrem 100% das decisões arquiteturais do projeto:
+- [x] **ADRs (12/12)** — ✅ Todas as 12 ADRs criadas em `docs/adr/active/`; commit `6fb775c`; 100% das decisões arquiteturais:
   - ADR-0001: 3 microsserviços FastAPI independentes
   - ADR-0002: FastAPI como framework web
   - ADR-0003: Redis 7 como Golden Signals store
@@ -598,9 +598,17 @@ Os itens abaixo **não foram implementados** nesta sessão e permanecem como tra
   - ADR-0010: Circuit breaker + fallback rule-based para Anthropic API
   - ADR-0011: Pydantic v2 para validação de output do LLM
   - ADR-0012: Docker Compose como orquestração (não Kubernetes)
+- [x] **AI Governance** — ✅ commit `af37c55`; LLM observability + Prometheus IRA + docs:
+  - `llm_metrics.py`: 4 métricas Prometheus (duration histogram, calls counter, validation failures, injection sanitized)
+  - `base.py` e `orchestrator.py` instrumentados com timing e contadores por outcome
+  - `/prometheus/metrics` exposto no IRA com `require_prometheus_key` (A05)
+  - `docs/ai-governance/checklist.md` — 17 itens ✅ (transparência, fairness, privacidade, auditabilidade, segurança)
+  - `docs/ai-governance/risk-classification.md` — Medium Risk, controles mapeados
+  - AI traceability headers em `orchestrator.py`, `base.py`, `prompts.py`
+  - 14 novos testes — 202 total IRA, 97.30% cobertura
 - [ ] **A09** — Alertas automáticos em Grafana/PagerDuty para breaching de SLOs
 - [ ] **Mutmut** — Mutation testing (meta: ≥ 70% mutation score)
-- [ ] **SDLC Governance** — `dependency-manifest.yaml`, RFC/CAB process, threat model (skill gaps restantes)
+- [ ] **SDLC Governance** — `eol-inventory.yaml`, RFC/CAB, tech-debt register (skill gap restante)
 - [ ] **Defesa da dissertação** — Apresentação dos resultados MTTD/MTTR ao orientador
 
-**Testes totais:** 321 — LI 82 (96.89%) · IRA 188 (98.32%) · KB 51 (97.63%)
+**Testes totais:** 334 — LI 82 (96.89%) · IRA 202 (97.30%) · KB 51 (97.63%)
