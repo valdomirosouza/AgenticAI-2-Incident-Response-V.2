@@ -402,7 +402,8 @@ AgenticAI-2-Incident-Response/
 │   └── runbooks/           — high-latency.md, redis-memory.md
 ├── AgenticAI-Incident-Response.md  — SDD v1.7.0 (§7.4 e §3.2.2 corrigidos na Sessão 2)
 ├── CLAUDE.md               — guia para Claude Code (criado na Sessão 2)
-├── prompt.md               — histórico de 36 interações com timestamps BRT
+├── README.md               — visão geral, arquitetura Mermaid, quickstart (criado na Sessão 2)
+├── prompt.md               — histórico de 41 interações com timestamps BRT
 └── SESSION_MEMORY.md       — este arquivo
 ```
 
@@ -476,15 +477,16 @@ Validação do projeto recém-criado. **Gaps identificados e corrigidos:**
 ## 14. Histórico de Commits
 
 ```
+45154dc  docs: atualiza prompt.md com prompts #37–#41
+ca7dea2  docs: adiciona diagrama Mermaid flowchart na seção Arquitetura do README
+9009e8b  docs: adiciona README.md na raiz do projeto
+681e736  docs: atualiza SESSION_MEMORY.md com resultados de testes confirmados
 1b0240e  docs: atualiza prompt.md com prompts #34–#36
 d51d992  docs: atualiza prompt.md com prompts #32–#33
 0d50710  docs: atualiza SESSION_MEMORY.md com estado da Sessão 2
 61579cb  docs: atualiza prompt.md com prompts #30–#31 (criação do repo GitHub)
 01413a5  docs: atualiza prompt.md com prompts #25–#29 (Sessão 2)
 573dcf8  docs: adiciona CLAUDE.md e corrige stales no SDD §3.2.2 e §7.4
-a47973f  docs: atualiza prompt.md com prompt #24
-2d1ec04  docs: SESSION_MEMORY.md + prompt.md atualizado com prompts #22 e #23
-bc4655b  docs: atualiza prompt.md com prompt #21
 2755d8c  docs: SDD v1.7.0 — auditoria de alinhamento SDD×Harness (9 gaps corrigidos)
 d5a98db  feat: projeto completo — Sprints 1–4 concluídos
 ```
