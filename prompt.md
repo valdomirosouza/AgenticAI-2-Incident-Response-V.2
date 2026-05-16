@@ -621,51 +621,75 @@ Adicionou §15b ao SESSION_MEMORY.md (Sessão 3 — roteiro E2E completo + tabel
 
 ---
 
+### 22:55 BRT — Prompt #45
+
+**Usuário:**
+
+> Vamos executar um novo cenário de teste começando com a ingestão de logs de HAPROXY, analise e correção de falhas que estão gerando incidente em produção. Escreva o roteiro de testes, inicialize os containers com todos os serviços e coloque os agentes especialistas para trabalharem. No final detalhe o passo a passo, desde a inicialização de cada serviço, ingestão de logs, Ciclo PRAL e por fim o preenchimento de Postmortem e devidas melhorias a partir deste.
+
+**Claude:**  
+Executou cenário completo INC-003 (Falha Deploy Blue/Green). Stack resetada (FLUSHALL Redis), KB re-seeded (INC-001 + INC-002). Roteiro em 6 fases: baseline (60 logs, P95=178ms, 5xx=0%), deploy degradado (40 logs, P95=566ms, 5xx=3%), incidente crítico (60 logs, P95=7681ms, 5xx=32.5%), análise POST /analyze (63s, severity=critical, kb_score=0.534, INC-002 recuperado da KB), rollback + recuperação (210 logs saudáveis). Post-mortem INC-003 criado (129 linhas) e seeded na KB (16 chunks, total 34). Commit `0dc4bb0` publicado.
+
+---
+
+### 23:05 BRT — Prompt #46
+
+**Usuário:**
+
+> Só um ajuste o PRAL é de \[P\]erseive, \[R\]easoning, \[A\]ct and \[L\]earn. Ciclo PRAL (Perceive → Reasoning → Act → Learning)
+
+**Claude:**  
+Corrigiu o mapeamento do ciclo PRAL — nomenclatura correta é o ciclo cognitivo do agente autônomo: **Perceive** (4 agentes coletam Golden Signals via tool-use), **Reasoning** (Claude sintetiza hipóteses, descarta Redis OOM, confirma bimodal pattern, recupera INC-002 da KB com score=0.534), **Act** (engenheiro executa rollback guiado pelo IncidentReport — modelo HOTL), **Learn** (INC-003 seeded na KB, retroalimenta o próximo Perceive). Atualizou SESSION_MEMORY.md §15b com tabela PRAL e prompt.md com #45–#46.
+
+---
+
 ## Resumo
 
-| #   | Data/Hora (BRT) | Prompt (resumo)                                  | Entrega                                                                            |
-| --- | --------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| 01  | 14/05 20:55     | Ler SDD e sugerir passo a passo                  | Plano de implementação por sprints                                                 |
-| 02  | 14/05 20:58     | Fase 0: scaffolding + Sprint 1                   | Log-Ingestion testes (55, 94%)                                                     |
-| 03  | 14/05 21:15     | Rodar testes Log-Ingestion                       | Testes corrigidos e passando                                                       |
-| 04  | 14/05 21:38     | Sprint 2: testes Knowledge-Base                  | KB testes (49, 97.6%)                                                              |
-| 05  | 14/05 21:45     | Sprint 3: testes IRA                             | IRA testes (122, 98.4%)                                                            |
-| 06  | 14/05 21:56     | Sprint 4: docker-compose + CI/CD                 | ci.yml, sast.yml, dast.yml, docker-compose                                         |
-| 07  | 14/05 22:10     | Sprints concluídas?                              | Identificados S4-01..07 pendentes                                                  |
-| 08  | 14/05 22:12     | sim                                              | S4-02 E2E testcontainers (10 testes)                                               |
-| 09  | 14/05 23:01     | vamos seguir                                     | Retomada pós-compactação                                                           |
-| 10  | 14/05 23:14     | s4-03                                            | Load tests Locust + check_slos.py + CI                                             |
-| 11  | 14/05 23:23     | Atualizar documentação                           | SDD v1.3.0                                                                         |
-| 12  | 15/05 07:51     | vamos para o próximo                             | S4-04 Circuit Breaker (19 testes)                                                  |
-| 13  | 15/05 08:46     | vamos seguir                                     | S4-01 SLOs (modelos + cálculos puros)                                              |
-| 14  | 15/05 10:29     | vamos para o próximo                             | S4-01 completo (22 testes) + S4-06 SBOM                                            |
-| 15  | 15/05 11:08     | Criar prompt.md                                  | Este arquivo                                                                       |
-| 16  | 15/05 11:30     | Diagramas de sequência Mermaid                   | SDD v1.5.0 — §2.6 com 4 diagramas                                                  |
-| 17  | 15/05 12:00     | vamos para o próximo (S4-07)                     | Rotação de API Keys — key_manager.py, /admin/\*, 174 testes, 98.55% cov            |
-| 18  | 15/05 12:30     | commit tudo e atualiza o prompt.md               | git init + primeiro commit do projeto completo (Sprints 1–4 ✅)                    |
-| 19  | 15/05 14:20     | commit tudo e atualiza o prompt.md               | Working tree já limpo; registrado este prompt e commitado prompt.md                |
-| 20  | 15/05 14:45     | SDD e Harness Engineering alinhados?             | Auditoria completa — 9 gaps corrigidos; SDD v1.7.0                                 |
-| 21  | 15/05 15:10     | commit tudo e atualiza o prompt.md               | Working tree já limpo; apenas prompt.md registrado e commitado                     |
-| 22  | 15/05 15:20     | Gravar memória da sessão em Markdown             | SESSION_MEMORY.md criado (15 seções, estado completo da sessão)                    |
-| 23  | 15/05 15:35     | (retomada pós-compactação)                       | SESSION_MEMORY.md + prompt.md commitados                                           |
-| 24  | 15/05 15:40     | commit tudo e atualiza o prompt.md               | Working tree já limpo; apenas prompt.md atualizado e commitado                     |
-| 25  | 15/05 20:30     | Valide o CLAUDE.md, SDD e Harness Engineering    | Relatório de validação: CLAUDE.md ausente, 2 stales no SDD, harness parcial        |
-| 26  | 15/05 20:35     | Cria o CLAUDE.md agora                           | CLAUDE.md criado (163 linhas)                                                      |
-| 27  | 15/05 20:45     | Corrige os itens stale do SDD §7.4 e §3.2.2      | 8 itens ⬜→✅ no §7.4; anotação sprint incorreta removida do §3.2.2                |
-| 28  | 15/05 20:55     | Commit essas alterações                          | Commit `573dcf8` — CLAUDE.md + SDD corrigido                                       |
-| 29  | 15/05 21:00     | Atualiza o prompt.md com os prompts desta sessão | Sessão 2 registrada (#25–#29)                                                      |
-| 30  | 15/05 20:35     | Criar repo GitHub e publicar código              | Repo público criado: github.com/valdomirosouza/AgenticAI-2-Incident-Response-V.2   |
-| 31  | 15/05 20:40     | Atualiza o prompt.md com os prompts desta sessão | Prompts #30–#31 registrados                                                        |
-| 32  | 15/05 20:45     | Atualiza o SESSION_MEMORY.md com estado atual    | 5 seções atualizadas; commit `0d50710` publicado                                   |
-| 33  | 15/05 20:50     | Atualiza o prompt.md com os prompts desta sessão | Prompts #32–#33 registrados                                                        |
-| 34  | 15/05 21:10     | Rodar os testes dos 3 serviços                   | 300 testes ✅ — LI 96.96%, IRA 98.26%, KB 97.60% (venvs recriados com Python 3.12) |
-| 35  | 15/05 21:15     | Commit e push dos resultados                     | Working tree limpo — nada a commitar                                               |
-| 36  | 15/05 21:20     | Atualiza o prompt.md com os prompts desta sessão | Prompts #34–#36 registrados                                                        |
-| 37  | 15/05 21:30     | Atualiza o SESSION_MEMORY.md com estado atual    | §6, §10, §14 atualizados; commit `681e736` publicado                               |
-| 38  | 15/05 21:35     | o projeto está 100% comitado no Git?             | Working tree limpo, zero commits à frente do remote — ✅                           |
-| 39  | 15/05 21:40     | inclua um README.md na raiz do projeto           | README.md criado (197 linhas); commit `9009e8b` publicado                          |
-| 40  | 15/05 21:50     | Diagrama Mermaid flowchart na seção Arquitetura  | System Overview flowchart (11 passos ①–⑪); commit `ca7dea2` publicado              |
-| 41  | 15/05 21:55     | Atualiza o prompt.md com os prompts desta sessão | Este registro                                                                      |
-| 42  | 16/05 22:10     | ajustei o .env com a API KEY                     | Confirmou API key; bloqueio na porta 6379 (V1 stack ativa)                         |
-| 43  | 16/05 22:15     | (retomada pós-compactação — cenário E2E)         | 6 bugs corrigidos; E2E completo: severity=critical, 5 LLM calls, 3 KB chunks       |
-| 44  | 16/05 22:50     | Atualiza o prompt.md e SESSION_MEMORY.md         | Sessão 3 registrada; commit + push                                                 |
+| #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
+| --- | --------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 01  | 14/05 20:55     | Ler SDD e sugerir passo a passo                     | Plano de implementação por sprints                                                  |
+| 02  | 14/05 20:58     | Fase 0: scaffolding + Sprint 1                      | Log-Ingestion testes (55, 94%)                                                      |
+| 03  | 14/05 21:15     | Rodar testes Log-Ingestion                          | Testes corrigidos e passando                                                        |
+| 04  | 14/05 21:38     | Sprint 2: testes Knowledge-Base                     | KB testes (49, 97.6%)                                                               |
+| 05  | 14/05 21:45     | Sprint 3: testes IRA                                | IRA testes (122, 98.4%)                                                             |
+| 06  | 14/05 21:56     | Sprint 4: docker-compose + CI/CD                    | ci.yml, sast.yml, dast.yml, docker-compose                                          |
+| 07  | 14/05 22:10     | Sprints concluídas?                                 | Identificados S4-01..07 pendentes                                                   |
+| 08  | 14/05 22:12     | sim                                                 | S4-02 E2E testcontainers (10 testes)                                                |
+| 09  | 14/05 23:01     | vamos seguir                                        | Retomada pós-compactação                                                            |
+| 10  | 14/05 23:14     | s4-03                                               | Load tests Locust + check_slos.py + CI                                              |
+| 11  | 14/05 23:23     | Atualizar documentação                              | SDD v1.3.0                                                                          |
+| 12  | 15/05 07:51     | vamos para o próximo                                | S4-04 Circuit Breaker (19 testes)                                                   |
+| 13  | 15/05 08:46     | vamos seguir                                        | S4-01 SLOs (modelos + cálculos puros)                                               |
+| 14  | 15/05 10:29     | vamos para o próximo                                | S4-01 completo (22 testes) + S4-06 SBOM                                             |
+| 15  | 15/05 11:08     | Criar prompt.md                                     | Este arquivo                                                                        |
+| 16  | 15/05 11:30     | Diagramas de sequência Mermaid                      | SDD v1.5.0 — §2.6 com 4 diagramas                                                   |
+| 17  | 15/05 12:00     | vamos para o próximo (S4-07)                        | Rotação de API Keys — key_manager.py, /admin/\*, 174 testes, 98.55% cov             |
+| 18  | 15/05 12:30     | commit tudo e atualiza o prompt.md                  | git init + primeiro commit do projeto completo (Sprints 1–4 ✅)                     |
+| 19  | 15/05 14:20     | commit tudo e atualiza o prompt.md                  | Working tree já limpo; registrado este prompt e commitado prompt.md                 |
+| 20  | 15/05 14:45     | SDD e Harness Engineering alinhados?                | Auditoria completa — 9 gaps corrigidos; SDD v1.7.0                                  |
+| 21  | 15/05 15:10     | commit tudo e atualiza o prompt.md                  | Working tree já limpo; apenas prompt.md registrado e commitado                      |
+| 22  | 15/05 15:20     | Gravar memória da sessão em Markdown                | SESSION_MEMORY.md criado (15 seções, estado completo da sessão)                     |
+| 23  | 15/05 15:35     | (retomada pós-compactação)                          | SESSION_MEMORY.md + prompt.md commitados                                            |
+| 24  | 15/05 15:40     | commit tudo e atualiza o prompt.md                  | Working tree já limpo; apenas prompt.md atualizado e commitado                      |
+| 25  | 15/05 20:30     | Valide o CLAUDE.md, SDD e Harness Engineering       | Relatório de validação: CLAUDE.md ausente, 2 stales no SDD, harness parcial         |
+| 26  | 15/05 20:35     | Cria o CLAUDE.md agora                              | CLAUDE.md criado (163 linhas)                                                       |
+| 27  | 15/05 20:45     | Corrige os itens stale do SDD §7.4 e §3.2.2         | 8 itens ⬜→✅ no §7.4; anotação sprint incorreta removida do §3.2.2                 |
+| 28  | 15/05 20:55     | Commit essas alterações                             | Commit `573dcf8` — CLAUDE.md + SDD corrigido                                        |
+| 29  | 15/05 21:00     | Atualiza o prompt.md com os prompts desta sessão    | Sessão 2 registrada (#25–#29)                                                       |
+| 30  | 15/05 20:35     | Criar repo GitHub e publicar código                 | Repo público criado: github.com/valdomirosouza/AgenticAI-2-Incident-Response-V.2    |
+| 31  | 15/05 20:40     | Atualiza o prompt.md com os prompts desta sessão    | Prompts #30–#31 registrados                                                         |
+| 32  | 15/05 20:45     | Atualiza o SESSION_MEMORY.md com estado atual       | 5 seções atualizadas; commit `0d50710` publicado                                    |
+| 33  | 15/05 20:50     | Atualiza o prompt.md com os prompts desta sessão    | Prompts #32–#33 registrados                                                         |
+| 34  | 15/05 21:10     | Rodar os testes dos 3 serviços                      | 300 testes ✅ — LI 96.96%, IRA 98.26%, KB 97.60% (venvs recriados com Python 3.12)  |
+| 35  | 15/05 21:15     | Commit e push dos resultados                        | Working tree limpo — nada a commitar                                                |
+| 36  | 15/05 21:20     | Atualiza o prompt.md com os prompts desta sessão    | Prompts #34–#36 registrados                                                         |
+| 37  | 15/05 21:30     | Atualiza o SESSION_MEMORY.md com estado atual       | §6, §10, §14 atualizados; commit `681e736` publicado                                |
+| 38  | 15/05 21:35     | o projeto está 100% comitado no Git?                | Working tree limpo, zero commits à frente do remote — ✅                            |
+| 39  | 15/05 21:40     | inclua um README.md na raiz do projeto              | README.md criado (197 linhas); commit `9009e8b` publicado                           |
+| 40  | 15/05 21:50     | Diagrama Mermaid flowchart na seção Arquitetura     | System Overview flowchart (11 passos ①–⑪); commit `ca7dea2` publicado               |
+| 41  | 15/05 21:55     | Atualiza o prompt.md com os prompts desta sessão    | Este registro                                                                       |
+| 42  | 16/05 22:10     | ajustei o .env com a API KEY                        | Confirmou API key; bloqueio na porta 6379 (V1 stack ativa)                          |
+| 43  | 16/05 22:15     | (retomada pós-compactação — cenário E2E)            | 6 bugs corrigidos; E2E completo: severity=critical, 5 LLM calls, 3 KB chunks        |
+| 44  | 16/05 22:50     | Atualiza o prompt.md e SESSION_MEMORY.md            | Sessão 3 registrada; commit + push                                                  |
+| 45  | 16/05 22:55     | Novo cenário E2E completo + Ciclo PRAL + Postmortem | INC-003 (deploy blue/green): severity=critical, MTTD<2min, MTTR=18min; KB=34 chunks |
+| 46  | 16/05 23:05     | Correção: PRAL = Perceive→Reasoning→Act→Learn       | Ciclo PRAL remapeado; SESSION_MEMORY §15b + prompt.md atualizados                   |

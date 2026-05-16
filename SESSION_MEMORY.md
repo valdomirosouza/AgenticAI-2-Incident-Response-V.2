@@ -498,26 +498,41 @@ d5a98db  feat: projeto completo — Sprints 1–4 concluídos
 
 ## 15b. Sessão 3 — Cenário de Teste E2E (2026-05-16)
 
-### Roteiro executado:
+### Ciclo PRAL — Perceive → Reasoning → Act → Learn
+
+O sistema opera no ciclo cognitivo PRAL, que mapeia diretamente ao fluxo do Agentic AI Copilot:
+
+| Fase PRAL     | Componente                        | O que ocorre                                                     |
+| ------------- | --------------------------------- | ---------------------------------------------------------------- |
+| **Perceive**  | 4 SpecialistAgents via tool-use   | GET /metrics/\* coletam Golden Signals em paralelo               |
+| **Reasoning** | OrchestratorAgent + Claude API    | Síntese causal: hipóteses, root cause, trigger, KB retrieval     |
+| **Act**       | Engenheiro on-call (HOTL)         | Agente recomenda; humano valida e executa a remediação           |
+| **Learn**     | Post-mortem → seed_kb.py → Qdrant | Novo incidente vetorizado; próximo ciclo parte com mais contexto |
+
+### Roteiro executado (INC-003 — Deploy Blue/Green):
 
 **Fase 0 — Infraestrutura:** Stack completa iniciada com `docker compose up -d --wait`
 
 **Fase 1 — Seed KB:** `seed_kb.py` → 18 chunks (INC-001: 8 chunks, INC-002: 10 chunks) em Qdrant `postmortems`
 
-**Fase 2 — Baseline:** 50 logs HAProxy ingeridos (status_code=200, time_response=80–150ms)
+**[PERCEIVE] Fase 2 — Baseline:** 60 logs saudáveis (200 OK, 60–180ms) → Golden Signals: P95=178ms, 5xx=0%
 
-**Fase 3 — Injeção de incidente:** 30 logs alta latência (800–2500ms, mix 200/5xx) + 20 logs 5xx puros (3000–8000ms)
+**[PERCEIVE] Fase 3 — Deploy + Incidente:**
 
-**Fase 4 — Análise:** `POST /analyze` → `IncidentReport` com:
+- 40 logs deploy (v2 startup 300–700ms, 20% 503) → P95=566ms, 5xx=3% (SLO breach inicial)
+- 60 logs incidente (v2 travado 3000–10000ms, 80% 5xx) → P95=7681ms, 5xx=32.5%
+
+**[REASONING] Fase 4 — Análise:** `POST /analyze` → `IncidentReport` em 63s:
 
 - `overall_severity: critical`
 - `llm_calls_count: 5` (4 especialistas + 1 síntese)
-- `kb_chunks_retrieved: 3`, `kb_score_max: 0.37`
-- `escalation_recommended: true`
-- `similar_incidents: [3 UUIDs Qdrant]`
-- `analysis_duration_seconds: 32.2s`
+- `kb_chunks_retrieved: 3`, `kb_score_max: 0.534` (INC-002 recuperado)
+- `escalation_recommended: false`
+- Root cause: readiness probe ausente; Trigger: deploy blue/green
 
-**Fase 5 — SLOs:** Todos 3 SLOs `health: "breaching"` confirmado
+**[ACT] Fase 5 — Rollback:** Engenheiro remove v2 do pool; 210 logs de recuperação → 5xx cai para 14.86%
+
+**[LEARN] Fase 6 — Post-Mortem INC-003:** Criado (129 linhas) e seeded na KB (16 chunks, total 34)
 
 ### 6 bugs de produção encontrados e corrigidos (commit 1e374ff):
 
