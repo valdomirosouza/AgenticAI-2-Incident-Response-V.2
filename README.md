@@ -191,11 +191,11 @@ python3.12 -m venv .venv
 
 | Workflow        | Trigger           | O que faz                                  |
 | --------------- | ----------------- | ------------------------------------------ |
-| `ci.yml`        | push / PR         | pytest nos 3 serviços + docker build gate  |
-| `sast.yml`      | push / PR → main  | bandit + semgrep + pip-audit + checkov     |
-| `dast.yml`      | push → main       | Schemathesis fuzzing + OWASP ZAP baseline  |
-| `sbom.yml`      | push / PR → main  | syft (SPDX) + grype (bloqueia CVE crítico) |
-| `load-test.yml` | workflow_dispatch | Locust + validação de SLOs                 |
+| `ci.yml`        | push / PR         | pytest nos 3 serviços (≥85% coverage) + docker build gate          |
+| `sast.yml`      | push / PR → main  | bandit + semgrep + pip-audit + checkov + trivy + trufflehog + **license-check** |
+| `dast.yml`      | push → main       | Schemathesis fuzzing + OWASP ZAP baseline                           |
+| `sbom.yml`      | push / PR → main  | syft SBOM + grype CVE scan (bloqueia CRITICAL) + cosign signing      |
+| `load-test.yml` | workflow_dispatch | Locust + validação de SLOs                                          |
 
 ---
 
@@ -226,13 +226,25 @@ Mapeamento completo OWASP Top 10 Web (2021) e OWASP LLM Top 10 (2025) no [SDD](A
 
 ## Documentação
 
-| Arquivo                                                            | Descrição                                                |
-| ------------------------------------------------------------------ | -------------------------------------------------------- |
-| [`AgenticAI-Incident-Response.md`](AgenticAI-Incident-Response.md) | SDD v1.7.0 — especificação completa do sistema           |
-| [`CLAUDE.md`](CLAUDE.md)                                           | Guia para Claude Code (comandos, convenções, regras)     |
-| [`docs/post-mortems/`](docs/post-mortems/)                         | Post-mortems dos incidentes de referência                |
-| [`docs/runbooks/`](docs/runbooks/)                                 | Runbooks operacionais                                    |
-| [`SESSION_MEMORY.md`](SESSION_MEMORY.md)                           | Histórico técnico detalhado da sessão de desenvolvimento |
+| Arquivo                                                              | Descrição                                                      |
+| -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`AgenticAI-Incident-Response.md`](AgenticAI-Incident-Response.md)   | SDD v1.8.0 — especificação completa do sistema                 |
+| [`CLAUDE.md`](CLAUDE.md)                                             | Guia para Claude Code (comandos, convenções, regras)           |
+| [`CHANGELOG.md`](CHANGELOG.md)                                       | Histórico de versões do projeto                                |
+| [`docs/specs/`](docs/specs/)                                         | Specs formais SDD (SPEC-2026-001 a 004)                        |
+| [`docs/specs/nalsd/`](docs/specs/nalsd/)                             | NALSD capacity planning (back-of-envelope por serviço)         |
+| [`docs/api/`](docs/api/)                                             | OpenAPI 3.1 estático dos 3 serviços                            |
+| [`docs/adr/`](docs/adr/)                                             | 13 Architecture Decision Records                               |
+| [`docs/post-mortems/`](docs/post-mortems/)                           | Postmortems (INC-001 a 003) + template blameless               |
+| [`docs/runbooks/`](docs/runbooks/)                                   | Runbooks operacionais + chaos experiments planejados           |
+| [`docs/security/`](docs/security/)                                   | Threat model (STRIDE/LINDDUN), DPIA, checklist LGPD            |
+| [`docs/sdlc/`](docs/sdlc/)                                           | RFC-2026-001, tech-debt register, EOL inventory                |
+| [`docs/dependency-manifest-*.yaml`](docs/)                           | Dependency manifests enriquecidos (Layer 2) por serviço        |
+| [`slo/slo.yaml`](slo/slo.yaml)                                       | Definição declarativa de SLOs com alertas e error budget policy |
+| [`prompts/v1/`](prompts/v1/)                                         | 5 prompts versionados dos agentes (rastreabilidade LLM)        |
+| [`infra/`](infra/)                                                   | Prometheus config, alertas, dashboard Grafana                  |
+| [`skills/`](skills/)                                                 | 12 skills de engenharia usadas como padrões de referência      |
+| [`SESSION_MEMORY.md`](SESSION_MEMORY.md)                             | Histórico técnico detalhado da sessão de desenvolvimento       |
 
 ---
 
@@ -243,9 +255,22 @@ Mapeamento completo OWASP Top 10 Web (2021) e OWASP LLM Top 10 (2025) no [SDD](A
 ├── Knowledge-Base/            # Serviço :8002 — RAG com Qdrant
 ├── Log-Ingestion-and-Metrics/ # Serviço :8000 — ingestão HAProxy + Golden Signals
 ├── load-tests/                # Locust + check_slos.py
-├── infra/                     # Prometheus + Grafana
-├── docs/                      # Post-mortems e runbooks
-├── .github/workflows/         # 5 pipelines CI/CD
+├── infra/                     # Prometheus config, alertas, dashboard Grafana
+├── docs/
+│   ├── adr/                   # 13 Architecture Decision Records
+│   ├── api/                   # OpenAPI 3.1 estático dos 3 serviços
+│   ├── post-mortems/          # INC-001 a 003 + POSTMORTEM_TEMPLATE.md
+│   ├── runbooks/              # high-latency, redis-memory, chaos-experiments
+│   ├── sdlc/                  # RFC, tech-debt register, EOL inventory
+│   ├── security/              # threat-model, dpia, lgpd-checklist
+│   └── specs/                 # SPEC-2026-001 a 004 + nalsd/
+├── prompts/v1/                # 5 prompts versionados dos agentes
+├── skills/                    # 12 skills de engenharia (padrões de referência)
+├── slo/slo.yaml               # Definição declarativa de SLOs
+├── .github/
+│   ├── workflows/             # ci, sast, dast, sbom, load-test
+│   └── BRANCH_PROTECTION.md   # Regras de proteção de branch
+├── CHANGELOG.md
 ├── docker-compose.yml
 └── .env.example
 ```

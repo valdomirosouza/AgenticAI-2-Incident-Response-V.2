@@ -6,11 +6,11 @@
 
 | Campo       | Valor                                                                                              |
 | ----------- | -------------------------------------------------------------------------------------------------- |
-| Versão      | 1.7.0 — Maio 2026                                                                                  |
-| Status      | Sprint 4 CONCLUÍDO ✅ — S4-01 S4-02 S4-03 S4-04 S4-05 S4-06 S4-07 todos ✅ — Sprints 1–4 completos |
-| Projeto     | Dissertação de Mestrado — PPGCA / Unisinos                                                         |
-| Repositório | github.com/valdomirosouza/AgenticAI-2-Incident-Response                                            |
-| Data        | 15 de Maio de 2026                                                                                 |
+| Versão      | 1.8.0 — Maio 2026                                                                                                  |
+| Status      | Sprint 5 CONCLUÍDO ✅ — Sprints 1–5 completos — Skill-based Governance Maturity implementada                       |
+| Projeto     | Dissertação de Mestrado — PPGCA / Unisinos                                                                         |
+| Repositório | github.com/valdomirosouza/AgenticAI-2-Incident-Response                                                            |
+| Data        | 16 de Maio de 2026                                                                                                 |
 
 ---
 
@@ -718,6 +718,9 @@ bandit -r app/            → falha em HIGH ou CRITICAL
 semgrep --config=...      → regras customizadas LLM + OWASP
 pip-audit                 → CVEs HIGH/CRITICAL nas dependências
 checkov -d .              → IaC Dockerfile + docker-compose (SARIF upload)
+trivy fs .                → CVEs críticos em pacotes Python (bloqueante)
+trufflehog                → secrets no histórico git (somente verificados)
+pip-licenses              → bloqueia licenças GPL/AGPL/LGPL/SSPL/CC-BY-NC
 ```
 
 **Workflow `dast.yml`** — dispara em push para `main`/`staging`:
@@ -1291,6 +1294,47 @@ limiter = Limiter(key_func=get_api_key_or_ip)
 | S4-05 | Fallback de análise baseada em regras (`fallback_analyzer.py`)   | Agent              | Resiliência  | ✅     |
 | S4-06 | Publicar SBOM com `syft`/`grype`                                 | Todos              | Supply Chain | ✅     |
 | S4-07 | Rotação automática de API Keys                                   | Agent              | A07          | ✅     |
+
+### Sprint 5 — Skill-based Governance Maturity ✅ Concluído
+
+Validação cruzada das 12 skills de engenharia (`skills/`) contra o estado do projeto.
+Gaps identificados e implementados em ordem de prioridade (commit d7fd312 + e64e441).
+
+| ID    | Tarefa                                                                          | Skill de Referência         | Artefato                                    | Status |
+| ----- | ------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | ------ |
+| S5-01 | Specs retroativas (SPEC-2026-001 a 004) seguindo SDD cycle                     | spec-driven-development     | `docs/specs/`                               | ✅     |
+| S5-02 | NALSD back-of-envelope por serviço (tráfego, latência, storage, instâncias)    | large-system-design         | `docs/specs/nalsd/nalsd-capacity-planning.md` | ✅     |
+| S5-03 | `max-complexity = 10` (McCabe) ativado nos 3 `pyproject.toml` via ruff         | large-system-design         | `pyproject.toml` (3 serviços)               | ✅     |
+| S5-04 | Prompts versionados em `prompts/v1/` com metadados de rastreabilidade          | ai-governance               | `prompts/v1/` + `prompts/CHANGELOG.md`      | ✅     |
+| S5-05 | `CHANGELOG.md` na raiz e por serviço                                            | documentation-standards     | `CHANGELOG.md` (raiz + 3 serviços)          | ✅     |
+| S5-06 | `dependency-manifest-*.yaml` enriquecido (Layer 2) por serviço                 | documentation-standards     | `docs/dependency-manifest-*.yaml`           | ✅     |
+| S5-07 | `slo/slo.yaml` declarativo com alertas e error budget policy                   | documentation-standards     | `slo/slo.yaml`                              | ✅     |
+| S5-08 | `README.md` por serviço (Quick Start, Architecture, API, Observability, SLO)   | documentation-standards     | `*/README.md` (3 serviços)                  | ✅     |
+| S5-09 | OpenAPI 3.1 estático dos 3 serviços                                             | documentation-standards     | `docs/api/openapi-*.yaml`                   | ✅     |
+| S5-10 | DPIA (Data Protection Impact Assessment) — LGPD/GDPR                           | security-by-design          | `docs/security/dpia.md`                     | ✅     |
+| S5-11 | Checklist de conformidade LGPD/GDPR/CCPA                                        | security-by-design          | `docs/security/lgpd-checklist.md`           | ✅     |
+| S5-12 | Job `license-check` (pip-licenses) no `sast.yml` — bloqueia GPL/AGPL/LGPL     | cicd-pipeline               | `.github/workflows/sast.yml`                | ✅     |
+| S5-13 | Branch protection rules documentadas                                            | cicd-pipeline               | `.github/BRANCH_PROTECTION.md`              | ✅     |
+| S5-14 | 4 chaos experiments planejados (Redis, Anthropic, Qdrant, memory pressure)     | sre-foundations             | `docs/runbooks/chaos-experiments.md`        | ✅     |
+| S5-15 | Template formal de postmortem blameless (5-Whys, root cause vs trigger)        | sre-foundations             | `docs/post-mortems/POSTMORTEM_TEMPLATE.md`  | ✅     |
+| S5-16 | 5 gaps residuais registrados como DEBT-2026-009 a 013                          | sdlc-governance             | `docs/sdlc/tech-debt-register.md`           | ✅     |
+
+**Cobertura de skills após Sprint 5:**
+
+| Skill | Pré-S5 | Pós-S5 |
+| ----- | ------- | ------- |
+| spec-driven-development | 50% | ~95% |
+| large-system-design | 60% | ~85% |
+| ai-governance | 65% | ~90% |
+| documentation-standards | 75% | ~95% |
+| security-by-design | 75% | ~90% |
+| cicd-pipeline | 85% | ~95% |
+| sre-foundations | 85% | ~95% |
+| observability-engineering | 90% | ~95% |
+| credentials-and-secrets | 90% | 90% |
+| managing-adrs | 85% | 85% |
+| sdlc-governance | 80% | 80% |
+| devsecops | 80% | 80% |
 
 ---
 
