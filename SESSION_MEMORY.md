@@ -584,8 +584,23 @@ Os itens abaixo **não foram implementados** nesta sessão e permanecem como tra
 - [x] **LLM07** — ✅ `PROMPT_CLASSIFICATION="SENSITIVE"` em `prompts.py`; 2 regras Semgrep; 3 testes no-leak — commit `7aa20cf`
 - [x] **Prometheus auth** — ✅ `require_prometheus_key` + `Depends()` no Instrumentator; obrigatório em staging/production; 5 testes — commit `3458116`
 - [x] **LLM02** — ✅ `_sanitize_finding_text` redacta IPv4, IPv6 e FQDNs internos (`[IP_REDACTED]`, `[HOST_REDACTED]`); 5 testes — commit `3458116`
+- [x] **Skills gap analysis** — ✅ 12 skill areas avaliadas; ~65% conformidade; ADRs e SDLC Governance identificados como gaps críticos
+- [x] **ADRs (12/12)** — ✅ Todas as 12 ADRs criadas em `docs/adr/active/`; commit `6fb775c`; cobrem 100% das decisões arquiteturais do projeto:
+  - ADR-0001: 3 microsserviços FastAPI independentes
+  - ADR-0002: FastAPI como framework web
+  - ADR-0003: Redis 7 como Golden Signals store
+  - ADR-0004: Qdrant como banco vetorial
+  - ADR-0005: Claude Sonnet 4.6 como motor LLM
+  - ADR-0006: Human-on-the-Loop (HOTL) — sem remediação autônoma
+  - ADR-0007: Tool-use loop com 4 agentes especialistas em paralelo
+  - ADR-0008: all-MiniLM-L6-v2 como modelo de embeddings
+  - ADR-0009: API Key + hmac.compare_digest para autenticação
+  - ADR-0010: Circuit breaker + fallback rule-based para Anthropic API
+  - ADR-0011: Pydantic v2 para validação de output do LLM
+  - ADR-0012: Docker Compose como orquestração (não Kubernetes)
 - [ ] **A09** — Alertas automáticos em Grafana/PagerDuty para breaching de SLOs
 - [ ] **Mutmut** — Mutation testing (meta: ≥ 70% mutation score)
+- [ ] **SDLC Governance** — `dependency-manifest.yaml`, RFC/CAB process, threat model (skill gaps restantes)
 - [ ] **Defesa da dissertação** — Apresentação dos resultados MTTD/MTTR ao orientador
 
 **Testes totais:** 321 — LI 82 (96.89%) · IRA 188 (98.32%) · KB 51 (97.63%)

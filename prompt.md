@@ -805,6 +805,68 @@ Adicionou prompts #56–#58 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com o
 
 ---
 
+### 00:40 BRT — Prompt #59
+
+**Usuário:**
+
+> leia a pasta skills e valide se o código do projeto está atendendo todas as habilidades descritas lá.
+
+**Claude:**  
+Leu os 12 diretórios em `skills/`: managing-adrs, managing-chaos-engineering, managing-dependency-manifest, managing-incident-response, managing-load-tests, managing-observability, managing-post-mortems, managing-runbooks, managing-sdlc-governance, managing-security-testing, managing-service-catalog, managing-slos. Avaliou conformidade projeto × skills e reportou ~65% overall. ADRs (0%) e SDLC Governance (10%) identificados como maiores gaps. Skills bem cobertas: SLOs (95%), Post-Mortems (90%), Observabilidade (85%), Load Tests (80%), Segurança (75%).
+
+---
+
+### 00:45 BRT — Prompt #60
+
+**Usuário:**
+
+> sim, pode começar pelas ADRs. Importante criar já as ADRs para cada uma das implementações seguindo o template.
+
+**Claude:**  
+Criou `docs/adr/README.md` (índice com 12 entradas) e ADRs 0001–0004 seguindo o template em `skills/managing-adrs/adr-template.md`:
+
+- ADR-0001: Arquitetura de 3 microsserviços FastAPI
+- ADR-0002: FastAPI como framework web
+- ADR-0003: Redis 7 como armazenamento de Golden Signals
+- ADR-0004: Qdrant como banco de dados vetorial
+
+Sessão encerrou por compactação de contexto antes de criar ADRs 0005–0012.
+
+---
+
+### 01:00 BRT — Prompt #61
+
+**Usuário:**
+
+> (retomada pós-compactação — continuação das ADRs)
+
+**Claude:**  
+Retomou criação das ADRs restantes. Criou ADRs 0005–0012 em paralelo:
+
+- ADR-0005: Anthropic Claude (claude-sonnet-4-6) como motor LLM
+- ADR-0006: Human-on-the-Loop (HOTL) — sem remediação autônoma
+- ADR-0007: Tool-use loop com 4 agentes especialistas em paralelo
+- ADR-0008: all-MiniLM-L6-v2 como modelo de embeddings
+- ADR-0009: API Key com hmac.compare_digest para autenticação
+- ADR-0010: Circuit breaker com fallback rule-based para Anthropic API
+- ADR-0011: Pydantic v2 para validação de output do LLM
+- ADR-0012: Docker Compose como orquestração (não Kubernetes)
+
+Commit `6fb775c` — 13 arquivos, 1.761 inserções.
+
+---
+
+### 01:10 BRT — Prompt #62
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #59–#62 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com ADRs concluídas.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -866,4 +928,8 @@ Adicionou prompts #56–#58 ao prompt.md. Atualizou SESSION_MEMORY.md §15 com o
 | 55  | 16/05 00:15     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #53–#55 registrados                                                         |
 | 56  | 16/05 00:20     | seguimos com estes                                  | Prometheus auth + LLM02 confirmados                                                 |
 | 57  | 16/05 00:25     | (implementação)                                     | commit 3458116 — 321 testes ✅; Prometheus auth A05 + LLM02 IP/host redaction       |
-| 58  | 16/05 00:30     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
+| 58  | 16/05 00:30     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #56–#58 registrados                                                         |
+| 59  | 16/05 00:40     | leia a pasta skills e valide conformidade           | ~65% conformidade; ADRs (0%) e SDLC Governance (10%) como maiores gaps              |
+| 60  | 16/05 00:45     | sim, pode começar pelas ADRs (seguir template)      | ADRs 0001–0004 criadas + README.md índice; sessão compactada                        |
+| 61  | 16/05 01:00     | (retomada pós-compactação — ADRs 0005–0012)         | ADRs 0005–0012 criadas; commit `6fb775c` — 13 arquivos, 1.761 inserções             |
+| 62  | 16/05 01:10     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
