@@ -1,0 +1,146 @@
+# EOL Inventory — AgenticAI-2-Incident-Response
+# Processo: skills/sdlc-governance/deprecation-process.md
+# Revisão trimestral: Q3-2026 (2026-08-01)
+# Responsável: Valdomiro Souza
+#
+# Regra: nunca operar em produção com runtime ou dependência além do EOL do upstream.
+# Fontes: endoflife.date, python.org/devguide, redis.io/releases, docs.qdrant.tech
+
+runtimes:
+  - name: Python
+    version: "3.12"
+    eol_date: "2028-10-31"
+    source: https://endoflife.date/python
+    status: active
+    used_by: [log-ingestion, incident-response-agent, knowledge-base]
+    notes: "Python 3.12 released Oct 2023; 5-year support cycle. EOL Oct 2028."
+    action_required_at: "2028-07-01" # 90 dias antes do EOL
+
+  - name: "Debian Bookworm (base image)"
+    version: "12"
+    eol_date: "2028-06-30"
+    source: https://endoflife.date/debian
+    status: active
+    used_by: [log-ingestion, incident-response-agent, knowledge-base]
+    notes: "python:3.12-slim-bookworm. Debian 12 LTS até Jun 2028."
+    action_required_at: "2028-03-01"
+
+infrastructure:
+  - name: Redis
+    version: "7"
+    eol_date: "2026-12-31"
+    source: https://endoflife.date/redis
+    status: active
+    used_by: [log-ingestion]
+    notes: >
+      Redis 7.x tem suporte até aproximadamente final de 2026.
+      Verificar redis.io/releases para data exata de EOL.
+      Redis 8 lançado em 2025 — considerar upgrade no Q4-2026.
+    action_required_at: "2026-09-01"
+
+  - name: Qdrant
+    version: "1.18.0"
+    eol_date: null
+    source: https://github.com/qdrant/qdrant/releases
+    status: active
+    used_by: [knowledge-base]
+    notes: >
+      Qdrant tem releases contínuos (rolling). Sem política formal de EOL por versão.
+      Risco: CVEs em versões antigas não recebem backport — grype CI bloqueia em CRITICAL.
+      Atualizar quando nova versão estável for lançada ou CVE CRITICAL detectado.
+    action_required_at: null
+    review_trigger: "grype CRITICAL CVE ou nova major version disponível"
+
+frameworks:
+  - name: FastAPI
+    version: "0.111.0"
+    eol_date: null
+    source: https://github.com/tiangolo/fastapi/releases
+    status: active
+    used_by: [log-ingestion, incident-response-agent, knowledge-base]
+    notes: >
+      FastAPI usa semver. 0.111.0 é versão pinada. pip-audit monitora CVEs no CI.
+      Sem política formal de EOL — atualizar quando CVE CRITICAL ou breaking change
+      em Pydantic v2 exigir.
+    action_required_at: null
+    review_trigger: "pip-audit CRITICAL ou release de FastAPI 1.0.0"
+
+  - name: "Pydantic"
+    version: "v2"
+    eol_date: null
+    source: https://docs.pydantic.dev/latest/
+    status: active
+    used_by: [log-ingestion, incident-response-agent, knowledge-base]
+    notes: >
+      Pydantic v2 é a versão atual suportada. v1 está em modo de manutenção
+      (sem novas features). Se Pydantic v3 for lançado com breaking changes,
+      revisitar ADR-2026-0011.
+    action_required_at: null
+    review_trigger: "lançamento de Pydantic v3 com breaking changes"
+
+ai_models:
+  - name: "claude-sonnet-4-6"
+    type: external_api
+    eol_date: null
+    source: https://www.anthropic.com/changelog
+    status: active
+    used_by: [incident-response-agent]
+    notes: >
+      Modelo configurado em Incident-Response-Agent/app/config.py.
+      Anthropic depreca modelos com aviso de ~6 meses. Monitorar anthropic.com/changelog.
+      Circuit breaker (ADR-2026-0010) protege contra indisponibilidade durante transição.
+    action_required_at: null
+    review_trigger: "anúncio de deprecação pela Anthropic"
+
+  - name: "all-MiniLM-L6-v2"
+    type: local_model
+    eol_date: null
+    source: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+    status: active
+    used_by: [knowledge-base]
+    notes: >
+      Modelo open-source hospedado no HuggingFace Hub. Sem política formal de EOL.
+      Risco: HuggingFace pode remover o modelo do Hub — fixar revision hash no código.
+      Tech debt DEBT-2026-001: migrar para paraphrase-multilingual-MiniLM-L12-v2 quando
+      post-mortems forem reescritos em inglês.
+    action_required_at: null
+    review_trigger: "DEBT-2026-001 resolvido ou modelo removido do HuggingFace Hub"
+
+security_tooling:
+  - name: syft
+    version: "1.4.1"
+    eol_date: null
+    source: https://github.com/anchore/syft/releases
+    used_by: [sbom.yml CI]
+    notes: "Pinado no sbom.yml. Atualizar trimestralmente."
+    review_trigger: "nova versão disponível na revisão trimestral"
+
+  - name: grype
+    version: "0.79.0"
+    eol_date: null
+    source: https://github.com/anchore/grype/releases
+    used_by: [sbom.yml CI]
+    notes: "Pinado no sbom.yml. Atualizar trimestralmente para CVE database atualizada."
+    review_trigger: "nova versão disponível na revisão trimestral"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EOL Radar — próximas ações
+# ─────────────────────────────────────────────────────────────────────────────
+upcoming_actions:
+  - date: "2026-08-01"
+    item: "Redis 7 EOL approaching"
+    action: "Avaliar upgrade para Redis 8 — verificar breaking changes em redis-py client"
+
+  - date: "2026-08-01"
+    item: "Revisão trimestral Q3-2026"
+    action: >
+      Revisar todos os itens deste inventário. Atualizar syft e grype.
+      Verificar se Qdrant tem nova versão estável. Checar changelog Anthropic.
+
+  - date: "2028-03-01"
+    item: "Debian Bookworm EOL approaching"
+    action: "Atualizar Dockerfiles para python:3.12-slim-trixie (Debian 13) ou versão posterior"
+
+  - date: "2028-07-01"
+    item: "Python 3.12 EOL approaching"
+    action: "Migrar para Python 3.13+ — avaliar breaking changes em FastAPI, Pydantic, anthropic SDK"
