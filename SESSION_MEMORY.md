@@ -557,6 +557,18 @@ O sistema opera no ciclo cognitivo PRAL, que mapeia diretamente ao fluxo do Agen
 | 3    | §9.13.6 | Cenário 5 adicionado ao Wheel of Misfortune: INC-003 EXECUTADO (2026-05-15), com métricas reais                   |
 | 4    | §10.8   | Corpus distingue cenários hipotéticos dos executados; INC-003 real documentado (34 chunks, score=0.534)           |
 
+### Testes — Sessão 3 (2026-05-16, prompts #48–#49)
+
+300 testes rodados, 0 falhas, commit `6f6dfae`:
+
+| Serviço                   | Testes | Cobertura | Status |
+| ------------------------- | ------ | --------- | ------ |
+| Log-Ingestion-and-Metrics | 77     | 96.96%    | ✅     |
+| Incident-Response-Agent   | 174    | 98.30%    | ✅     |
+| Knowledge-Base            | 49     | 97.60%    | ✅     |
+
+**Fix:** `test_default_min_similarity_score` atualizado de `0.70` → `0.30` para refletir a correção cross-lingual PT-BR↔EN (KB config.py).
+
 ---
 
 ## 15. Próximos Passos Sugeridos

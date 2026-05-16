@@ -659,6 +659,34 @@ Atualizou `AgenticAI-Incident-Response.md` (SDD v1.7.0) em 4 edits:
 
 ---
 
+### 23:30 BRT — Prompt #48
+
+**Usuário:**
+
+> vamos rodar os testes dos 3 serviços
+
+**Claude:**  
+Rodou os 3 serviços em paralelo (ignorando E2E que exigem Docker). Log-Ingestion e IRA passaram de imediato. KB tinha 1 falha: `test_default_min_similarity_score` esperava `0.70` mas o default foi alterado para `0.30` (correção cross-lingual PT-BR↔EN da Sessão 3). Corrigiu o teste e rerodou. **300 testes, 0 falhas, commit `6f6dfae` publicado.**
+
+| Serviço                   | Testes | Cobertura |
+| ------------------------- | ------ | --------- |
+| Log-Ingestion-and-Metrics | 77     | 96.96%    |
+| Incident-Response-Agent   | 174    | 98.30%    |
+| Knowledge-Base            | 49     | 97.60%    |
+
+---
+
+### 23:35 BRT — Prompt #49
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #48–#49 ao prompt.md. Atualizou SESSION_MEMORY.md §15b com resultado dos testes e coberturas atuais.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -710,3 +738,5 @@ Atualizou `AgenticAI-Incident-Response.md` (SDD v1.7.0) em 4 edits:
 | 45  | 16/05 22:55     | Novo cenário E2E completo + Ciclo PRAL + Postmortem | INC-003 (deploy blue/green): severity=critical, MTTD<2min, MTTR=18min; KB=34 chunks |
 | 46  | 16/05 23:05     | Correção: PRAL = Perceive→Reasoning→Act→Learn       | Ciclo PRAL remapeado; SESSION_MEMORY §15b + prompt.md atualizados                   |
 | 47  | 16/05 23:15     | Atualiza o SDD com o ciclo PRAL e o INC-003         | SDD §9.13.1 + §10.1 + §9.13.6 + §10.8 atualizados (4 edits — PRAL + INC-003 real)   |
+| 48  | 16/05 23:30     | vamos rodar os testes dos 3 serviços                | 300 testes ✅ — LI 96.96%, IRA 98.30%, KB 97.60%; fix KB test (0.70→0.30)           |
+| 49  | 16/05 23:35     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
