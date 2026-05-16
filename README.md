@@ -228,6 +228,7 @@ Mapeamento completo OWASP Top 10 Web (2021) e OWASP LLM Top 10 (2025) no [SDD](A
 
 | Arquivo                                                              | Descrição                                                      |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`docs/PRD.md`](docs/PRD.md)                                         | PRD v1.0.0 — requisitos funcionais, não-funcionais e critérios de aceite |
 | [`AgenticAI-Incident-Response.md`](AgenticAI-Incident-Response.md)   | SDD v1.8.0 — especificação completa do sistema                 |
 | [`CLAUDE.md`](CLAUDE.md)                                             | Guia para Claude Code (comandos, convenções, regras)           |
 | [`CHANGELOG.md`](CHANGELOG.md)                                       | Histórico de versões do projeto                                |
