@@ -576,14 +576,16 @@ O sistema opera no ciclo cognitivo PRAL, que mapeia diretamente ao fluxo do Agen
 Os itens abaixo **não foram implementados** nesta sessão e permanecem como trabalho futuro:
 
 - [x] **GitHub remote** — ✅ Repositório público criado e publicado na Sessão 2
-- [ ] **ZAP gate** — Mudar `fail_action: false` → `true` no `dast.yml` para bloquear build em issues MEDIUM+
+- [x] **ZAP gate** — ✅ `fail_action: true` nos 2 scans (commit `b42fb96`)
+- [x] **trufflehog/git-secrets** — ✅ Job `secrets` no `sast.yml` com `--only-verified` (commit `b42fb96`)
+- [x] **A01/A05** — ✅ `API_KEY` obrigatória em `staging` e `production`; +8 testes (commit `b42fb96`)
 - [ ] **trivy image** — Integrar scan de imagem Docker no CI (complemento ao grype SBOM)
-- [ ] **trufflehog/git-secrets** — Integrar detecção de secrets hardcoded no CI
 - [ ] **Prometheus auth** — Proteger `GET /prometheus/metrics` por auth básica ou IP restrito
 - [ ] **LLM02** — Anonimizar IPs/hostnames nas métricas antes de enviar ao Claude
 - [ ] **LLM07** — Classificação formal de system prompts como dados sensíveis
-- [ ] **A01/A05** — `API_KEY` obrigatória em todos os ambientes
 - [ ] **A09** — Alertas automáticos em Grafana/PagerDuty para breaching de SLOs
 - [ ] **Mutmut** — Mutation testing (meta: ≥ 70% mutation score)
 - [ ] **pip-compile --generate-hashes** — Pinnar dependências com hashes para supply chain completo
 - [ ] **Defesa da dissertação** — Apresentação dos resultados MTTD/MTTR ao orientador
+
+**Testes totais (após Sessão 3):** 308 — LI 77 (96.96%) · IRA 180 (98.31%) · KB 51 (97.63%)

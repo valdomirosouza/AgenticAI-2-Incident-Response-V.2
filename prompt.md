@@ -687,6 +687,47 @@ Adicionou prompts #48–#49 ao prompt.md. Atualizou SESSION_MEMORY.md §15b com 
 
 ---
 
+### 23:45 BRT — Prompt #50
+
+**Usuário:**
+
+> vamos para o próximo
+
+**Claude:**  
+Apresentou lista de 10 itens pendentes com impacto e complexidade. Recomendou começar por ZAP gate + trufflehog + A01/A05 (alto impacto, baixa complexidade). Usuário confirmou.
+
+---
+
+### 23:50 BRT — Prompt #51
+
+**Usuário:**
+
+> ZAP gate + trufflehog + A01/A05
+
+**Claude:**  
+Implementou os 3 itens de segurança — commit `b42fb96`:
+
+- **ZAP gate** (`dast.yml`): `fail_action: false → true` nos dois scans ZAP (Log-Ingestion + KB). Build agora bloqueia em qualquer alert MEDIUM+.
+- **TruffleHog** (`sast.yml`): novo job `secrets` com `fetch-depth: 0` e `--only-verified`. Escaneia histórico Git completo a cada push/PR em busca de credenciais vazadas.
+- **A01/A05** (IRA + KB `config.py`): `API_KEY` obrigatória em `staging` e `production` (antes só em `production`). Development mantém bypass para facilidade local.
+- **Testes**: `Incident-Response-Agent/tests/test_config.py` criado (6 testes); KB `tests/test_config.py` +2 testes (staging required / staging passes).
+- **`.env.example`**: comentário atualizado refletindo requisito staging.
+
+Coberturas finais: IRA 98.31% (180 testes) · KB 97.63% (51 testes) · LI 77 = **308 testes totais**.
+
+---
+
+### 23:55 BRT — Prompt #52
+
+**Usuário:**
+
+> atualiza o prompt.md e o SESSION_MEMORY.md
+
+**Claude:**  
+Adicionou prompts #50–#52 ao prompt.md. Atualizou SESSION_MEMORY.md §15 (itens concluídos) e §15b (testes e coberturas).
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                     | Entrega                                                                             |
@@ -739,4 +780,7 @@ Adicionou prompts #48–#49 ao prompt.md. Atualizou SESSION_MEMORY.md §15b com 
 | 46  | 16/05 23:05     | Correção: PRAL = Perceive→Reasoning→Act→Learn       | Ciclo PRAL remapeado; SESSION_MEMORY §15b + prompt.md atualizados                   |
 | 47  | 16/05 23:15     | Atualiza o SDD com o ciclo PRAL e o INC-003         | SDD §9.13.1 + §10.1 + §9.13.6 + §10.8 atualizados (4 edits — PRAL + INC-003 real)   |
 | 48  | 16/05 23:30     | vamos rodar os testes dos 3 serviços                | 300 testes ✅ — LI 96.96%, IRA 98.30%, KB 97.60%; fix KB test (0.70→0.30)           |
-| 49  | 16/05 23:35     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
+| 49  | 16/05 23:35     | atualiza o prompt.md e o SESSION_MEMORY.md          | Prompts #48–#49 registrados                                                         |
+| 50  | 16/05 23:45     | vamos para o próximo                                | Lista de 10 itens pendentes apresentada; ZAP+TruffleHog+A01/A05 escolhidos          |
+| 51  | 16/05 23:50     | ZAP gate + trufflehog + A01/A05                     | commit b42fb96 — 308 testes ✅, IRA 98.31%, KB 97.63%; 3 itens segurança fechados   |
+| 52  | 16/05 23:55     | atualiza o prompt.md e o SESSION_MEMORY.md          | Este registro                                                                       |
