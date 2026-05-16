@@ -1,0 +1,91 @@
+# SLO Definitions — AgenticAI-2 Incident Response
+# Serviço: Log-Ingestion-and-Metrics (:8000)
+# Referência: SPEC-2026-001 §Observability, SDD §3.2.1, skills/observability-engineering/
+# Implementação Python: Log-Ingestion-and-Metrics/app/slo.py
+# Alertas Prometheus: infra/prometheus/alerts.yaml
+
+service: log-ingestion-and-metrics
+version: "1.0.0"
+last_updated: "2026-05-16"
+owner: valdomiro.souza@zsms.cloud
+review_cadence: quarterly
+
+slos:
+  - id: SLO-001
+    name: availability
+    description: Taxa de requisições sem erro 5xx
+    sli:
+      type: request_based
+      good_events: "requests sem status 5xx"
+      total_events: "total de requests"
+      metric: "1 - (error_rate_5xx_pct / 100)"
+    target_pct: 99.5
+    error_budget_pct: 0.5
+    window: rolling_30d
+    thresholds:
+      error_rate_5xx_max_pct: 0.5
+    alerts:
+      - name: SLOAvailabilityBudgetAtRisk
+        condition: "error_budget_consumed > 50%"
+        severity: warning
+        action: "Investigar aumento de 5xx; revisar logs de erros"
+      - name: SLOAvailabilityBreaching
+        condition: "error_rate_5xx_pct > 0.5%"
+        severity: critical
+        action: "Incidente SEV-2; acionar on-call; verificar Redis e endpoints"
+
+  - id: SLO-002
+    name: latency_p95
+    description: 99% das requisições com P95 ≤ 500ms
+    sli:
+      type: window_based
+      metric: "p95_ms"
+      threshold_ms: 500
+    target_pct: 99.0
+    error_budget_pct: 1.0
+    window: rolling_30d
+    thresholds:
+      p95_max_ms: 500
+    alerts:
+      - name: SLOP95LatencyBudgetAtRisk
+        condition: "p95_ms > 400ms"
+        severity: warning
+        action: "Monitorar tendência; verificar Redis latency"
+      - name: SLOP95LatencyBreaching
+        condition: "p95_ms > 500ms for 5min"
+        severity: critical
+        action: "Incidente SEV-2; runbook: docs/runbooks/high-latency.md"
+
+  - id: SLO-003
+    name: latency_p99
+    description: 99.9% das requisições com P99 ≤ 1000ms
+    sli:
+      type: window_based
+      metric: "p99_ms"
+      threshold_ms: 1000
+    target_pct: 99.9
+    error_budget_pct: 0.1
+    window: rolling_30d
+    thresholds:
+      p99_max_ms: 1000
+    alerts:
+      - name: SLOP99LatencyBreaching
+        condition: "p99_ms > 1000ms for 5min"
+        severity: critical
+        action: "Incidente SEV-1 candidato; escalar para Tech Lead"
+
+error_budget_policy:
+  budget_50pct_consumed:
+    action: "Feature freeze; foco em confiabilidade"
+    notification: "Slack #sre-alerts"
+  budget_10pct_consumed:
+    action: "Deploy freeze (apenas hotfixes); revisão de incidentes obrigatória"
+    notification: "Slack #sre-alerts + email Tech Lead"
+  budget_exhausted:
+    action: "Deploy freeze total; escalação executiva; revisão do SLO target"
+    notification: "PagerDuty + email gestão"
+
+endpoints:
+  slo_status: "GET /metrics/slo-status"
+  prometheus_metrics: "GET /prometheus/metrics"
+  grafana_dashboard: "infra/grafana/dashboards/golden-signals.json"

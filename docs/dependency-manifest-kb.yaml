@@ -1,0 +1,94 @@
+# dependency-manifest.yaml — Knowledge-Base
+# Layer 2: Enriched manifest (skills/documentation-standards)
+# Layer 1: Knowledge-Base/requirements.txt (pinned)
+# Layer 3: SBOM gerado em CI (.github/workflows/sbom.yml) via Syft
+
+service: knowledge-base
+version: "1.0.0"
+last_updated: "2026-05-16"
+owner: valdomiro.souza@zsms.cloud
+spec_reference: docs/specs/SPEC-2026-003-knowledge-base.md
+
+runtime_dependencies:
+  - name: fastapi
+    version: "0.111.0"
+    purpose: "Framework web assíncrono"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: qdrant-client
+    version: "1.9.1"
+    purpose: "Cliente assíncrono para Qdrant vector database"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: sentence-transformers
+    version: "3.0.0"
+    purpose: "Geração de embeddings via all-MiniLM-L6-v2 (384-dim)"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+    notes: "~22 MB modelo; ~800 MB dependências torch — mockado em CI (requirements-test.txt)"
+
+  - name: torch
+    version: "2.3.0"
+    purpose: "Backend de computação para sentence-transformers"
+    license: BSD
+    cve_status: clean
+    end_of_life: null
+    notes: "Apenas runtime prod; ausente em CI (requirements-test.txt usa stub sys.modules)"
+
+  - name: pydantic
+    version: "2.7.1"
+    purpose: "Validação de modelos SearchRequest e ChunkIngest"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: pydantic-settings
+    version: "2.2.1"
+    purpose: "Configuração via variáveis de ambiente"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: uvicorn
+    version: "0.29.0"
+    purpose: "ASGI server"
+    license: BSD
+    cve_status: clean
+    end_of_life: null
+
+  - name: httpx
+    version: "0.27.0"
+    purpose: "Cliente HTTP (usado em testes de integração)"
+    license: BSD
+    cve_status: clean
+    end_of_life: null
+
+infra_dependencies:
+  - name: Qdrant
+    version: "1.9.x"
+    purpose: "Vector database para busca semântica de runbooks/postmortems"
+    managed: false
+    endpoint: "http://qdrant:6333"
+    backup_policy: "Snapshot manual; coleção recriável via re-ingestão"
+    notes: "score_threshold=0.70 configurado (LLM08:2025 — ADR-0004)"
+
+test_dependencies:
+  - name: pytest
+    version: "pinned"
+    purpose: "Test runner"
+    license: MIT
+
+  - name: pytest-asyncio
+    version: "pinned"
+    purpose: "Testes assíncronos"
+    license: Apache-2.0
+
+  - name: sentence-transformers (stub)
+    version: "N/A"
+    purpose: "Stub via sys.modules em conftest.py — evita 800 MB em CI"
+    notes: "Ver Knowledge-Base/requirements-test.txt"

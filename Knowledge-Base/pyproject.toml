@@ -19,6 +19,12 @@ ignore_missing_imports = true
 line-length = 110
 target-version = "py312"
 
+[tool.ruff.lint]
+select = ["C90"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
 [tool.black]
 line-length = 110
 target-version = ["py312"]

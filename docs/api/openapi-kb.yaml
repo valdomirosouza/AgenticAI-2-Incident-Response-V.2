@@ -1,0 +1,121 @@
+# OpenAPI 3.1 — Knowledge-Base
+# NOTA: Este arquivo é uma referência estática para documentação e versionamento.
+# O spec autoritativo em runtime é gerado pelo FastAPI em GET /openapi.json (somente em dev).
+# Para o spec em tempo real: docker compose up && curl http://localhost:8002/openapi.json
+#
+# Versão: 1.0.0 | Spec reference: SPEC-2026-003
+
+openapi: "3.1.0"
+info:
+  title: Knowledge-Base
+  version: "1.0.0"
+  description: |
+    Vector database de runbooks, postmortems e playbooks.
+    Busca semântica por similaridade coseno (all-MiniLM-L6-v2, 384 dims).
+    Score threshold: 0.70 (LLM08:2025 mitigation).
+
+servers:
+  - url: http://localhost:8002
+    description: Development
+
+paths:
+  /kb/ingest:
+    post:
+      summary: Ingere chunk de conhecimento no Qdrant
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChunkIngest"
+      responses:
+        "201":
+          description: Chunk ingerido com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chunk_id:
+                    type: string
+                    format: uuid
+                  blameful_warnings:
+                    type: array
+                    items:
+                      type: string
+        "401":
+          description: API key ausente ou inválida
+        "422":
+          description: Chunk inválido (tamanho, campos)
+
+  /kb/search:
+    post:
+      summary: Busca semântica por similaridade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+      responses:
+        "200":
+          description: Resultados com score ≥ 0.70
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  count:
+                    type: integer
+
+  /health:
+    get:
+      summary: Liveness check + conectividade Qdrant
+      responses:
+        "200":
+          description: Healthy
+        "503":
+          description: Qdrant inacessível
+
+components:
+  schemas:
+    ChunkIngest:
+      type: object
+      required: [content, incident_id]
+      properties:
+        content:
+          type: string
+          minLength: 1
+        incident_id:
+          type: string
+          minLength: 1
+          maxLength: 50
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        limit:
+          type: integer
+          default: 3
+          minimum: 1
+          maximum: 10
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key

@@ -1,0 +1,109 @@
+# dependency-manifest.yaml — Log-Ingestion-and-Metrics
+# Layer 2: Enriched manifest (skills/documentation-standards)
+# Layer 1: Log-Ingestion-and-Metrics/requirements.txt (pinned hashes)
+# Layer 3: SBOM gerado em CI (.github/workflows/sbom.yml) via Syft
+
+service: log-ingestion-and-metrics
+version: "1.0.0"
+last_updated: "2026-05-16"
+owner: valdomiro.souza@zsms.cloud
+spec_reference: docs/specs/SPEC-2026-001-log-ingestion-and-metrics.md
+
+runtime_dependencies:
+  - name: fastapi
+    version: "0.111.0"
+    purpose: "Framework web assíncrono para APIs REST"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: redis
+    version: "5.0.4"
+    purpose: "Cliente Redis — store de métricas Golden Signals"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: pydantic
+    version: "2.7.1"
+    purpose: "Validação de modelos de dados e settings"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: pydantic-settings
+    version: "2.2.1"
+    purpose: "Configuração via variáveis de ambiente"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: prometheus-fastapi-instrumentator
+    version: "7.0.0"
+    purpose: "Instrumentação automática de métricas HTTP Prometheus"
+    license: ISC
+    cve_status: clean
+    end_of_life: null
+
+  - name: opentelemetry-sdk
+    version: "1.24.0"
+    purpose: "Distributed tracing (OTel SDK)"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: opentelemetry-instrumentation-fastapi
+    version: "0.45b0"
+    purpose: "Auto-instrumentação FastAPI para traces"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: opentelemetry-instrumentation-redis
+    version: "0.45b0"
+    purpose: "Auto-instrumentação Redis para traces"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: uvicorn
+    version: "pinned via requirements.txt"
+    purpose: "ASGI server"
+    license: BSD
+    cve_status: clean
+    end_of_life: null
+
+infra_dependencies:
+  - name: Redis
+    version: "7.x"
+    purpose: "Store de métricas Golden Signals (counters, sorted sets)"
+    managed: false
+    backup_policy: "Sem backup — dados efêmeros de sessão; reconstruídos por ingestão"
+    notes: "maxmemory-policy allkeys-lru recomendado em produção"
+
+  - name: Prometheus
+    version: "2.x"
+    purpose: "Coleta de métricas HTTP e SLO"
+    managed: false
+
+  - name: Grafana
+    version: "10.x"
+    purpose: "Visualização de Golden Signals e SLOs"
+    managed: false
+
+test_dependencies:
+  - name: pytest
+    version: "pinned"
+    purpose: "Test runner"
+    license: MIT
+
+  - name: fakeredis
+    version: "pinned"
+    purpose: "Mock Redis para testes unitários sem conexão real"
+    license: BSD
+    notes: "asyncio_mode=auto em pyproject.toml"
+
+  - name: pytest-asyncio
+    version: "pinned"
+    purpose: "Suporte a testes assíncronos"
+    license: Apache-2.0

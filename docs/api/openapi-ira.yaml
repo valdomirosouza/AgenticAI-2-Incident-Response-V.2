@@ -1,0 +1,134 @@
+# OpenAPI 3.1 — Incident-Response-Agent
+# NOTA: Este arquivo é uma referência estática para documentação e versionamento.
+# O spec autoritativo em runtime é gerado pelo FastAPI em GET /openapi.json (somente em dev).
+# Para o spec em tempo real: docker compose up && curl http://localhost:8001/openapi.json
+#
+# Versão: 1.0.0 | Spec reference: SPEC-2026-002
+
+openapi: "3.1.0"
+info:
+  title: Incident-Response-Agent
+  version: "1.0.0"
+  description: |
+    Agente de análise de incidentes baseado em LLM (Claude Sonnet 4.6).
+    Padrão Human-on-the-Loop: recomenda ações, não executa.
+    Rate limit: 10 req/min em POST /analyze.
+
+servers:
+  - url: http://localhost:8001
+    description: Development
+
+paths:
+  /analyze:
+    post:
+      summary: Análise de incidente (4 specialists + orchestrator)
+      security:
+        - ApiKeyAuth: []
+      description: |
+        Executa 4 agentes especialistas em paralelo (latência, erros, saturação, tráfego)
+        e sintetiza um IncidentReport com raciocínio causal (root cause vs trigger).
+        Rate limited: 10 req/min. Retorna fallback rule-based se circuit breaker aberto.
+      responses:
+        "200":
+          description: IncidentReport
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentReport"
+        "401":
+          description: API key ausente ou inválida
+        "429":
+          description: Rate limit exceeded (10 req/min)
+
+  /admin/circuit-breaker/status:
+    get:
+      summary: Status do circuit breaker Anthropic
+      security:
+        - AdminKeyAuth: []
+      responses:
+        "200":
+          description: Estado atual (CLOSED/OPEN/HALF_OPEN)
+
+  /admin/circuit-breaker/reset:
+    post:
+      summary: Reset manual do circuit breaker
+      security:
+        - AdminKeyAuth: []
+      responses:
+        "200":
+          description: Circuit breaker resetado
+
+  /health:
+    get:
+      summary: Liveness check
+      responses:
+        "200":
+          description: Healthy
+
+components:
+  schemas:
+    IncidentReport:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        overall_severity:
+          type: string
+          enum: [ok, warning, critical]
+        title:
+          type: string
+        diagnosis:
+          type: string
+        root_causes:
+          type: array
+          items:
+            type: string
+        triggers:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        incident_commander_brief:
+          type: string
+        escalate:
+          type: boolean
+        kb_references:
+          type: array
+          items:
+            type: string
+        specialist_findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpecialistFinding"
+        analysis_source:
+          type: string
+          enum: [llm, fallback]
+        prompt_version:
+          type: string
+
+    SpecialistFinding:
+      type: object
+      properties:
+        specialist:
+          type: string
+        severity:
+          type: string
+          enum: [ok, warning, critical]
+        summary:
+          type: string
+        details:
+          type: string
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    AdminKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Admin-Key

@@ -1,0 +1,119 @@
+# dependency-manifest.yaml — Incident-Response-Agent
+# Layer 2: Enriched manifest (skills/documentation-standards)
+# Layer 1: Incident-Response-Agent/requirements.txt (pinned hashes)
+# Layer 3: SBOM gerado em CI (.github/workflows/sbom.yml) via Syft
+
+service: incident-response-agent
+version: "1.0.0"
+last_updated: "2026-05-16"
+owner: valdomiro.souza@zsms.cloud
+spec_reference: docs/specs/SPEC-2026-002-incident-response-agent.md
+
+runtime_dependencies:
+  - name: fastapi
+    version: "0.111.0"
+    purpose: "Framework web assíncrono para APIs REST"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: anthropic
+    version: "0.28.0"
+    purpose: "SDK Anthropic para Claude Sonnet 4.6 — core do sistema de análise"
+    license: MIT
+    external_service: true
+    data_sent: "findings de métricas de infra (IPs/hostnames anonimizados)"
+    data_classification: null
+    pii_sent: false
+    dpa_reference: "https://www.anthropic.com/legal/privacy"
+    notes: "ADR-2026-0005; circuit breaker configurado; rate limit 10/min"
+
+  - name: pydantic
+    version: "2.7.1"
+    purpose: "Validação de output do LLM (OrchestratorResponse, IncidentReport)"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+    notes: "ADR-2026-0011 — validação Pydantic como gate de segurança"
+
+  - name: pydantic-settings
+    version: "2.2.1"
+    purpose: "Configuração via variáveis de ambiente com validação de produção"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: slowapi
+    version: "pinned"
+    purpose: "Rate limiting (10 req/min) em /analyze"
+    license: MIT
+    cve_status: clean
+    end_of_life: null
+
+  - name: tenacity
+    version: "pinned"
+    purpose: "Retry com exponential backoff nas chamadas Anthropic"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: prometheus-fastapi-instrumentator
+    version: "7.0.0"
+    purpose: "Métricas HTTP + LLM observability"
+    license: ISC
+    cve_status: clean
+    end_of_life: null
+
+  - name: opentelemetry-sdk
+    version: "1.24.0"
+    purpose: "Distributed tracing"
+    license: Apache-2.0
+    cve_status: clean
+    end_of_life: null
+
+  - name: httpx
+    version: "0.27.0"
+    purpose: "Cliente HTTP assíncrono para chamadas inter-serviço (Log-Ingestion, KB)"
+    license: BSD
+    cve_status: clean
+    end_of_life: null
+
+infra_dependencies:
+  - name: Log-Ingestion-and-Metrics
+    version: "1.0.0"
+    purpose: "Fonte dos Golden Signals para análise dos specialists"
+    managed: false
+    endpoint: "http://log-ingestion:8000"
+    trust_model: "API Key (X-API-Key) — ADR-2026-0013"
+
+  - name: Knowledge-Base
+    version: "1.0.0"
+    purpose: "Busca semântica de runbooks e postmortems históricos"
+    managed: false
+    endpoint: "http://knowledge-base:8002"
+    trust_model: "API Key (X-API-Key) — ADR-2026-0013"
+
+ai_dependencies:
+  - name: Anthropic API
+    model: "claude-sonnet-4-6"
+    purpose: "Análise de incidentes via 4 specialists + orchestrator"
+    data_sent: "métricas de infra anonimizadas (IPs/FQDNs redactados)"
+    dpa_reference: "https://www.anthropic.com/legal/privacy"
+    pii_sent: false
+    notes: "Circuit breaker ADR-0010; prompts versionados em prompts/v1/"
+
+test_dependencies:
+  - name: pytest
+    version: "pinned"
+    purpose: "Test runner"
+    license: MIT
+
+  - name: pytest-asyncio
+    version: "pinned"
+    purpose: "Testes assíncronos"
+    license: Apache-2.0
+
+  - name: respx
+    version: "pinned"
+    purpose: "Mock de chamadas HTTP (httpx) em testes unitários"
+    license: BSD

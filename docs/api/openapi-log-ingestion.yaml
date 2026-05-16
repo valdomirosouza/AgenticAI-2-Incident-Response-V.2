@@ -1,0 +1,139 @@
+# OpenAPI 3.1 — Log-Ingestion-and-Metrics
+# NOTA: Este arquivo é uma referência estática para documentação e versionamento.
+# O spec autoritativo em runtime é gerado pelo FastAPI em GET /openapi.json (somente em dev).
+# Para o spec em tempo real: docker compose up && curl http://localhost:8000/openapi.json
+#
+# Versão: 1.0.0 | Spec reference: SPEC-2026-001
+
+openapi: "3.1.0"
+info:
+  title: Log-Ingestion-and-Metrics
+  version: "1.0.0"
+  description: |
+    Serviço de ingestão de logs HAProxy e cálculo de Golden Signals em tempo real.
+    Expõe métricas de latência (P50/P95/P99), error rates, RPS e saturação Redis.
+    Autenticação via X-API-Key (HMAC compare_digest).
+
+servers:
+  - url: http://localhost:8000
+    description: Development
+
+paths:
+  /logs:
+    post:
+      summary: Ingestão de log HAProxy
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HaproxyLog"
+      responses:
+        "202":
+          description: Log aceito e métricas atualizadas
+        "401":
+          description: API key ausente ou inválida
+        "422":
+          description: Payload inválido (validação Pydantic)
+
+  /metrics/overview:
+    get:
+      summary: Totais de requests e error rates
+      responses:
+        "200":
+          description: MetricsOverview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsOverview"
+
+  /metrics/response-times:
+    get:
+      summary: Latência P50/P95/P99 em ms
+      responses:
+        "200":
+          description: ResponseTimesData
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseTimesData"
+
+  /metrics/slo-status:
+    get:
+      summary: SLO status com error budget
+      responses:
+        "200":
+          description: SloStatusReport (availability, latency_p95, latency_p99)
+
+  /health:
+    get:
+      summary: Liveness check + conectividade Redis
+      responses:
+        "200":
+          description: Healthy
+        "503":
+          description: Redis inacessível
+
+components:
+  schemas:
+    HaproxyLog:
+      type: object
+      required: [frontend, backend, status_code, time_response, bytes_read]
+      properties:
+        frontend:
+          type: string
+          maxLength: 100
+        backend:
+          type: string
+          maxLength: 100
+        status_code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        time_response:
+          type: number
+          minimum: 0
+          description: Tempo de resposta em ms
+        bytes_read:
+          type: integer
+          minimum: 0
+        request_method:
+          type: string
+          default: GET
+        request_path:
+          type: string
+          default: /
+
+    MetricsOverview:
+      type: object
+      properties:
+        requests_total:
+          type: integer
+        errors_4xx:
+          type: integer
+        errors_5xx:
+          type: integer
+        error_rate_4xx_pct:
+          type: number
+        error_rate_5xx_pct:
+          type: number
+
+    ResponseTimesData:
+      type: object
+      properties:
+        p50_ms:
+          type: number
+        p95_ms:
+          type: number
+        p99_ms:
+          type: number
+        sample_count:
+          type: integer
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key

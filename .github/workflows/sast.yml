@@ -59,6 +59,52 @@ jobs:
           sarif_file: checkov.sarif
         continue-on-error: true
 
+  # ── License check — licenças incompatíveis bloqueiam CI (skills/cicd-pipeline) ─
+  license-check:
+    name: License check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-licenses
+        run: pip install pip-licenses
+
+      - name: Check Log-Ingestion-and-Metrics licenses
+        run: |
+          pip install -r Log-Ingestion-and-Metrics/requirements.txt --quiet
+          pip-licenses --format=markdown --order=license \
+            --fail-on="GPL;AGPL;LGPL;SSPL;CC-BY-NC" \
+            --output-file=license-report-log-ingestion.md
+          echo "=== Log-Ingestion licenses ===" && cat license-report-log-ingestion.md
+
+      - name: Check Incident-Response-Agent licenses
+        run: |
+          pip install -r Incident-Response-Agent/requirements.txt --quiet
+          pip-licenses --format=markdown --order=license \
+            --fail-on="GPL;AGPL;LGPL;SSPL;CC-BY-NC" \
+            --output-file=license-report-ira.md
+          echo "=== IRA licenses ===" && cat license-report-ira.md
+
+      - name: Check Knowledge-Base licenses
+        run: |
+          pip install -r Knowledge-Base/requirements.txt --quiet
+          pip-licenses --format=markdown --order=license \
+            --fail-on="GPL;AGPL;LGPL;SSPL;CC-BY-NC" \
+            --output-file=license-report-kb.md
+          echo "=== KB licenses ===" && cat license-report-kb.md
+
+      - name: Upload license reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-reports
+          path: license-report-*.md
+          retention-days: 90
+
   # ── Trivy — CVE scan em filesystem + imagens (supply chain / SDD §5) ────────
   trivy:
     name: Trivy FS scan
