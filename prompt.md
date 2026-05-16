@@ -511,6 +511,61 @@ Adicionou prompts #34–#36 e atualizou a tabela de resumo.
 
 ---
 
+### 21:30 BRT — Prompt #37
+
+**Usuário:**
+
+> Atualiza o SESSION_MEMORY.md com o estado atual da sessão
+
+**Claude:**  
+Atualizou 3 seções do `SESSION_MEMORY.md`: §6 coberturas corrigidas (LI 96.96%, IRA 98.26%) + nota sobre venvs Python 3.12, §10 prompt.md 31→36 interações, §14 histórico de commits com `1b0240e`, `d51d992`, `0d50710`. Commit `681e736` criado e publicado.
+
+---
+
+### 21:35 BRT — Prompt #38
+
+**Usuário:**
+
+> o projeto está 100% comitado no repositorio Git?
+
+**Claude:**  
+Verificou `git status` e `git log origin/main..HEAD`. Working tree limpo, zero commits à frente do remote — projeto 100% sincronizado com o GitHub.
+
+---
+
+### 21:40 BRT — Prompt #39
+
+**Usuário:**
+
+> inclua um README.md na raiz do projeto
+
+**Claude:**  
+Criou `README.md` (197 linhas) cobrindo: visão geral, fluxo ASCII, arquitetura, pré-requisitos, instalação, exemplo de curl + resposta JSON, testes, CI/CD, SLOs, segurança, documentação e estrutura do repositório. Commit `9009e8b` publicado.
+
+---
+
+### 21:50 BRT — Prompt #40
+
+**Usuário:**
+
+> crie um diagrama de arquitetura na sessão arquitetura do Readme.md semelhante ao deste exemplo (Mermaid flowchart)
+
+**Claude:**  
+Adicionou subseção `### System Overview` com diagrama `flowchart LR` em Mermaid ao README.md, com 11 passos numerados (①–⑪) cobrindo o fluxo completo: ingestão HAProxy → Redis → Prometheus/Grafana → análise paralela dos 4 agentes com tool-use Claude → busca KB Qdrant → síntese final `IncidentReport`. Renomeou tabela de serviços para `### Serviços`. Commit `ca7dea2` publicado.
+
+---
+
+### 21:55 BRT — Prompt #41
+
+**Usuário:**
+
+> Atualiza o prompt.md com os prompts desta sessão
+
+**Claude:**  
+Adicionou prompts #37–#41 e atualizou a tabela de resumo.
+
+---
+
 ## Resumo
 
 | #   | Data/Hora (BRT) | Prompt (resumo)                                  | Entrega                                                                            |
@@ -550,4 +605,9 @@ Adicionou prompts #34–#36 e atualizou a tabela de resumo.
 | 33  | 15/05 20:50     | Atualiza o prompt.md com os prompts desta sessão | Prompts #32–#33 registrados                                                        |
 | 34  | 15/05 21:10     | Rodar os testes dos 3 serviços                   | 300 testes ✅ — LI 96.96%, IRA 98.26%, KB 97.60% (venvs recriados com Python 3.12) |
 | 35  | 15/05 21:15     | Commit e push dos resultados                     | Working tree limpo — nada a commitar                                               |
-| 36  | 15/05 21:20     | Atualiza o prompt.md com os prompts desta sessão | Este registro                                                                      |
+| 36  | 15/05 21:20     | Atualiza o prompt.md com os prompts desta sessão | Prompts #34–#36 registrados                                                        |
+| 37  | 15/05 21:30     | Atualiza o SESSION_MEMORY.md com estado atual    | §6, §10, §14 atualizados; commit `681e736` publicado                               |
+| 38  | 15/05 21:35     | o projeto está 100% comitado no Git?             | Working tree limpo, zero commits à frente do remote — ✅                           |
+| 39  | 15/05 21:40     | inclua um README.md na raiz do projeto           | README.md criado (197 linhas); commit `9009e8b` publicado                          |
+| 40  | 15/05 21:50     | Diagrama Mermaid flowchart na seção Arquitetura  | System Overview flowchart (11 passos ①–⑪); commit `ca7dea2` publicado              |
+| 41  | 15/05 21:55     | Atualiza o prompt.md com os prompts desta sessão | Este registro                                                                      |
