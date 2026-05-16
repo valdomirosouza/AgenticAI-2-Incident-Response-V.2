@@ -342,12 +342,12 @@ sequenceDiagram
         opt retries esgotados
             RT-->>CB: raise exception
             CB->>CB: record_failure() → _consecutive_failures++
-            note over CB: se _consecutive_failures >= failure_threshold<br/>_state = OPEN; _opened_at = now()
+            note over CB: se _consecutive_failures >= failure_threshold<br/>_state = OPEN&#59; _opened_at = now()
             CB-->>AG: raise exception
         end
     end
 
-    note over CB: Após recovery_timeout (60s): OPEN → HALF_OPEN<br/>Próximo sucesso → CLOSED; próxima falha → OPEN
+    note over CB: Após recovery_timeout (60s): OPEN → HALF_OPEN<br/>Próximo sucesso → CLOSED&#59; próxima falha → OPEN
 ```
 
 ---
